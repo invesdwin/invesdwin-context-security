@@ -1,0 +1,10 @@
+<configuration>
+
+	<logger name="de.invesdwin.context.security.web.internal.ChildContextDispatcherServlet" additivity="false" level="ERROR">
+		<appender-ref ref="stdout" />
+		<appender-ref ref="stderr" />
+		<appender-ref ref="common" />
+		<appender-ref ref="error" />
+	</logger>
+
+</configuration>

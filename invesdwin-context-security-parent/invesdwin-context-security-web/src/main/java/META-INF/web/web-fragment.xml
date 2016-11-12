@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-fragment>
+
+	<name>de.invesdwin.context.security.web</name>
+
+	<!-- spring-security -->
+
+	<servlet>
+		<!-- See: http://stackoverflow.com/questions/26609793/separate-spring-context-for-delegatingfilterproxy -->
+		<servlet-name>filterContextLoader</servlet-name>
+		<servlet-class>de.invesdwin.context.security.web.internal.ChildContextDispatcherServlet
+		</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:/META-INF/ctx.bootstrap.dummy.xml
+			</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<filter>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy
+		</filter-class>
+		<init-param>
+			<param-name>contextAttribute</param-name>
+			<!-- this name gets generated inside FrameworkServlet, which is the base 
+				class for DispatcherServlet -->
+			<param-value>org.springframework.web.servlet.FrameworkServlet.CONTEXT.filterContextLoader
+			</param-value>
+		</init-param>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- see https://blogs.oracle.com/swchan/entry/servlet_3_0_web_fragment -->
+	<ordering>
+		<before>
+			<others />
+		</before>
+	</ordering>
+
+</web-fragment>

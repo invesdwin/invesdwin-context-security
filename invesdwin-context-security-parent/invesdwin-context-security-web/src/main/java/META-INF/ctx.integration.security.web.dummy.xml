@@ -1,0 +1,29 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- When using spring-security you should define custom http tags with 
+		their own authenticationmanagers for different use-cases. See: http://stackoverflow.com/questions/22118243/spring-security-3-2-multiple-http-tag-with-different-authentication-manager -->
+
+	<!-- prevent org.springframework.beans.factory.NoSuchBeanDefinitionException: 
+		No bean named 'springSecurityFilterChain' is defined; see: http://www.baeldung.com/no-bean-named-springsecurityfilterchain-is-defined -->
+	<!-- create-session="ifRequired" is needed or else wicket won't redirect 
+		to spring-security filter access denied page after login when it was the 
+		first request -->
+	<security:http auto-config="true" authentication-manager-ref="dummyAuthenticationManager"
+		use-expressions="true" pattern="_DUMMY_">
+
+		<!-- See: http://stackoverflow.com/questions/28138864/expected-csrf-token-not-found-has-your-session-expired-403 -->
+		<security:csrf disabled="true" />
+		<!-- X-Frame-Security defaults break ajax file uploads in wicket. See: 
+			http://rpuchkovskiy.blogspot.de/2014/10/spring-security-32-defaults-break.html -->
+		<security:headers>
+			<security:frame-options policy="SAMEORIGIN" />
+		</security:headers>
+
+		<security:intercept-url pattern="_DUMMY_" />
+
+	</security:http>
+
+</beans>

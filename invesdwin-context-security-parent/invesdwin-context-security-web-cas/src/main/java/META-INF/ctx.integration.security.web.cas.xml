@@ -1,0 +1,63 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+
+	<bean id="casProperties"
+		class="de.invesdwin.context.system.properties.SystemPropertiesDefinition" />
+
+	<bean id="casServiceProperties" class="org.springframework.security.cas.ServiceProperties">
+		<property name="service"
+			value="${#{T(de.invesdwin.context.integration.IntegrationProperties).WEBSERVER_BIND_URI.toString()}/cas/LoginSuccess" />
+		<property name="sendRenew" value="false" />
+	</bean>
+
+	<!-- Secured pages with CAS as entry point; use the following http tag -->
+	<security:http entry-point-ref="casEntryPoint"
+		use-expressions="false" pattern="/cas/**">
+
+		<security:csrf disabled="true" />
+		<security:headers>
+			<security:frame-options policy="SAMEORIGIN" />
+		</security:headers>
+
+		<!-- <security:intercept-url pattern="/cas/**" access="IS_AUTHENTICATED_FULLY" 
+			/> -->
+		<security:custom-filter position="CAS_FILTER"
+			ref="casFilter" />
+	</security:http>
+
+	<bean id="casFilter"
+		class="org.springframework.security.cas.web.CasAuthenticationFilter">
+		<property name="authenticationManager" ref="casAuthenticationManager" />
+	</bean>
+
+	<bean id="casEntryPoint"
+		class="org.springframework.security.cas.web.CasAuthenticationEntryPoint">
+		<property name="loginUrl" value="${de.invesdwin.context.security.web.cas.CasProperties.CAS_SERVICE_URI}/login" />
+		<property name="serviceProperties" ref="casServiceProperties" />
+	</bean>
+
+	<security:authentication-manager id="casAuthenticationManager">
+		<security:authentication-provider
+			ref="casAuthenticationProvider" />
+	</security:authentication-manager>
+
+	<bean id="casAuthenticationProvider"
+		class="org.springframework.security.cas.authentication.CasAuthenticationProvider">
+		<property name="authenticationUserDetailsService" ref="casUserDetailsService" />
+		<property name="serviceProperties" ref="casServiceProperties" />
+		<property name="ticketValidator">
+			<bean class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
+				<constructor-arg index="0" value="${de.invesdwin.context.security.web.cas.CasProperties.CAS_SERVICE_URI}" />
+			</bean>
+		</property>
+		<property name="key" value="casAuthenticationProviderKey" />
+	</bean>
+
+	<bean id="casUserDetailsService"
+		class="de.invesdwin.context.security.web.cas.internal.RoleAddingCasUserDetailsService" />
+
+</beans>

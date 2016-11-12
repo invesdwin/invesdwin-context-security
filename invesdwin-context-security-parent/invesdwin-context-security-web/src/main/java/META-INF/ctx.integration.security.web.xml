@@ -1,0 +1,22 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- This filter is responsible for storing the SecurityContextHolder between 
+		requests. Also see SecureWebSession.authenticate(). See: https://github.com/thombergs/wicket-spring-security-example/blob/master/src/main/resources/spring-security.xml#L21 -->
+	<bean
+		class="org.springframework.security.web.context.SecurityContextPersistenceFilter" />
+
+	<!-- the default authentication manager is a dummy, please always reference 
+		a specific one in your code -->
+	<security:authentication-manager alias="dummyAuthenticationManager">
+		<security:authentication-provider>
+			<security:user-service>
+				<security:user name="_DUMMY_" password="_DUMMY_"
+					authorities="" />
+			</security:user-service>
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+</beans>
