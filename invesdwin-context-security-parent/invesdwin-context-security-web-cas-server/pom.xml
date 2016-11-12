@@ -10,10 +10,26 @@
 	<artifactId>invesdwin-context-security-web-cas-server</artifactId>
 	<packaging>jar</packaging>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>de.invesdwin</groupId>
+				<artifactId>invesdwin-context-persistence-parent</artifactId>
+				<version>${version.invesdwin-context-persistence}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>de.invesdwin</groupId>
 			<artifactId>invesdwin-context-security-ldap-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.invesdwin</groupId>
+			<artifactId>invesdwin-context-persistence-jpa-hibernate</artifactId>
 		</dependency>
 
 		<dependency>
