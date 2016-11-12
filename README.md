@@ -55,7 +55,7 @@ The `invesdwin-context-security-web-*` modules provide integration of security s
 
 - **Kerberos**: the `invesdwin-context-security-web-kerberos` module allows your web application to use single sign on via [SPNEGO](https://en.wikipedia.org/wiki/SPNEGO) over Kerberos. It reuses the existing configuration of the `invesdwin-context-security-kerberos` module and just adds the spring context configuration to make use of it in the servlet context. This module was successfully tested against [OpenLDAP](http://www.openldap.org/) and ApacheDS (which is available as an embedded server as explained above).
 - **SAML**: the `invesdwin-context-security-web-saml` module provides support for single sign on via [SAML](https://en.wikipedia.org/wiki/Security_Assertion_Markup_Language). This module was successfully tested against the [SSOCircle](http://www.ssocircle.com) server. The following configuration options are available:
-```
+```properties
 de.invesdwin.context.security.web.saml.SamlProperties.ENTITY_ID=urn:de:invesdwin:serviceprovider
 # you can specify web paths (http: or https: prefix) filesystem paths (no prefix) or classpath paths (classpath: prefix)
 de.invesdwin.context.security.web.saml.SamlProperties.IDP_METADATA_RESOURCE=http://idp.ssocircle.com/idp-meta.xml
