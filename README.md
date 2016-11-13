@@ -28,7 +28,7 @@ The `invesdwin-context-security-kerberos` module provides some utilities to gene
 
 These modules provide integration for LDAP clients using [spring-ldap](http://projects.spring.io/spring-ldap/). The following tools are available:
 
-- **ALdapDao**: this is a DAO implementation for LDAP similarly to the ADao available for JPA in [invesdwin-context-persistence-jpa](https://github.com/subes/invesdwin-context-persistence/). Just extend it for each Entry (this is an Entity in LDAP speak) and write your queries in there. `@Transactional` and QueryDSL support is provided out the box by this module. Configuration is done by the following properties:
+- **ALdapDao**: this is a DAO implementation for LDAP similarly to the ADao available for JPA in [invesdwin-context-persistence-jpa](https://github.com/subes/invesdwin-context-persistence/). Just extend it for each Entry (this is an Entity in LDAP speak) and write your queries in there. `@Transactional` and QueryDSL support is provided out of the box by this module. Configuration is done by the following properties:
 ```properties
 de.invesdwin.context.security.ldap.LdapProperties.LDAP_CONTEXT_URI=ldap://localhost:10389
 de.invesdwin.context.security.ldap.LdapProperties.LDAP_CONTEXT_BASE=dc=invesdwin,dc=de
