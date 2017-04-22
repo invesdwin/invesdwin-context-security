@@ -41,6 +41,7 @@
 		<version.cas-server>4.0.1</version.cas-server>
 		<version.api-ldap>1.0.0-RC1</version.api-ldap>
 		<version.spring-ldap>2.1.0.RELEASE</version.spring-ldap>
+		<version.spring-ws-security>2.3.0.RELEASE</version.spring-ws-security>
 	</properties>
 
 	<dependencyManagement>
@@ -184,7 +185,7 @@
 			<dependency>
 				<groupId>org.springframework.ws</groupId>
 				<artifactId>spring-ws-security</artifactId>
-				<version>${version.spring-ws}</version>
+				<version>${version.spring-ws-security}</version>
 				<exclusions>
 					<exclusion>
 						<artifactId>commons-logging</artifactId>
