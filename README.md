@@ -68,6 +68,6 @@ de.invesdwin.context.security.web.saml.SamlProperties.KEYSTORE_STOREPASS=${de.in
 ```
 - **CAS**: the `invesdwin-context-security-web-cas` module provides support for single sign on via [CAS](https://en.wikipedia.org/wiki/Central_Authentication_Service). This module is currently in an experimental state and is not yet fully tested. Work needs to be done in the `invesdwin-context-security-web-cas-server` module to provide an embedded server to test against.
 
-See the code of the [invesdwin-context-integration-ws](https://github.com/subes/invesdwin-context-integration) module to see a simple example of securing your web applications via the [spring-security namespace configuration](http://docs.spring.io/spring-security/site/docs/current/reference/html/ns-config.html#ns-minimal).
-
 Further modules for e.g. OpenID or OAuth might come in the future to allow single sign on with Google or Facebook. If you want to use single sign on with [Active Directory](https://en.wikipedia.org/wiki/Active_Directory) you can already use Kerberos directly or SAML with the [Active Directory Federation Services](https://en.wikipedia.org/wiki/Active_Directory_Federation_Services) using the appropriate modules above.
+
+See the code of the [invesdwin-context-integration-ws](https://github.com/subes/invesdwin-context-integration) module to see a simpler example of securing your web applications via the [spring-security namespace configuration](http://docs.spring.io/spring-security/site/docs/current/reference/html/ns-config.html#ns-minimal).
