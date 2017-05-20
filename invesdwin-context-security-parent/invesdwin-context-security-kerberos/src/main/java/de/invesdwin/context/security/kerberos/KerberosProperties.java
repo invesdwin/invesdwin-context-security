@@ -61,8 +61,8 @@ public final class KerberosProperties {
             //read passphrase
             final String kerberosServicePassphraseKey = "KERBEROS_SERVICE_PASSPHRASE";
             if (systemProperties.containsValue(kerberosServicePassphraseKey)) {
-                KERBEROS_SERVICE_PASSPHRASE = systemProperties.getStringWithSecurityWarning(kerberosServicePassphraseKey,
-                        IProperties.INVESDWIN_DEFAULT_PASSWORD);
+                KERBEROS_SERVICE_PASSPHRASE = systemProperties.getStringWithSecurityWarning(
+                        kerberosServicePassphraseKey, IProperties.INVESDWIN_DEFAULT_PASSWORD);
             } else {
                 KERBEROS_SERVICE_PASSPHRASE = null;
             }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-fragment>
+	<name>de.invesdwin.context.security.web.kerberos</name>
+
+	<servlet>
+		<servlet-name>forwardToSignIn</servlet-name>
+		<servlet-class>de.invesdwin.context.security.web.kerberos.internal.ForwardToSignInServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>forwardToSignIn</servlet-name>
+		<url-pattern>/forwardToSignIn</url-pattern>
+	</servlet-mapping>
+
+</web-fragment>

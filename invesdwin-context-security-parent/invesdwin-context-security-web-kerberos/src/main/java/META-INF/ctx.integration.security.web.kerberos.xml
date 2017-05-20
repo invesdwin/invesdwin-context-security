@@ -44,10 +44,12 @@
 		</property>
 	</bean>
 
-	<!-- not using the forward url here since it does not work, instead using 
-		the form-login in http tag as fallback -->
+	<!-- need a workaround here since only servlets can answer forwards, thus 
+		we let a servlet redirect to the web framework filter at /signin -->
 	<bean id="spnegoEntryPoint"
-		class="org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint" />
+		class="org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint">
+		<constructor-arg value="/forwardToSignIn" />
+	</bean>
 
 	<bean id="spnegoAuthenticationProcessingFilter"
 		class="org.springframework.security.kerberos.web.authentication.SpnegoAuthenticationProcessingFilter">
