@@ -73,3 +73,7 @@ Further modules for e.g. OpenID or OAuth might come in the future to allow singl
 See the code of the [invesdwin-context-integration-ws](https://github.com/subes/invesdwin-context-integration/blob/master/invesdwin-context-integration-parent/invesdwin-context-integration-ws/src/main/java/META-INF/ctx.integration.ws.xml) module to see a simpler example of securing your web applications via the [spring-security namespace configuration](http://docs.spring.io/spring-security/site/docs/current/reference/html/ns-config.html#ns-minimal).
 
 For examples of using the single sign on modules with wicket, you can have a look at the `invesdwin-context-client-wicket-examples` module of [invesdwin-context-client](https://github.com/subes/invesdwin-context-client). The project also provides wicket integration modules for some of the technologies discussed here.
+
+## Support
+
+If you need further assistance or have some ideas for improvements and don't want to create an issue here on github, feel free to ask a question in our [invesdwin-platform googlegroup](https://groups.google.com/forum/#!forum/invesdwin-platform).
