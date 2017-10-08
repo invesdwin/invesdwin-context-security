@@ -4,7 +4,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Named;
 import javax.naming.ldap.LdapName;
 
-import org.springframework.ldap.repository.support.QueryDslLdapQuery;
+import org.springframework.data.ldap.repository.support.QuerydslLdapQuery;
 import org.springframework.transaction.annotation.Transactional;
 
 import de.invesdwin.context.security.ldap.dao.ALdapDao;
@@ -15,7 +15,7 @@ public class TestDao extends ALdapDao<TestEntry> {
 
     public TestEntry findUserBySurname(final String sn) {
         final QTestEntry qTest = QTestEntry.testEntry;
-        return new QueryDslLdapQuery<TestEntry>(getLdapTemplate(), qTest).where(qTest.sn.eq(sn)).uniqueResult();
+        return new QuerydslLdapQuery<TestEntry>(getLdapTemplate(), qTest).where(qTest.sn.eq(sn)).uniqueResult();
     }
 
     @Transactional

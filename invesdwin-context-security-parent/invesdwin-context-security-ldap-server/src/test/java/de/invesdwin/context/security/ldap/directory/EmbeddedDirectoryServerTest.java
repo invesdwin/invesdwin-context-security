@@ -43,14 +43,16 @@ public class EmbeddedDirectoryServerTest extends ATest {
                 .isFalse();
         //but login as a normal user is possible
         final String uid = Strings.substringBefore(KerberosProperties.KERBEROS_SERVICE_PRINCIPAL, "/");
-        Assertions.assertThat(
-                ldapTemplate.authenticate("", "(uid=" + uid + ")", KerberosProperties.KERBEROS_SERVICE_PASSPHRASE))
+        Assertions
+                .assertThat(ldapTemplate.authenticate("", "(uid=" + uid + ")",
+                        KerberosProperties.KERBEROS_SERVICE_PASSPHRASE))
                 .isTrue();
         //though only with correct credentials
         Assertions.assertThat(ldapTemplate.authenticate("", "(uid=" + uid + ")",
                 KerberosProperties.KERBEROS_SERVICE_PASSPHRASE + "2")).isFalse();
-        Assertions.assertThat(
-                ldapTemplate.authenticate("", "(uid=" + uid + "2)", KerberosProperties.KERBEROS_SERVICE_PASSPHRASE))
+        Assertions
+                .assertThat(ldapTemplate.authenticate("", "(uid=" + uid + "2)",
+                        KerberosProperties.KERBEROS_SERVICE_PASSPHRASE))
                 .isFalse();
     }
 

@@ -3,6 +3,7 @@ package de.invesdwin.context.security.kerberos.internal.config;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ import de.invesdwin.context.security.kerberos.KerberosProperties;
 @NotThreadSafe
 public class DefaultKrb5ConfGenerator {
 
-    @GuardedBy("this.class")
+    @GuardedBy("DefaultKrb5ConfGenerator.class")
     private static File alreadyGenerated;
 
     public Resource newKrb5ConfResource() {
@@ -38,7 +39,7 @@ public class DefaultKrb5ConfGenerator {
                     properties.put("ENCTYPES", getEncryptionTypesStr());
                     final String replaced = StrSubstitutor.replace(template, properties);
                     final File file = new File(ContextProperties.TEMP_CLASSPATH_DIRECTORY, "META-INF/krb5.conf");
-                    FileUtils.write(file, replaced);
+                    FileUtils.write(file, replaced, Charset.defaultCharset());
                     alreadyGenerated = file;
                 }
                 return new FileSystemResource(alreadyGenerated);
@@ -60,7 +61,7 @@ public class DefaultKrb5ConfGenerator {
     private String getTemplate() throws IOException {
         final ClassPathResource templateResource = new ClassPathResource("META-INF/template.krb5.conf");
         final InputStream in = templateResource.getInputStream();
-        final String template = IOUtils.toString(in);
+        final String template = IOUtils.toString(in, Charset.defaultCharset());
         in.close();
         return template;
     }

@@ -1,5 +1,7 @@
 package de.invesdwin.context.security.ldap.dao;
 
+import java.util.Optional;
+
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -7,11 +9,11 @@ import javax.naming.Name;
 import javax.naming.ldap.LdapName;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.data.ldap.repository.LdapRepository;
+import org.springframework.data.ldap.repository.support.SimpleLdapRepository;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.BaseLdapNameAware;
 import org.springframework.ldap.query.LdapQuery;
-import org.springframework.ldap.repository.LdapRepository;
-import org.springframework.ldap.repository.support.SimpleLdapRepository;
 import org.springframework.ldap.support.LdapNameBuilder;
 
 import de.invesdwin.util.assertions.Assertions;
@@ -72,18 +74,22 @@ public abstract class ALdapDao<E> implements LdapRepository<E>, InitializingBean
     }
 
     @Override
-    public <S extends E> Iterable<S> save(final Iterable<S> entities) {
-        return delegate.save(entities);
+    public <S extends E> Iterable<S> saveAll(final Iterable<S> entities) {
+        return delegate.saveAll(entities);
+    }
+
+    public E findOneById(final Name id) {
+        return findById(id).orElse(null);
     }
 
     @Override
-    public E findOne(final Name id) {
-        return delegate.findOne(id);
+    public Optional<E> findById(final Name id) {
+        return delegate.findById(id);
     }
 
     @Override
-    public boolean exists(final Name id) {
-        return delegate.exists(id);
+    public boolean existsById(final Name id) {
+        return delegate.existsById(id);
     }
 
     @Override
@@ -92,8 +98,8 @@ public abstract class ALdapDao<E> implements LdapRepository<E>, InitializingBean
     }
 
     @Override
-    public Iterable<E> findAll(final Iterable<Name> ids) {
-        return delegate.findAll(ids);
+    public Iterable<E> findAllById(final Iterable<Name> ids) {
+        return delegate.findAllById(ids);
     }
 
     @Override
@@ -102,8 +108,8 @@ public abstract class ALdapDao<E> implements LdapRepository<E>, InitializingBean
     }
 
     @Override
-    public void delete(final Name id) {
-        delegate.delete(id);
+    public void deleteById(final Name id) {
+        delegate.deleteById(id);
     }
 
     @Override
@@ -112,8 +118,8 @@ public abstract class ALdapDao<E> implements LdapRepository<E>, InitializingBean
     }
 
     @Override
-    public void delete(final Iterable<? extends E> entities) {
-        delegate.delete(entities);
+    public void deleteAll(final Iterable<? extends E> entities) {
+        delegate.deleteAll(entities);
     }
 
     @Override
@@ -122,7 +128,7 @@ public abstract class ALdapDao<E> implements LdapRepository<E>, InitializingBean
     }
 
     @Override
-    public E findOne(final LdapQuery ldapQuery) {
+    public Optional<E> findOne(final LdapQuery ldapQuery) {
         return delegate.findOne(ldapQuery);
     }
 

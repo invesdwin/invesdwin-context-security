@@ -16,7 +16,7 @@ import de.invesdwin.context.security.kerberos.Keytabs;
 @NotThreadSafe
 public class DefaultKrb5KeytabGenerator {
 
-    @GuardedBy("this.class")
+    @GuardedBy("DefaultKrb5KeytabGenerator.class")
     private static File alreadyGenerated;
 
     private void createContent(final File file) throws IOException {
@@ -24,7 +24,7 @@ public class DefaultKrb5KeytabGenerator {
     }
 
     public Resource newKrb5KeytabResource() {
-        synchronized (DefaultKrb5ConfGenerator.class) {
+        synchronized (DefaultKrb5KeytabGenerator.class) {
             try {
                 if (alreadyGenerated == null || !alreadyGenerated.exists()) {
                     final File file = new File(ContextProperties.TEMP_CLASSPATH_DIRECTORY, "META-INF/krb5.keytab");

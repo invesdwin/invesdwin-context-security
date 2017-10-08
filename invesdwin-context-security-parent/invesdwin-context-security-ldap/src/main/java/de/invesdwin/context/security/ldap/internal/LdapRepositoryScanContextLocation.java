@@ -2,6 +2,7 @@ package de.invesdwin.context.security.ldap.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +18,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.ldap.repository.LdapRepository;
+import org.springframework.data.ldap.repository.LdapRepository;
 
 import de.invesdwin.context.ContextProperties;
 import de.invesdwin.context.beans.init.locations.IContextLocation;
@@ -39,7 +40,7 @@ public class LdapRepositoryScanContextLocation implements IContextLocation {
         try {
             final String content = generateContextXml();
             final File xmlFile = new File(ContextProperties.TEMP_DIRECTORY, "ctx.ldap.repository.scan.xml");
-            FileUtils.writeStringToFile(xmlFile, content);
+            FileUtils.writeStringToFile(xmlFile, content, Charset.defaultCharset());
             final FileSystemResource fsResource = new FileSystemResource(xmlFile);
             xmlFile.deleteOnExit();
             return Arrays.asList(PositionedResource.of(fsResource, ResourcePosition.END));
