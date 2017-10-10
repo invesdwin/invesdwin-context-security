@@ -8,7 +8,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
