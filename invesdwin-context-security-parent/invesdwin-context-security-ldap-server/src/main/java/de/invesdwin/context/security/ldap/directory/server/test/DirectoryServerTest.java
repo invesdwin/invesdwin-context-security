@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.ldap.directory.test;
+package de.invesdwin.context.security.ldap.directory.server.test;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

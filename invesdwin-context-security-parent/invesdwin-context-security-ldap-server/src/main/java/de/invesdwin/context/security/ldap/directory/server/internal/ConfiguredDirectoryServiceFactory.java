@@ -6,7 +6,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.apache.directory.server.core.factory.DefaultDirectoryServiceFactory;
 
-import de.invesdwin.context.security.ldap.directory.DirectoryServerProperties;
+import de.invesdwin.context.security.ldap.directory.server.DirectoryServerProperties;
 import de.invesdwin.context.system.properties.SystemProperties;
 
 @NotThreadSafe

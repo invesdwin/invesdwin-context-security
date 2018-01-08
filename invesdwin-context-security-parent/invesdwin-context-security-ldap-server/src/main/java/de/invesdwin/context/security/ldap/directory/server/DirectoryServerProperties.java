@@ -1,11 +1,10 @@
-package de.invesdwin.context.security.ldap.directory;
+package de.invesdwin.context.security.ldap.directory.server;
 
 import java.io.File;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
 import de.invesdwin.context.ContextProperties;
-import de.invesdwin.context.security.ldap.directory.server.DirectoryServer;
 
 @NotThreadSafe
 public final class DirectoryServerProperties {

@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import org.junit.Test;
 import org.springframework.dao.EmptyResultDataAccessException;
 
-import de.invesdwin.context.security.ldap.directory.test.DirectoryServerTest;
+import de.invesdwin.context.security.ldap.directory.server.test.DirectoryServerTest;
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
 

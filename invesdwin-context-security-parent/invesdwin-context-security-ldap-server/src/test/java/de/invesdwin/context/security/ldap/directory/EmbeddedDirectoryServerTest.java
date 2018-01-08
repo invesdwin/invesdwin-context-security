@@ -21,7 +21,7 @@ import de.invesdwin.context.security.kerberos.KerberosProperties;
 import de.invesdwin.context.security.kerberos.Keytabs;
 import de.invesdwin.context.security.ldap.LdapProperties;
 import de.invesdwin.context.security.ldap.directory.server.DirectoryServer;
-import de.invesdwin.context.security.ldap.directory.test.DirectoryServerTest;
+import de.invesdwin.context.security.ldap.directory.server.test.DirectoryServerTest;
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.lang.Strings;

@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.ldap.directory.test.internal;
+package de.invesdwin.context.security.ldap.directory.server.test.internal;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,10 +13,10 @@ import de.invesdwin.context.ContextDirectoriesStub;
 import de.invesdwin.context.beans.init.MergedContext;
 import de.invesdwin.context.beans.init.locations.PositionedResource;
 import de.invesdwin.context.integration.IntegrationProperties;
-import de.invesdwin.context.security.ldap.directory.DirectoryServerContextLocation;
-import de.invesdwin.context.security.ldap.directory.DirectoryServerProperties;
 import de.invesdwin.context.security.ldap.directory.server.DirectoryServer;
-import de.invesdwin.context.security.ldap.directory.test.DirectoryServerTest;
+import de.invesdwin.context.security.ldap.directory.server.DirectoryServerContextLocation;
+import de.invesdwin.context.security.ldap.directory.server.DirectoryServerProperties;
+import de.invesdwin.context.security.ldap.directory.server.test.DirectoryServerTest;
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.context.test.TestContext;
 import de.invesdwin.context.test.stub.StubSupport;

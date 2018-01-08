@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.ldap.directory;
+package de.invesdwin.context.security.ldap.directory.server;
 
 import java.util.Arrays;
 import java.util.List;
