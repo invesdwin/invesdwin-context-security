@@ -20,10 +20,10 @@ import de.invesdwin.context.beans.init.locations.PositionedResource.ResourcePosi
 @Named
 public class DirectoryServerContextLocation extends AConditionalContextLocation {
 
-    public static final PositionedResource CONTEXT_LOCATION = PositionedResource.of(new ClassPathResource(
-            "/META-INF/ctx.directory.server.xml"), ResourcePosition.START);
+    public static final PositionedResource CONTEXT_LOCATION = PositionedResource
+            .of(new ClassPathResource("/META-INF/ctx.directory.server.xml"), ResourcePosition.START);
 
-    private static volatile boolean activated = false;
+    private static volatile boolean activated = true;
 
     @Override
     protected List<PositionedResource> getContextResourcesIfConditionSatisfied() {
