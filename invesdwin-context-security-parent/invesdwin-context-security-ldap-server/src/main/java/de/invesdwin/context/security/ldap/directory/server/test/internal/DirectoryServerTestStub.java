@@ -12,7 +12,6 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import de.invesdwin.context.ContextDirectoriesStub;
 import de.invesdwin.context.beans.init.MergedContext;
 import de.invesdwin.context.beans.init.locations.PositionedResource;
-import de.invesdwin.context.integration.IntegrationProperties;
 import de.invesdwin.context.security.ldap.directory.server.DirectoryServer;
 import de.invesdwin.context.security.ldap.directory.server.DirectoryServerContextLocation;
 import de.invesdwin.context.security.ldap.directory.server.DirectoryServerProperties;
@@ -80,7 +79,6 @@ public class DirectoryServerTestStub extends StubSupport {
 
     private static void maybeStopLastServer() throws Exception {
         if (lastServer != null) {
-            IntegrationProperties.setWebserverTest(false);
             lastServer.stop();
             lastServer = null;
         }
