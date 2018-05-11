@@ -41,8 +41,8 @@
 		<version.spring-security-saml>1.0.1.RELEASE</version.spring-security-saml>
 		<version.cas-server>4.0.1</version.cas-server>
 		<version.api-ldap>1.0.0</version.api-ldap>
-		<version.spring-data-ldap>2.0.0.RELEASE</version.spring-data-ldap>
-		<version.spring-ws-security>2.4.0.RELEASE</version.spring-ws-security>
+		<version.spring-data-ldap>2.0.7.RELEASE</version.spring-data-ldap>
+		<version.spring-ws-security>3.0.1.RELEASE</version.spring-ws-security>
 	</properties>
 
 	<dependencyManagement>
