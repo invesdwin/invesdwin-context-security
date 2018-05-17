@@ -1,5 +1,6 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
@@ -8,10 +9,22 @@
 	<bean
 		class="org.springframework.security.web.context.SecurityContextPersistenceFilter" />
 
+	<!-- https://lists.apache.org/thread.html/%3CCAJi=3dUcd9qqaJb+YeVBoG8bL=yVEQLXMHWA10mC0Drq8ZmG_A@mail.gmail.com%3E 
+		https://stackoverflow.com/questions/48453980/spring-5-0-3-requestrejectedexception-the-request-was-rejected-because-the-url -->
+	<bean name="httpFirewall"
+		class="org.springframework.security.web.firewall.DefaultHttpFirewall" />
+	<security:http-firewall ref="httpFirewall" />
+
+	<bean name="noopPasswordEncoder"
+		class="org.springframework.security.crypto.password.NoOpPasswordEncoder" />
+
 	<!-- the default authentication manager is a dummy, please always reference 
 		a specific one in your code -->
-	<security:authentication-manager alias="dummyAuthenticationManager">
+	<security:authentication-manager
+		alias="dummyAuthenticationManager">
 		<security:authentication-provider>
+			<security:password-encoder
+				ref="noopPasswordEncoder" />
 			<security:user-service>
 				<security:user name="_DUMMY_" password="_DUMMY_"
 					authorities="" />
