@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -36,11 +37,11 @@
 		<version.invesdwin-context-security>${version.invesdwin-context}</version.invesdwin-context-security>
 		<version.invesdwin-context-persistence>${version.invesdwin-context}</version.invesdwin-context-persistence>
 
-		<version.apacheds>2.0.0-M24</version.apacheds>
+		<version.apacheds>2.0.0.AM25</version.apacheds>
 		<version.spring-security-kerberos>1.0.1.RELEASE</version.spring-security-kerberos>
 		<version.spring-security-saml>1.0.1.RELEASE</version.spring-security-saml>
 		<version.cas-server>4.0.1</version.cas-server>
-		<version.api-ldap>1.0.0</version.api-ldap>
+		<version.api-ldap>2.0.0.AM1</version.api-ldap>
 		<version.spring-data-ldap>2.0.7.RELEASE</version.spring-data-ldap>
 		<version.spring-ws-security>3.0.1.RELEASE</version.spring-ws-security>
 	</properties>
@@ -104,8 +105,12 @@
 						<groupId>org.slf4j</groupId>
 					</exclusion>
 					<exclusion>
-						<artifactId>ehcache-core</artifactId>
 						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -113,6 +118,16 @@
 				<groupId>org.apache.directory.server</groupId>
 				<artifactId>apacheds-protocol-kerberos</artifactId>
 				<version>${version.apacheds}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.directory.server</groupId>
@@ -166,8 +181,12 @@
 				<version>${version.apacheds}</version>
 				<exclusions>
 					<exclusion>
-						<artifactId>ehcache-core</artifactId>
 						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -220,6 +239,10 @@
 						<groupId>org.opensaml</groupId>
 						<artifactId>opensaml-xacml-saml-impl</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 
@@ -266,12 +289,16 @@
 				<version>${version.apacheds}</version>
 				<exclusions>
 					<exclusion>
-						<artifactId>slf4j-log4j12</artifactId>
 						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
 					</exclusion>
 					<exclusion>
-						<artifactId>ehcache-core</artifactId>
 						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -285,8 +312,12 @@
 						<groupId>org.slf4j</groupId>
 					</exclusion>
 					<exclusion>
-						<artifactId>ehcache-core</artifactId>
 						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -319,7 +350,7 @@
 			<url>http://invesdwin.de/artifactory/invesdwin-oss-remote</url>
 		</pluginRepository>
 	</pluginRepositories>
-	
+
 	<scm>
 		<url>https://github.com/subes/invesdwin-context-security</url>
 		<connection>scm:git:https://github.com/subes/invesdwin-context-security.git</connection>
