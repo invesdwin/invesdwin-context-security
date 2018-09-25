@@ -15,7 +15,9 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Named;
 
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.data.ldap.repository.LdapRepository;
 
 import de.invesdwin.context.ContextProperties;
@@ -25,11 +27,9 @@ import de.invesdwin.context.beans.init.locations.PositionedResource.ResourcePosi
 import de.invesdwin.context.log.error.Err;
 import de.invesdwin.context.security.ldap.dao.ALdapDao;
 import de.invesdwin.util.assertions.Assertions;
-import de.invesdwin.util.classpath.FastClassPathScanner;
+import de.invesdwin.util.classpath.ClassPathScanner;
 import de.invesdwin.util.lang.Reflections;
 import de.invesdwin.util.lang.Strings;
-import io.github.classgraph.ClassInfo;
-import io.github.classgraph.ScanResult;
 
 @ThreadSafe
 @Named
@@ -98,24 +98,24 @@ public class LdapRepositoryScanContextLocation implements IContextLocation {
 
     private Map<Class<?>, Set<Class<?>>> scanForLdapRepositories(final String basePackage) {
         final Map<Class<?>, Set<Class<?>>> ldapRepositories = new HashMap<Class<?>, Set<Class<?>>>();
-        final ScanResult scanner = FastClassPathScanner.getScanResult();
+        final ClassPathScanner scanner = new ClassPathScanner().withInterfacesOnly();
+        scanner.addIncludeFilter(new AssignableTypeFilter(LdapRepository.class));
 
-        for (final ClassInfo ci : scanner.getClassesImplementing(LdapRepository.class.getName())) {
-            if (ci.isInterface()) {
-                final String beanClassName = ci.getName();
-                final Class<?> repositoryClass = Reflections.classForName(beanClassName);
-                if (!ALdapDao.class.isAssignableFrom(repositoryClass)) {
-                    final Class<?>[] typeArguments = Reflections.resolveTypeArguments(repositoryClass,
-                            LdapRepository.class);
-                    Assertions.assertThat(typeArguments.length).isEqualTo(2);
-                    final Class<?> entity = typeArguments[0];
-                    Set<Class<?>> set = ldapRepositories.get(entity);
-                    if (set == null) {
-                        set = new HashSet<Class<?>>();
-                        ldapRepositories.put(entity, set);
-                    }
-                    Assertions.assertThat(set.add(repositoryClass)).isTrue();
+        final Set<BeanDefinition> candidateComponents = scanner.findCandidateComponents(basePackage);
+        for (final BeanDefinition bd : candidateComponents) {
+            final String beanClassName = bd.getBeanClassName();
+            final Class<?> repositoryClass = Reflections.classForName(beanClassName);
+            if (!ALdapDao.class.isAssignableFrom(repositoryClass)) {
+                final Class<?>[] typeArguments = Reflections.resolveTypeArguments(repositoryClass,
+                        LdapRepository.class);
+                Assertions.assertThat(typeArguments.length).isEqualTo(2);
+                final Class<?> entity = typeArguments[0];
+                Set<Class<?>> set = ldapRepositories.get(entity);
+                if (set == null) {
+                    set = new HashSet<Class<?>>();
+                    ldapRepositories.put(entity, set);
                 }
+                Assertions.assertThat(set.add(repositoryClass)).isTrue();
             }
         }
         return ldapRepositories;
