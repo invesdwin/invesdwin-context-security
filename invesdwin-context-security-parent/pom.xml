@@ -42,7 +42,6 @@
 		<version.spring-security-saml>1.0.1.RELEASE</version.spring-security-saml>
 		<version.cas-server>4.0.1</version.cas-server>
 		<version.api-ldap>2.0.0.AM1</version.api-ldap>
-		<version.spring-data-ldap>2.0.7.RELEASE</version.spring-data-ldap>
 		<version.spring-ws-security>3.0.1.RELEASE</version.spring-ws-security>
 	</properties>
 
@@ -160,11 +159,6 @@
 				<groupId>org.apache.directory.api</groupId>
 				<artifactId>api-util</artifactId>
 				<version>${version.api-ldap}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.data</groupId>
-				<artifactId>spring-data-ldap</artifactId>
-				<version>${version.spring-data-ldap}</version>
 			</dependency>
 
 			<dependency>
