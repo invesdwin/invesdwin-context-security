@@ -10,7 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import de.invesdwin.context.beans.init.locations.IContextLocation;
 import de.invesdwin.context.beans.init.locations.PositionedResource;
-import de.invesdwin.context.beans.init.locations.PositionedResource.ResourcePosition;
+import de.invesdwin.context.beans.init.locations.position.ResourcePosition;
 
 @Named
 @Immutable
@@ -19,8 +19,8 @@ public class IntegrationSecurityWebCasContextLocation implements IContextLocatio
     @Override
     public List<PositionedResource> getContextResources() {
         //load this before any http filter that has a "/**" pattern
-        return Arrays.asList(PositionedResource.of(new ClassPathResource(
-                "/META-INF/ctx.integration.security.web.cas.xml"), ResourcePosition.START));
+        return Arrays.asList(PositionedResource
+                .of(new ClassPathResource("/META-INF/ctx.integration.security.web.cas.xml"), ResourcePosition.START));
     }
 
 }

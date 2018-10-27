@@ -19,7 +19,7 @@ import de.invesdwin.context.beans.init.PreMergedContext;
 import de.invesdwin.context.beans.init.locations.AConditionalContextLocation;
 import de.invesdwin.context.beans.init.locations.IContextLocation;
 import de.invesdwin.context.beans.init.locations.PositionedResource;
-import de.invesdwin.context.beans.init.locations.PositionedResource.ResourcePosition;
+import de.invesdwin.context.beans.init.locations.position.ResourcePosition;
 
 @Named
 @Immutable
@@ -30,8 +30,8 @@ public class IntegrationSecurityWebDummyContextLocation extends AConditionalCont
     @Override
     protected List<PositionedResource> getContextResourcesIfConditionSatisfied() {
         //the dummy-http-tag needs to be loaded before any /** pattern tags or else spring will throw an exception.
-        return Arrays.asList(PositionedResource.of(new ClassPathResource(
-                "/META-INF/ctx.integration.security.web.dummy.xml"), ResourcePosition.START));
+        return Arrays.asList(PositionedResource
+                .of(new ClassPathResource("/META-INF/ctx.integration.security.web.dummy.xml"), ResourcePosition.START));
     }
 
     @Override
@@ -44,8 +44,8 @@ public class IntegrationSecurityWebDummyContextLocation extends AConditionalCont
     }
 
     private boolean isAnotherContextAvailableWithSecurityHttpTag() {
-        final Map<String, IContextLocation> mergers = PreMergedContext.getInstance().getBeansOfType(
-                IContextLocation.class);
+        final Map<String, IContextLocation> mergers = PreMergedContext.getInstance()
+                .getBeansOfType(IContextLocation.class);
         for (final IContextLocation merger : mergers.values()) {
             if (merger == this) {
                 continue;
@@ -68,8 +68,8 @@ public class IntegrationSecurityWebDummyContextLocation extends AConditionalCont
         return true;
     }
 
-    private boolean containsSecurityHttpTag(final PositionedResource contextResource) throws XMLStreamException,
-    IOException {
+    private boolean containsSecurityHttpTag(final PositionedResource contextResource)
+            throws XMLStreamException, IOException {
         final XMLInputFactory xif = XMLInputFactory.newInstance();
         final XMLStreamReader xsr = xif.createXMLStreamReader(contextResource.getInputStream());
         xsr.nextTag(); //beans tag skipped

@@ -23,7 +23,7 @@ import org.springframework.data.ldap.repository.LdapRepository;
 import de.invesdwin.context.ContextProperties;
 import de.invesdwin.context.beans.init.locations.IContextLocation;
 import de.invesdwin.context.beans.init.locations.PositionedResource;
-import de.invesdwin.context.beans.init.locations.PositionedResource.ResourcePosition;
+import de.invesdwin.context.beans.init.locations.position.ResourcePosition;
 import de.invesdwin.context.log.error.Err;
 import de.invesdwin.context.security.ldap.dao.ALdapDao;
 import de.invesdwin.util.assertions.Assertions;
