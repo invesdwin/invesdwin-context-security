@@ -257,6 +257,12 @@
 				<groupId>com.narupley</groupId>
 				<artifactId>not-going-to-be-commons-ssl</artifactId>
 				<version>${version.not-going-to-be-commons-ssl}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
