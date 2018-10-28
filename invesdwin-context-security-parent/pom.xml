@@ -39,10 +39,11 @@
 
 		<version.apacheds>2.0.0.AM25</version.apacheds>
 		<version.spring-security-kerberos>1.0.1.RELEASE</version.spring-security-kerberos>
-		<version.spring-security-saml>1.0.1.RELEASE</version.spring-security-saml>
+		<version.spring-security-saml>1.0.4.RELEASE</version.spring-security-saml>
 		<version.cas-server>4.0.1</version.cas-server>
 		<version.api-ldap>2.0.0.AM1</version.api-ldap>
 		<version.spring-ws-security>3.0.1.RELEASE</version.spring-ws-security>
+		<version.not-going-to-be-commons-ssl>0.3.18</version.not-going-to-be-commons-ssl>
 	</properties>
 
 	<dependencyManagement>
@@ -242,7 +243,20 @@
 						<groupId>org.bouncycastle</groupId>
 						<artifactId>bcprov-jdk15</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>ca.juliusdavies</groupId>
+						<artifactId>not-yet-commons-ssl</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>com.narupley</groupId>
+				<artifactId>not-going-to-be-commons-ssl</artifactId>
+				<version>${version.not-going-to-be-commons-ssl}</version>
 			</dependency>
 
 			<dependency>
