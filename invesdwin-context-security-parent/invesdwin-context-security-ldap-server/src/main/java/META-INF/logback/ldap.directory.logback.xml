@@ -7,5 +7,9 @@
 		<appender-ref ref="common" />
 		<appender-ref ref="error" />
 	</logger>
+	
+	<!-- disable warnings logged as error -->
+	<logger name="org.apache.directory.api.ldap.model.entry.Value" additivity="false" level="OFF" />
+	<logger name="org.apache.directory.api.ldap.model.entry.DefaultAttribute" additivity="false" level="OFF" />
     
 </configuration>

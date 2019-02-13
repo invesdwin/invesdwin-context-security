@@ -112,9 +112,14 @@ public class EmbeddedDirectoryServerTest extends ATest {
                     subject.getPrincipals().iterator().next().getClass());
             org.junit.Assert.assertEquals(principal, subject.getPrincipals().iterator().next().getName());
             loginContext.logout();
+            loginContext = null;
         } finally {
             if (loginContext != null) {
-                loginContext.logout();
+                try {
+                    loginContext.logout();
+                } catch (final Exception e) {
+                    //ignore
+                }
             }
         }
     }
