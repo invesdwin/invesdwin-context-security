@@ -43,7 +43,7 @@
 		<version.spring-security-saml>1.0.4.RELEASE</version.spring-security-saml>
 		<version.cas-server>4.0.1</version.cas-server>
 		<version.api-ldap>1.0.0</version.api-ldap>
-		<version.spring-ws-security>3.0.1.RELEASE</version.spring-ws-security>
+		<version.spring-ws-security>3.0.7.RELEASE</version.spring-ws-security>
 		<version.not-going-to-be-commons-ssl>0.3.18</version.not-going-to-be-commons-ssl>
 	</properties>
 
