@@ -34,8 +34,8 @@
 	</modules>
 
 	<properties>
-		<version.invesdwin-context-security>${version.invesdwin-context}</version.invesdwin-context-security>
-		<version.invesdwin-context-persistence>${version.invesdwin-context}</version.invesdwin-context-persistence>
+		<version.invesdwin-context-security>1.0.0-SNAPSHOT</version.invesdwin-context-security>
+		<version.invesdwin-context-persistence>1.0.0-SNAPSHOT</version.invesdwin-context-persistence>
 
 		<!-- kerberos test fails with 2.0.0.AM25 -->
 		<version.apacheds>2.0.0-M24</version.apacheds>
