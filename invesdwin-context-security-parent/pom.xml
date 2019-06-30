@@ -34,9 +34,9 @@
 	</modules>
 
 	<properties>
-		<version.invesdwin-context>1.0.0-SNAPSHOT</version.invesdwin-context>
-		<version.invesdwin-context-security>${project.version}</version.invesdwin-context-security>
-		<version.invesdwin-context-persistence>1.0.0-SNAPSHOT</version.invesdwin-context-persistence>
+		<project.version.invesdwin-context>1.0.0-SNAPSHOT</project.version.invesdwin-context>
+		<project.version.invesdwin-context-security>${project.version}</project.version.invesdwin-context-security>
+		<project.version.invesdwin-context-persistence>1.0.0-SNAPSHOT</project.version.invesdwin-context-persistence>
 
 		<!-- kerberos test fails with 2.0.0.AM25 -->
 		<version.apacheds>2.0.0-M24</version.apacheds>
@@ -53,7 +53,7 @@
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-persistence-parent</artifactId>
-				<version>${version.invesdwin-context-persistence}</version>
+				<version>${project.version.invesdwin-context-persistence}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -61,48 +61,48 @@
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security</artifactId>
-				<version>${version.invesdwin-context-security}</version>
+				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security-kerberos</artifactId>
-				<version>${version.invesdwin-context-security}</version>
+				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security-web</artifactId>
-				<version>${version.invesdwin-context-security}</version>
+				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security-web-saml</artifactId>
-				<version>${version.invesdwin-context-security}</version>
+				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security-web-cas</artifactId>
-				<version>${version.invesdwin-context-security}</version>
+				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security-web-cas-server</artifactId>
-				<version>${version.invesdwin-context-security}</version>
+				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security-web-kerberos</artifactId>
-				<version>${version.invesdwin-context-security}</version>
+				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security-ldap</artifactId>
-				<version>${version.invesdwin-context-security}</version>
+				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security-ldap-server</artifactId>
-				<version>${version.invesdwin-context-security}</version>
+				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
 
 			<dependency>
