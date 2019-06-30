@@ -34,7 +34,7 @@
 	</modules>
 
 	<properties>
-		<project.version.invesdwin-context>1.0.0-SNAPSHOT</project.version.invesdwin-context>
+		<project.version.invesdwin-context>1.0.0</project.version.invesdwin-context>
 		<project.version.invesdwin-context-security>${project.version}</project.version.invesdwin-context-security>
 		<project.version.invesdwin-context-persistence>1.0.0-SNAPSHOT</project.version.invesdwin-context-persistence>
 
@@ -50,6 +50,12 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>de.invesdwin</groupId>
+				<artifactId>invesdwin-context-parent</artifactId>
+				<version>${project.version.invesdwin-context}</version>
+				<type>pom</type>
+			</dependency>
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-persistence-parent</artifactId>
