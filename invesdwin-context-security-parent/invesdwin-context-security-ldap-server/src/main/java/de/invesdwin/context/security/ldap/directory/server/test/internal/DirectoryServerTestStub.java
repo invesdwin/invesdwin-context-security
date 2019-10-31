@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.inject.Named;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import de.invesdwin.context.ContextDirectoriesStub;
@@ -19,6 +18,7 @@ import de.invesdwin.context.security.ldap.directory.server.test.DirectoryServerT
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.context.test.TestContext;
 import de.invesdwin.context.test.stub.StubSupport;
+import de.invesdwin.util.lang.Files;
 import de.invesdwin.util.lang.Reflections;
 import de.invesdwin.util.shutdown.IShutdownHook;
 import de.invesdwin.util.shutdown.ShutdownHookManager;
@@ -57,7 +57,7 @@ public class DirectoryServerTestStub extends StubSupport {
     public void setUpContext(final ATest test, final TestContext ctx) throws Exception {
         //clean up for next test
         try {
-            FileUtils.deleteDirectory(DirectoryServerProperties.WORKING_DIR);
+            Files.deleteDirectory(DirectoryServerProperties.WORKING_DIR);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

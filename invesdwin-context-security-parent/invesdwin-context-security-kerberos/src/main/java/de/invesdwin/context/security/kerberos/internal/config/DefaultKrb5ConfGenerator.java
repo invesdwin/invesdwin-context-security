@@ -10,9 +10,8 @@ import java.util.Map;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -20,6 +19,7 @@ import org.springframework.core.io.Resource;
 
 import de.invesdwin.context.ContextProperties;
 import de.invesdwin.context.security.kerberos.KerberosProperties;
+import de.invesdwin.util.lang.Files;
 
 @NotThreadSafe
 public class DefaultKrb5ConfGenerator {
@@ -37,9 +37,9 @@ public class DefaultKrb5ConfGenerator {
                     properties.put("PORT", String.valueOf(KerberosProperties.KERBEROS_SERVER_URI.getPort()));
                     properties.put("REALM", KerberosProperties.KERBEROS_PRIMARY_REALM);
                     properties.put("ENCTYPES", getEncryptionTypesStr());
-                    final String replaced = StrSubstitutor.replace(template, properties);
+                    final String replaced = StringSubstitutor.replace(template, properties);
                     final File file = new File(ContextProperties.TEMP_CLASSPATH_DIRECTORY, "META-INF/krb5.conf");
-                    FileUtils.write(file, replaced, Charset.defaultCharset());
+                    Files.write(file, replaced, Charset.defaultCharset());
                     alreadyGenerated = file;
                 }
                 return new FileSystemResource(alreadyGenerated);

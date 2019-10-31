@@ -14,7 +14,6 @@ import java.util.Set;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Named;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.type.filter.AssignableTypeFilter;
@@ -28,6 +27,7 @@ import de.invesdwin.context.log.error.Err;
 import de.invesdwin.context.security.ldap.dao.ALdapDao;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.classpath.ClassPathScanner;
+import de.invesdwin.util.lang.Files;
 import de.invesdwin.util.lang.Reflections;
 import de.invesdwin.util.lang.Strings;
 
@@ -40,7 +40,7 @@ public class LdapRepositoryScanContextLocation implements IContextLocation {
         try {
             final String content = generateContextXml();
             final File xmlFile = new File(ContextProperties.TEMP_DIRECTORY, "ctx.ldap.repository.scan.xml");
-            FileUtils.writeStringToFile(xmlFile, content, Charset.defaultCharset());
+            Files.writeStringToFile(xmlFile, content, Charset.defaultCharset());
             final FileSystemResource fsResource = new FileSystemResource(xmlFile);
             xmlFile.deleteOnExit();
             return Arrays.asList(PositionedResource.of(fsResource, ResourcePosition.END));

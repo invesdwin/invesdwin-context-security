@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.directory.server.kerberos.shared.crypto.encryption.KerberosKeyFactory;
 import org.apache.directory.server.kerberos.shared.keytab.Keytab;
 import org.apache.directory.server.kerberos.shared.keytab.KeytabEntry;
@@ -20,6 +19,7 @@ import org.apache.directory.shared.kerberos.components.EncryptionKey;
 
 import de.invesdwin.context.ContextProperties;
 import de.invesdwin.util.assertions.Assertions;
+import de.invesdwin.util.lang.Files;
 import de.invesdwin.util.lang.UniqueNameGenerator;
 
 @NotThreadSafe
@@ -59,7 +59,8 @@ public final class Keytabs {
             Assertions.assertThat(principalName).endsWith("@" + KerberosProperties.KERBEROS_PRIMARY_REALM);
             final String passPhrase = e.getValue();
             for (final Map.Entry<EncryptionType, EncryptionKey> keyEntry : KerberosKeyFactory
-                    .getKerberosKeys(principalName, passPhrase, KerberosProperties.getEncryptionTypes()).entrySet()) {
+                    .getKerberosKeys(principalName, passPhrase, KerberosProperties.getEncryptionTypes())
+                    .entrySet()) {
                 final EncryptionKey key = keyEntry.getValue();
                 final byte keyVersion = (byte) key.getKeyVersion();
                 entries.add(new KeytabEntry(principalName, principalType, timeStamp, keyVersion, key));
@@ -67,7 +68,7 @@ public final class Keytabs {
         }
         keytab.setEntries(entries);
         try {
-            FileUtils.forceMkdir(file.getParentFile());
+            Files.forceMkdir(file.getParentFile());
             keytab.write(file);
         } catch (final IOException e1) {
             throw new RuntimeException(e1);
