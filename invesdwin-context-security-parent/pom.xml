@@ -39,11 +39,11 @@
 		<!-- kerberos test fails with 2.0.0.AM25 -->
 		<version.apacheds>2.0.0-M24</version.apacheds>
 		<version.spring-security-kerberos>1.0.1.RELEASE</version.spring-security-kerberos>
-		<version.spring-security-saml>1.0.4.RELEASE</version.spring-security-saml>
+		<version.spring-security-saml>1.0.10.RELEASE</version.spring-security-saml>
 		<version.cas-server>4.0.1</version.cas-server>
 		<version.api-ldap>1.0.0</version.api-ldap>
-		<version.spring-ws-security>3.0.7.RELEASE</version.spring-ws-security>
-		<version.not-going-to-be-commons-ssl>0.3.18</version.not-going-to-be-commons-ssl>
+		<version.spring-ws-security>3.0.8.RELEASE</version.spring-ws-security>
+		<version.not-going-to-be-commons-ssl>0.3.20</version.not-going-to-be-commons-ssl>
 	</properties>
 
 	<dependencyManagement>
