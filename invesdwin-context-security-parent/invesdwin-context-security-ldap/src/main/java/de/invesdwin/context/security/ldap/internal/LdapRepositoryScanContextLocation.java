@@ -28,8 +28,8 @@ import de.invesdwin.context.security.ldap.dao.ALdapDao;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.classpath.ClassPathScanner;
 import de.invesdwin.util.lang.Files;
-import de.invesdwin.util.lang.Reflections;
 import de.invesdwin.util.lang.Strings;
+import de.invesdwin.util.lang.reflection.Reflections;
 
 @ThreadSafe
 @Named

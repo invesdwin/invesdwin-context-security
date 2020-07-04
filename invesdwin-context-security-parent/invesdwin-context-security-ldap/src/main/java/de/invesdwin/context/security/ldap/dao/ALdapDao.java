@@ -17,7 +17,7 @@ import org.springframework.ldap.query.LdapQuery;
 import org.springframework.ldap.support.LdapNameBuilder;
 
 import de.invesdwin.util.assertions.Assertions;
-import de.invesdwin.util.lang.Reflections;
+import de.invesdwin.util.lang.reflection.Reflections;
 
 @Named
 @ThreadSafe

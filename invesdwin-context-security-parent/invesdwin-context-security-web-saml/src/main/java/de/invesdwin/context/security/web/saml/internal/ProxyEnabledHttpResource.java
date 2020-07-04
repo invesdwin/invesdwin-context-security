@@ -11,7 +11,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.opensaml.util.resource.HttpResource;
 
 import de.invesdwin.util.assertions.Assertions;
-import de.invesdwin.util.lang.Reflections;
+import de.invesdwin.util.lang.reflection.Reflections;
 import de.invesdwin.util.lang.uri.URIs;
 
 @NotThreadSafe

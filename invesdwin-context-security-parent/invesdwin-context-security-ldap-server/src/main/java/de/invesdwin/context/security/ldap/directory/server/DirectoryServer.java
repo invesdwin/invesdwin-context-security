@@ -31,9 +31,9 @@ import de.invesdwin.context.security.kerberos.KerberosProperties;
 import de.invesdwin.context.security.ldap.LdapProperties;
 import de.invesdwin.context.security.ldap.directory.server.internal.DirectoryServerConfigAnnotations;
 import de.invesdwin.util.assertions.Assertions;
-import de.invesdwin.util.lang.Reflections;
 import de.invesdwin.util.lang.Strings;
 import de.invesdwin.util.lang.UUIDs;
+import de.invesdwin.util.lang.reflection.Reflections;
 import de.invesdwin.util.shutdown.IShutdownHook;
 import de.invesdwin.util.shutdown.ShutdownHookManager;
 
