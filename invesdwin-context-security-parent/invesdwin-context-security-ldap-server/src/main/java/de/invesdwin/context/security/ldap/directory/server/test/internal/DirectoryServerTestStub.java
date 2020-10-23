@@ -66,7 +66,7 @@ public class DirectoryServerTestStub extends StubSupport {
     @Override
     public void setUpOnce(final ATest test, final TestContext ctx) throws Exception {
         try {
-            lastServer = MergedContext.getInstance().getBean(DirectoryServer.class);
+            DirectoryServerTestStub.lastServer = MergedContext.getInstance().getBean(DirectoryServer.class);
         } catch (final NoSuchBeanDefinitionException e) { //SUPPRESS CHECKSTYLE empty block
             //ignore
         }
