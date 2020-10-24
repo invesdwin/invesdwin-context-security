@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.annotation.concurrent.Immutable;
 
+import org.apache.directory.server.kerberos.KerberosConfig;
 import org.apache.directory.shared.kerberos.KerberosUtils;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
 import org.springframework.core.io.Resource;
@@ -90,7 +91,8 @@ public final class KerberosProperties {
         }
     }
 
-    private KerberosProperties() {}
+    private KerberosProperties() {
+    }
 
     public static void refreshKrbConf() {
         try {
@@ -110,16 +112,22 @@ public final class KerberosProperties {
 
     public static Set<EncryptionType> getEncryptionTypes() {
         final Set<EncryptionType> enctypes = new HashSet<EncryptionType>();
-        for (final EncryptionType enctype : EncryptionType.values()) {
-            try {
-                if (enctype.getValue() > 0 && KerberosUtils.getAlgoNameFromEncType(enctype) != null) {
-                    enctypes.add(enctype);
-                }
-            } catch (final IllegalArgumentException e) {
-                continue;
+        //        for (final EncryptionType enctype : EncryptionType.values()) {
+        //            try {
+        //                if (enctype.getValue() > 0 && KerberosUtils.getAlgoNameFromEncType(enctype) != null) {
+        //                    enctypes.add(enctype);
+        //                }
+        //            } catch (final IllegalArgumentException e) {
+        //                continue;
+        //            }
+        //        }
+        //        Assertions.assertThat(enctypes.remove(EncryptionType.RC4_HMAC)).isTrue(); //arcfour results in checksum failed error right now -.-
+        for (final String encTypeName : KerberosConfig.DEFAULT_ENCRYPTION_TYPES) {
+            final EncryptionType enctype = EncryptionType.getByName(encTypeName);
+            if (enctype.getValue() > 0 && KerberosUtils.getAlgoNameFromEncType(enctype) != null) {
+                enctypes.add(enctype);
             }
         }
-        Assertions.assertThat(enctypes.remove(EncryptionType.RC4_HMAC)).isTrue(); //arcfour results in checksum failed error right now -.-
         return enctypes;
     }
 
