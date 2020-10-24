@@ -181,7 +181,8 @@ public class DirectoryServerConfigAnnotations {
     //@CreateDS(name = "JBossDS", partitions = { @CreatePartition(name = "jboss", suffix = "dc=jboss,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=jboss,dc=org\n"
     //  + "dc: jboss\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
     //@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"), @CreateIndex(attribute = "ou") }) }, additionalInterceptors = { KeyDerivationInterceptor.class })
-    @CreateDS(factory = ConfiguredDirectoryServiceFactory.class, additionalInterceptors = { KeyDerivationInterceptor.class })
+    @CreateDS(factory = ConfiguredDirectoryServiceFactory.class, additionalInterceptors = {
+            KeyDerivationInterceptor.class })
     public CreateDS newCreateDSAnnotation() {
         final CreateDS defaults = Reflections.getAnnotation(CreateDS.class);
         return new CreateDS() {
@@ -282,6 +283,11 @@ public class DirectoryServerConfigAnnotations {
             public String address() {
                 return KerberosProperties.KERBEROS_SERVER_URI.getHost();
             }
+
+            @Override
+            public boolean clientAuth() {
+                return false;
+            }
         };
     }
 
@@ -328,6 +334,11 @@ public class DirectoryServerConfigAnnotations {
             @Override
             public String address() {
                 return LdapProperties.LDAP_CONTEXT_URI.getHost();
+            }
+
+            @Override
+            public boolean clientAuth() {
+                return false;
             }
         };
     }
@@ -400,8 +411,8 @@ public class DirectoryServerConfigAnnotations {
             @Override
             public String entryLdif() {
                 final String kerberosServicePrincipal = KerberosProperties.KERBEROS_SERVICE_PRINCIPAL;
-                Assertions.assertThat(kerberosServicePrincipal).endsWith(
-                        "@" + KerberosProperties.KERBEROS_PRIMARY_REALM);
+                Assertions.assertThat(kerberosServicePrincipal)
+                        .endsWith("@" + KerberosProperties.KERBEROS_PRIMARY_REALM);
                 final String uid = Strings.substringBefore(kerberosServicePrincipal, "/");
                 Assertions.assertThat(uid).isNotEmpty();
                 //
@@ -410,16 +421,16 @@ public class DirectoryServerConfigAnnotations {
                         + "objectclass: domain\n" //
                         + "dc: invesdwin\n" //
                         + "\n" //
-                        //dn: ou=users,dc=example,dc=com
-                        //objectClass: organizationalUnit
-                        //objectClass: top
-                        //ou: users
+                //dn: ou=users,dc=example,dc=com
+                //objectClass: organizationalUnit
+                //objectClass: top
+                //ou: users
                         + "dn: ou=users," + LdapProperties.LDAP_CONTEXT_BASE + "\n"//
                         + "objectClass: organizationalUnit\n"//
                         + "objectClass: top\n"//
                         + "ou: users\n"//
                         + "\n"//
-                        ;
+                ;
 
             }
         };
