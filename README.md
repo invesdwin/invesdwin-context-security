@@ -5,7 +5,7 @@ This project provides security modules for the [invesdwin-context](https://githu
 
 Releases and snapshots are deployed to this maven repository:
 ```
-https://invesdwin.de/artifactory/invesdwin-oss-remote
+https://invesdwin.de/repo/invesdwin-oss-remote
 ```
 
 Dependency declaration:
