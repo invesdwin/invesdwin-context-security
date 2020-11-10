@@ -74,10 +74,9 @@ public class EmbeddedDirectoryServerTest extends ATest {
             loginContext = new LoginContext("", subject, null, createClientConfig("foo", keytab));
             loginContext.login();
             subject = loginContext.getSubject();
-            org.junit.Assert.assertEquals(1, subject.getPrincipals().size());
-            org.junit.Assert.assertEquals(KerberosPrincipal.class,
-                    subject.getPrincipals().iterator().next().getClass());
-            org.junit.Assert.assertEquals(principal, subject.getPrincipals().iterator().next().getName());
+            Assertions.checkEquals(1, subject.getPrincipals().size());
+            Assertions.checkEquals(KerberosPrincipal.class, subject.getPrincipals().iterator().next().getClass());
+            Assertions.checkEquals(principal, subject.getPrincipals().iterator().next().getName());
             loginContext.logout();
 
             //client login with suffix
@@ -85,10 +84,9 @@ public class EmbeddedDirectoryServerTest extends ATest {
             loginContext = new LoginContext("", subject, null, createClientConfig("foo@INVESDWIN.DE", keytab));
             loginContext.login();
             subject = loginContext.getSubject();
-            org.junit.Assert.assertEquals(1, subject.getPrincipals().size());
-            org.junit.Assert.assertEquals(KerberosPrincipal.class,
-                    subject.getPrincipals().iterator().next().getClass());
-            org.junit.Assert.assertEquals(principal, subject.getPrincipals().iterator().next().getName());
+            Assertions.checkEquals(1, subject.getPrincipals().size());
+            Assertions.checkEquals(KerberosPrincipal.class, subject.getPrincipals().iterator().next().getClass());
+            Assertions.checkEquals(principal, subject.getPrincipals().iterator().next().getName());
             loginContext.logout();
 
             // server login
@@ -96,10 +94,9 @@ public class EmbeddedDirectoryServerTest extends ATest {
             loginContext = new LoginContext("", subject, null, createServerConfig("foo", keytab));
             loginContext.login();
             subject = loginContext.getSubject();
-            org.junit.Assert.assertEquals(1, subject.getPrincipals().size());
-            org.junit.Assert.assertEquals(KerberosPrincipal.class,
-                    subject.getPrincipals().iterator().next().getClass());
-            org.junit.Assert.assertEquals(principal, subject.getPrincipals().iterator().next().getName());
+            Assertions.checkEquals(1, subject.getPrincipals().size());
+            Assertions.checkEquals(KerberosPrincipal.class, subject.getPrincipals().iterator().next().getClass());
+            Assertions.checkEquals(principal, subject.getPrincipals().iterator().next().getName());
             loginContext.logout();
 
             // server login with suffix
@@ -107,10 +104,9 @@ public class EmbeddedDirectoryServerTest extends ATest {
             loginContext = new LoginContext("", subject, null, createServerConfig("foo@INVESDWIN.DE", keytab));
             loginContext.login();
             subject = loginContext.getSubject();
-            org.junit.Assert.assertEquals(1, subject.getPrincipals().size());
-            org.junit.Assert.assertEquals(KerberosPrincipal.class,
-                    subject.getPrincipals().iterator().next().getClass());
-            org.junit.Assert.assertEquals(principal, subject.getPrincipals().iterator().next().getName());
+            Assertions.checkEquals(1, subject.getPrincipals().size());
+            Assertions.checkEquals(KerberosPrincipal.class, subject.getPrincipals().iterator().next().getClass());
+            Assertions.checkEquals(principal, subject.getPrincipals().iterator().next().getName());
             loginContext.logout();
             loginContext = null;
         } finally {
