@@ -1,5 +1,6 @@
 package de.invesdwin.context.security.ldap.dao;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -74,7 +75,7 @@ public abstract class ALdapDao<E> implements LdapRepository<E>, InitializingBean
     }
 
     @Override
-    public <S extends E> Iterable<S> saveAll(final Iterable<S> entities) {
+    public <S extends E> List<S> saveAll(final Iterable<S> entities) {
         return delegate.saveAll(entities);
     }
 
@@ -93,12 +94,12 @@ public abstract class ALdapDao<E> implements LdapRepository<E>, InitializingBean
     }
 
     @Override
-    public Iterable<E> findAll() {
+    public List<E> findAll() {
         return delegate.findAll();
     }
 
     @Override
-    public Iterable<E> findAllById(final Iterable<Name> ids) {
+    public List<E> findAllById(final Iterable<Name> ids) {
         return delegate.findAllById(ids);
     }
 
@@ -135,6 +136,11 @@ public abstract class ALdapDao<E> implements LdapRepository<E>, InitializingBean
     @Override
     public Iterable<E> findAll(final LdapQuery ldapQuery) {
         return delegate.findAll(ldapQuery);
+    }
+
+    @Override
+    public void deleteAllById(final Iterable<? extends Name> ids) {
+        delegate.deleteAllById(ids);
     }
 
 }
