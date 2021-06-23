@@ -13,7 +13,7 @@ Dependency declaration:
 <dependency>
 	<groupId>de.invesdwin</groupId>
 	<artifactId>invesdwin-context-security-web</artifactId>
-	<version>1.0.1</version><!---project.version.invesdwin-context-security-parent-->
+	<version>1.0.2</version><!---project.version.invesdwin-context-security-parent-->
 </dependency>
 ```
 ## Security Modules
