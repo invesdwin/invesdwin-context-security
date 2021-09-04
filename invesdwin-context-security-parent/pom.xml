@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>de.invesdwin</groupId>
@@ -23,7 +25,6 @@
 		<module>invesdwin-context-security-kerberos</module>
 		<module>invesdwin-context-security-web</module>
 		<module>invesdwin-context-security-web-cas</module>
-		<module>invesdwin-context-security-web-cas-server</module>
 		<module>invesdwin-context-security-web-kerberos</module>
 		<module>invesdwin-context-security-web-saml</module>
 		<module>invesdwin-context-security-ldap</module>
@@ -40,7 +41,6 @@
 		<version.apacheds>2.0.0.AM26</version.apacheds>
 		<version.spring-security-kerberos>1.0.1.RELEASE</version.spring-security-kerberos>
 		<version.spring-security-saml>1.0.10.RELEASE</version.spring-security-saml>
-		<version.cas-server>4.0.1</version.cas-server>
 		<version.spring-ws-security>3.0.8.RELEASE</version.spring-ws-security>
 		<version.not-going-to-be-commons-ssl>0.3.20</version.not-going-to-be-commons-ssl>
 	</properties>
@@ -316,31 +316,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
-			<dependency>
-				<groupId>org.jasig.cas</groupId>
-				<artifactId>cas-server-core</artifactId>
-				<version>${version.cas-server}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>aspectjrt</artifactId>
-						<groupId>org.aspectj</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>log4j</artifactId>
-						<groupId>log4j</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>slf4j-log4j12</artifactId>
-						<groupId>org.slf4j</groupId>
-					</exclusion>
-					<exclusion>
-						<groupId>com.sun.xml.bind</groupId>
-						<artifactId>jaxb-impl</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
 			<dependency>
 				<groupId>org.apache.directory.server</groupId>
 				<artifactId>apacheds-core</artifactId>
