@@ -98,7 +98,7 @@ public class LdapRepositoryScanContextLocation implements IContextLocation {
 
     private Map<Class<?>, Set<Class<?>>> scanForLdapRepositories(final String basePackage) {
         final Map<Class<?>, Set<Class<?>>> ldapRepositories = new HashMap<Class<?>, Set<Class<?>>>();
-        final ClassPathScanner scanner = new ClassPathScanner().withInterfacesOnly();
+        final ClassPathScanner scanner = new ClassPathScanner().setInterfacesOnly();
         scanner.addIncludeFilter(new AssignableTypeFilter(LdapRepository.class));
 
         final Set<BeanDefinition> candidateComponents = scanner.findCandidateComponents(basePackage);
