@@ -270,6 +270,10 @@
 						<groupId>org.opensaml</groupId>
 						<artifactId>opensaml-xacml-saml-impl</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>javax.xml.ws</groupId>
+						<artifactId>jaxws-api</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 
