@@ -348,6 +348,10 @@
 						<groupId>net.sf.ehcache</groupId>
 						<artifactId>ehcache-core</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 

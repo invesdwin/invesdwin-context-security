@@ -3,7 +3,7 @@ package de.invesdwin.context.security.ldap.test;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.inject.Inject;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import de.invesdwin.context.security.ldap.directory.server.test.DirectoryServerTest;

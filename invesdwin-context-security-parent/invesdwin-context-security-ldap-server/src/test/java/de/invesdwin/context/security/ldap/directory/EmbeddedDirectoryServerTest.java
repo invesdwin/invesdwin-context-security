@@ -11,7 +11,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.login.LoginContext;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.security.kerberos.client.config.SunJaasKrb5LoginConfig;
