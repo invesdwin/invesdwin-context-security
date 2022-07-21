@@ -16,7 +16,8 @@ import de.invesdwin.util.math.Bytes;
 /**
  * Adapted from: org.springframework.security.crypto.password.Pbkdf2PasswordEncoder
  * 
- * A java implementation of https://github.com/ctz/fastpbkdf2 would be nice.
+ * A java implementation of https://github.com/ctz/fastpbkdf2 would be nice, though native Argon2 is still better due to
+ * parallelization and general higher security of the algorithm.
  */
 @Immutable
 public class Pbkdf2PasswordHasher implements IPasswordHasher {
