@@ -2,6 +2,7 @@ package de.invesdwin.context.security.crypto.key.password.bcrypt;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.CryptoProperties;
 import de.invesdwin.context.security.crypto.key.derivation.HkdfDerivationFactory;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
 import de.invesdwin.util.lang.Objects;
@@ -18,21 +19,30 @@ public class BcryptPasswordHasher implements IPasswordHasher {
     public static final BcryptPasswordHasher INSTANCE = new BcryptPasswordHasher();
 
     private final RawBcryptFunction bcrypt;
+    private final byte[] pepper;
 
     public BcryptPasswordHasher() {
-        this(RawBcryptFunction.INSTANCE);
+        this(CryptoProperties.DEFAULT_PEPPER);
     }
 
-    public BcryptPasswordHasher(final RawBcryptFunction bcrypt) {
+    public BcryptPasswordHasher(final byte[] pepper) {
+        this(pepper, RawBcryptFunction.INSTANCE);
+    }
+
+    public BcryptPasswordHasher(final byte[] pepper, final RawBcryptFunction bcrypt) {
+        this.pepper = pepper;
         this.bcrypt = bcrypt;
+    }
+
+    public byte[] getPepper() {
+        return pepper;
     }
 
     public RawBcryptFunction getBcrypt() {
         return bcrypt;
     }
 
-    @Override
-    public int getIterations() {
+    public int getLogRounds() {
         return bcrypt.getLogarithmicRounds();
     }
 
@@ -57,10 +67,7 @@ public class BcryptPasswordHasher implements IPasswordHasher {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-                .add("type", bcrypt.getType())
-                .add("logIterations", getIterations())
-                .toString();
+        return Objects.toStringHelper(this).add("type", bcrypt.getType()).add("logRounds", getLogRounds()).toString();
     }
 
 }

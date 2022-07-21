@@ -15,7 +15,8 @@ public class RawBcryptFunction extends BcryptFunction {
 
     public static final Bcrypt DEFAULT_BCRYPT_TYPE = Bcrypt.B;
     /**
-     * About 200 ms on an I9-9900k
+     * About 200 ms on an I9-9900k. 12 log rounds is also what many other libraries use:
+     * https://security.stackexchange.com/questions/17207/recommended-of-rounds-for-bcrypt
      */
     public static final int DEFAULT_BCRYPT_LOG_ROUNDS = 12;
     public static final int BCRYPT_SALT_LENGTH = 16;

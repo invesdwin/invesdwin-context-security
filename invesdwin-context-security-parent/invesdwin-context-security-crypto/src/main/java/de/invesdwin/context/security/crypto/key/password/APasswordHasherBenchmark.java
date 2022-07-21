@@ -56,7 +56,7 @@ public abstract class APasswordHasherBenchmark<E extends IPasswordHasher> {
             instance.hash(SALT, PASSWORD, LENGTH);
         }
         final Duration duration = start.toDuration().divide(BENCHMARK_ROUNDS);
-        return new PasswordHasherBenchmarkResult<E>(instance, duration);
+        return new PasswordHasherBenchmarkResult<E>(duration, instance);
     }
 
     public PasswordHasherBenchmarkResult<E> benchmarkIterations(final Duration maxDuration, final boolean logProgress) {
@@ -78,16 +78,16 @@ public abstract class APasswordHasherBenchmark<E extends IPasswordHasher> {
 
                 if (elapsed > maxMilliseconds) {
                     if (logProgress) {
-                        log.info("Exceeded: %s", new PasswordHasherBenchmarkResult<E>(currentInstance,
-                                new Duration(elapsed, FTimeUnit.MILLISECONDS)));
+                        log.info("Exceeded: %s", new PasswordHasherBenchmarkResult<E>(
+                                new Duration(elapsed, FTimeUnit.MILLISECONDS), currentInstance));
                     }
                     break;
                 } else {
                     finalElapsed = elapsed;
                     suitableInstance = currentInstance;
                     if (logProgress) {
-                        log.info("Increased: %s", new PasswordHasherBenchmarkResult<E>(currentInstance,
-                                new Duration(elapsed, FTimeUnit.MILLISECONDS)));
+                        log.info("Increased: %s", new PasswordHasherBenchmarkResult<E>(
+                                new Duration(elapsed, FTimeUnit.MILLISECONDS), currentInstance));
                     }
                     iterations = increaseIterations(iterations);
                     currentInstance = newIterationsInstance(currentInstance, iterations);
@@ -101,8 +101,8 @@ public abstract class APasswordHasherBenchmark<E extends IPasswordHasher> {
             }
         }
 
-        return new PasswordHasherBenchmarkResult<>(suitableInstance,
-                new Duration(finalElapsed, FTimeUnit.MILLISECONDS));
+        return new PasswordHasherBenchmarkResult<>(new Duration(finalElapsed, FTimeUnit.MILLISECONDS),
+                suitableInstance);
     }
 
     protected abstract int increaseIterations(int iterations);

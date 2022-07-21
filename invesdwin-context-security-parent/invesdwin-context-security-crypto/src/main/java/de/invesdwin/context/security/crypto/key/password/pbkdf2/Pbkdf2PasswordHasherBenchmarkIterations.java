@@ -5,7 +5,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import de.invesdwin.context.security.crypto.key.password.APasswordHasherBenchmark;
 
 @NotThreadSafe
-public class Pbkdf2PasswordHasherBenchmark extends APasswordHasherBenchmark<Pbkdf2PasswordHasher> {
+public class Pbkdf2PasswordHasherBenchmarkIterations extends APasswordHasherBenchmark<Pbkdf2PasswordHasher> {
 
     @Override
     public Pbkdf2PasswordHasher getDefaultInstance() {

@@ -12,7 +12,7 @@ public class BcryptPasswordHasherTest {
 
     @Test
     public void testDuration() {
-        final BcryptPasswordHasherBenchmark benchmark = new BcryptPasswordHasherBenchmark();
+        final BcryptPasswordHasherBenchmarkLogRounds benchmark = new BcryptPasswordHasherBenchmarkLogRounds();
         benchmark.benchmarkReport(new Duration(200, FTimeUnit.MILLISECONDS));
     }
 

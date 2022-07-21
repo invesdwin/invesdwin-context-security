@@ -7,12 +7,12 @@ import de.invesdwin.util.time.duration.Duration;
 
 @Immutable
 public class PasswordHasherBenchmarkResult<E extends IPasswordHasher> {
-    private final E instance;
     private final Duration duration;
+    private final E instance;
 
-    public PasswordHasherBenchmarkResult(final E instance, final Duration duration) {
-        this.instance = instance;
+    public PasswordHasherBenchmarkResult(final Duration duration, final E instance) {
         this.duration = duration;
+        this.instance = instance;
     }
 
     public E getInstance() {
@@ -25,11 +25,7 @@ public class PasswordHasherBenchmarkResult<E extends IPasswordHasher> {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-                .add("duration", duration)
-                .add("iterations", instance.getIterations())
-                .with(instance)
-                .toString();
+        return Objects.toStringHelper(this).add("duration", duration).with(instance).toString();
     }
 
 }

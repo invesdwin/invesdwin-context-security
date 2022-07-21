@@ -6,6 +6,7 @@ import javax.annotation.concurrent.Immutable;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import de.invesdwin.context.security.crypto.CryptoProperties;
 import de.invesdwin.context.security.crypto.authentication.mac.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.authentication.mac.hmac.HmacAlgorithm;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
@@ -35,7 +36,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
     private final SecretKeyFactoryObjectPool secretKeyFactoryPool;
 
     public Pbkdf2PasswordHasher() {
-        this(Pbkdf2PasswordHasher.class.getName().getBytes());
+        this(CryptoProperties.DEFAULT_PEPPER);
     }
 
     public Pbkdf2PasswordHasher(final byte[] pepper) {
@@ -54,7 +55,6 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
         this.secretKeyFactoryPool = new SecretKeyFactoryObjectPool(algorithm);
     }
 
-    @Override
     public int getIterations() {
         return iterations;
     }

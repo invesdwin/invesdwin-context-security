@@ -16,8 +16,6 @@ package de.invesdwin.context.security.crypto.key.password;
  */
 public interface IPasswordHasher {
 
-    int getIterations();
-
     byte[] hash(byte[] salt, byte[] password, int length);
 
 }

@@ -5,7 +5,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import de.invesdwin.context.security.crypto.key.password.APasswordHasherBenchmark;
 
 @NotThreadSafe
-public class BcryptPasswordHasherBenchmark extends APasswordHasherBenchmark<BcryptPasswordHasher> {
+public class BcryptPasswordHasherBenchmarkLogRounds extends APasswordHasherBenchmark<BcryptPasswordHasher> {
 
     @Override
     public BcryptPasswordHasher getDefaultInstance() {
@@ -20,7 +20,8 @@ public class BcryptPasswordHasherBenchmark extends APasswordHasherBenchmark<Bcry
     @Override
     public BcryptPasswordHasher newIterationsInstance(final BcryptPasswordHasher previousInstance,
             final int iterations) {
-        return new BcryptPasswordHasher(new RawBcryptFunction(previousInstance.getBcrypt().getType(), iterations));
+        return new BcryptPasswordHasher(previousInstance.getPepper(),
+                new RawBcryptFunction(previousInstance.getBcrypt().getType(), iterations));
     }
 
     @Override

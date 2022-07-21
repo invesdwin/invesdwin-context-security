@@ -12,7 +12,7 @@ public class Pbkdf2PasswordHasherTest {
 
     @Test
     public void testDuration() {
-        final Pbkdf2PasswordHasherBenchmark benchmark = new Pbkdf2PasswordHasherBenchmark();
+        final Pbkdf2PasswordHasherBenchmarkIterations benchmark = new Pbkdf2PasswordHasherBenchmarkIterations();
         benchmark.benchmarkReport(new Duration(200, FTimeUnit.MILLISECONDS));
     }
 
