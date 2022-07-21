@@ -121,6 +121,10 @@
 						<groupId>net.sf.ehcache</groupId>
 						<artifactId>ehcache-core</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>org.bouncycastle</groupId>
+						<artifactId>bcprov-jdk15on</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -292,16 +296,20 @@
 						<groupId>commons-logging</groupId>
 					</exclusion>
 					<exclusion>
-						<groupId>org.bouncycastle</groupId>
-						<artifactId>bcprov-jdk15</artifactId>
-					</exclusion>
-					<exclusion>
 						<groupId>ca.juliusdavies</groupId>
 						<artifactId>not-yet-commons-ssl</artifactId>
 					</exclusion>
 					<exclusion>
 						<groupId>log4j</groupId>
 						<artifactId>log4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.bouncycastle</groupId>
+						<artifactId>bcprov-jdk15on</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.bouncycastle</groupId>
+						<artifactId>bcpkix-jdk15on</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -318,6 +326,14 @@
 						<groupId>commons-logging</groupId>
 						<artifactId>commons-logging</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>org.bouncycastle</groupId>
+						<artifactId>bcprov-ext-jdk15on</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.bouncycastle</groupId>
+						<artifactId>bcprov-jdk15on</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -332,6 +348,10 @@
 					<exclusion>
 						<groupId>net.sf.ehcache</groupId>
 						<artifactId>ehcache-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.bouncycastle</groupId>
+						<artifactId>bcprov-jdk15on</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>

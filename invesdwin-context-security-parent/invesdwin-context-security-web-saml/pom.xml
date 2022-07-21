@@ -24,7 +24,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
+			<artifactId>bcpkix-jdk18on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-ext-jdk18on</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>xml-apis</groupId>
