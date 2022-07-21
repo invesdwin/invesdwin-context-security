@@ -21,7 +21,9 @@ import de.invesdwin.util.math.Bytes;
 public class Pbkdf2PasswordHasher implements IPasswordHasher {
 
     public static final String ALGORITHM_PREFIX = "PBKDF2With";
-    //takes about 200ms for 200k iterations on an I9-9900k
+    /**
+     * About 200ms on an I9-9900k
+     */
     public static final int DEFAULT_ITERATIONS = 200_000;
     public static final IMacAlgorithm DEFAULT_MAC_ALGORITHM = HmacAlgorithm.HMAC_SHA_512;
     public static final Pbkdf2PasswordHasher INSTANCE = new Pbkdf2PasswordHasher();

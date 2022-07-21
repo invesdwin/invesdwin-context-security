@@ -2,7 +2,7 @@ package de.invesdwin.context.security.crypto.key.password.bcrypt;
 
 import java.util.Arrays;
 
-import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.Immutable;
 
 import com.password4j.BadParametersException;
 import com.password4j.BcryptFunction;
@@ -10,11 +10,14 @@ import com.password4j.types.Bcrypt;
 
 import de.invesdwin.util.math.Bytes;
 
-@NotThreadSafe
+@Immutable
 public class RawBcryptFunction extends BcryptFunction {
 
     public static final Bcrypt DEFAULT_BCRYPT_TYPE = Bcrypt.B;
-    public static final int DEFAULT_BCRYPT_LOG_ROUNDS = 10;
+    /**
+     * About 200 ms on an I9-9900k
+     */
+    public static final int DEFAULT_BCRYPT_LOG_ROUNDS = 12;
     public static final int BCRYPT_SALT_LENGTH = 16;
 
     public static final RawBcryptFunction INSTANCE = new RawBcryptFunction();
