@@ -15,6 +15,8 @@ import de.invesdwin.context.security.crypto.key.password.argon2.unsafe.NativeArg
  * https://medium.com/analytics-vidhya/password-hashing-pbkdf2-scrypt-bcrypt-and-argon2-e25aaf41598e
  * 
  * https://github.com/Password4j/password4j/wiki/Recommended-settings#responsiveness-3
+ * 
+ * Native Argon2 has the benefit of using off-heap memory and being able to utilize parallelization to reduce latency.
  */
 public interface IPasswordHasher {
 

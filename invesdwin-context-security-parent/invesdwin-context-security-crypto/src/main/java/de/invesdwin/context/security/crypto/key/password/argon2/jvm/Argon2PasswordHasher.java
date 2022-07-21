@@ -27,6 +27,9 @@ public class Argon2PasswordHasher implements IArgon2PasswordHasher {
      * determine the maximum memory (or configure about 64MB or whatever you want to spend) based on 4 iterations. Then
      * find the iterations that suit the time requirements in the parallel native implementation (staying above 4
      * iterations).
+     * 
+     * Though we follow the guidance from here (at least 12 mb and 20 iterations):
+     * https://github.com/Password4j/password4j/wiki/Recommended-settings#argon2
      */
     public static final int DEFAULT_MEMORY = 1 << 14;
     public static final int DEFAULT_ITERATIONS = 20;
