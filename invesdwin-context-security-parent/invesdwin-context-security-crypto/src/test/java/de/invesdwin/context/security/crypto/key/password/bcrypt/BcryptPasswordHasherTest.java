@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.key.password.pbkdf2;
+package de.invesdwin.context.security.crypto.key.password.bcrypt;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -8,11 +8,11 @@ import de.invesdwin.util.time.date.FTimeUnit;
 import de.invesdwin.util.time.duration.Duration;
 
 @NotThreadSafe
-public class Pbkdf2PasswordHasherTest {
+public class BcryptPasswordHasherTest {
 
     @Test
     public void testDuration() {
-        final Pbkdf2PasswordHasherBenchmark benchmark = new Pbkdf2PasswordHasherBenchmark();
+        final BcryptPasswordHasherBenchmark benchmark = new BcryptPasswordHasherBenchmark();
         benchmark.benchmarkReport(new Duration(200, FTimeUnit.MILLISECONDS));
     }
 

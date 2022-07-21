@@ -9,6 +9,7 @@ import javax.crypto.spec.PBEKeySpec;
 import de.invesdwin.context.security.crypto.authentication.mac.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.authentication.mac.hmac.HmacAlgorithm;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
+import de.invesdwin.util.lang.Objects;
 import de.invesdwin.util.math.Bytes;
 
 /**
@@ -23,7 +24,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
     //takes about 200ms for 200k iterations on an I9-9900k
     public static final int DEFAULT_ITERATIONS = 200_000;
     public static final IMacAlgorithm DEFAULT_MAC_ALGORITHM = HmacAlgorithm.HMAC_SHA_512;
-    public static final IPasswordHasher INSTANCE = new Pbkdf2PasswordHasher();
+    public static final Pbkdf2PasswordHasher INSTANCE = new Pbkdf2PasswordHasher();
 
     private final int iterations;
     private final byte[] pepper;
@@ -51,6 +52,15 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
         this.secretKeyFactoryPool = new SecretKeyFactoryObjectPool(algorithm);
     }
 
+    @Override
+    public int getIterations() {
+        return iterations;
+    }
+
+    public byte[] getPepper() {
+        return pepper;
+    }
+
     public String getAlgorithm() {
         return algorithm;
     }
@@ -71,6 +81,11 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
         } finally {
             secretKeyFactoryPool.returnObject(secretKeyFactory);
         }
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this).add("algorithm", algorithm).add("iterations", iterations).toString();
     }
 
 }
