@@ -87,17 +87,19 @@ public class NativeArgon2PasswordHasher implements IArgon2PasswordHasher {
 
     @Override
     public byte[] hash(final byte[] salt, final byte[] password, final int length) {
-        final byte[] hash = argon2.rawHashAdvanced(length, memory, parallelism, password, salt, pepper, null, length,
-                version.getNativeVersion());
+        final byte[] hash = argon2.rawHashAdvanced(iterations, memory, parallelism, password, salt, pepper, null,
+                length, version.getNativeVersion());
         return hash;
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
+                .add("type", type)
                 .add("memory", memory)
                 .add("iterations", iterations)
                 .add("parallelism", parallelism)
+                .add("version", version)
                 .toString();
     }
 

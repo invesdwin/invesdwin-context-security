@@ -11,8 +11,6 @@ import de.invesdwin.context.security.crypto.key.password.argon2.Argon2PasswordHa
 import de.invesdwin.context.security.crypto.key.password.argon2.Argon2PasswordHasherBenchmarkMemory;
 import de.invesdwin.context.security.crypto.key.password.argon2.IArgon2PasswordHasher;
 import de.invesdwin.context.security.crypto.key.password.argon2.jvm.Argon2PasswordHasher;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.concurrent.Executors;
 import de.invesdwin.util.lang.Objects;
@@ -69,15 +67,15 @@ public class NativeArgon2PasswordHasherTest {
     @Test
     public void testParallelisation() {
         final int length = 64;
-        final byte[] salt = new byte[length];
-        final byte[] password = new byte[length];
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            random.nextBytes(salt);
-            random.nextBytes(password);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final byte[] salt = new byte[32];
+        final byte[] password = "asdf".getBytes();
+        //        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+        //        try {
+        //            random.nextBytes(salt);
+        //            random.nextBytes(password);
+        //        } finally {
+        //            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
+        //        }
         byte[] prevResult = null;
         final int maxParallelisation = Executors.getCpuThreadPoolCount();
         for (int parallelisation = 1; parallelisation <= maxParallelisation; parallelisation++) {

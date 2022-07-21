@@ -85,7 +85,6 @@ public class Argon2PasswordHasher implements IArgon2PasswordHasher {
 
     @Override
     public byte[] hash(final byte[] salt, final byte[] password, final int length) {
-        final byte[] hash = new byte[length];
         final Argon2Parameters params = new Argon2Parameters.Builder(this.type.getType()).withSalt(salt)
                 .withVersion(this.version.getVersion())
                 .withParallelism(this.parallelism)
@@ -93,10 +92,15 @@ public class Argon2PasswordHasher implements IArgon2PasswordHasher {
                 .withIterations(this.iterations)
                 .withSecret(this.pepper)
                 .build();
-        final Argon2BytesGenerator generator = new Argon2BytesGenerator();
-        generator.init(params);
-        generator.generateBytes(new String(password).toCharArray(), hash);
-        return hash;
+        final Argon2BytesGenerator generator = Argon2BytesGeneratorObjectPool.INSTANCE.borrowObject();
+        try {
+            generator.init(params);
+            final byte[] hash = new byte[length];
+            generator.generateBytes(password, hash);
+            return hash;
+        } finally {
+            Argon2BytesGeneratorObjectPool.INSTANCE.returnObject(generator);
+        }
     }
 
     @Override
