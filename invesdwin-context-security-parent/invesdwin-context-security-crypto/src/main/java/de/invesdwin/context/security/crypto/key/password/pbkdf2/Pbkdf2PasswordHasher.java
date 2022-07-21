@@ -73,7 +73,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
 
     @Override
     public byte[] hash(final byte[] salt, final byte[] password, final int length) {
-        final PBEKeySpec spec = new PBEKeySpec(new String(password).toCharArray(), Bytes.concatenate(salt, this.pepper),
+        final PBEKeySpec spec = new PBEKeySpec(new String(password).toCharArray(), Bytes.concat(salt, this.pepper),
                 this.iterations, length);
         final SecretKeyFactory secretKeyFactory = secretKeyFactoryPool.borrowObject();
         try {

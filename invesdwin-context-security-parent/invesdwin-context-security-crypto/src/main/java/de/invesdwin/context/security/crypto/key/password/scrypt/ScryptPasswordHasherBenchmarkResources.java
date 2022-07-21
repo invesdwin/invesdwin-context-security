@@ -13,29 +13,37 @@ public class ScryptPasswordHasherBenchmarkResources extends APasswordHasherBench
     }
 
     @Override
-    public ScryptPasswordHasher newHighMemoryInstance() {
+    public ScryptPasswordHasher newInitialCostInstance() {
         return getDefaultInstance();
     }
 
     @Override
-    public ScryptPasswordHasher newIterationsInstance(final ScryptPasswordHasher previousInstance,
-            final int iterations) {
-        return null;
+    public ScryptPasswordHasher newCostInstance(final ScryptPasswordHasher previousInstance, final int cost) {
+        return new ScryptPasswordHasher(previousInstance.getPepper(), new FastScryptFunction(
+                previousInstance.getScrypt().getWorkFactor(), cost, previousInstance.getScrypt().getParallelization()));
     }
 
     @Override
-    protected ScryptPasswordHasher newReducedMemoryInstance(final ScryptPasswordHasher previousInstance) {
-        throw new UnsupportedOperationException();
+    protected ScryptPasswordHasher newReducedOtherCostInstance(final ScryptPasswordHasher previousInstance) {
+        return new ScryptPasswordHasher(previousInstance.getPepper(),
+                new FastScryptFunction(previousInstance.getScrypt().getWorkFactor() / 2,
+                        previousInstance.getScrypt().getResources(),
+                        previousInstance.getScrypt().getParallelization()));
     }
 
     @Override
-    protected int increaseIterations(final int iterations) {
-        return iterations + 1;
+    protected String getCostName() {
+        return "resources";
     }
 
     @Override
-    protected int getInitialIterations() {
-        return 4;
+    protected int increaseCost(final int iterations) {
+        return iterations + iterations;
+    }
+
+    @Override
+    protected int getInitialCost() {
+        return 2;
     }
 
 }

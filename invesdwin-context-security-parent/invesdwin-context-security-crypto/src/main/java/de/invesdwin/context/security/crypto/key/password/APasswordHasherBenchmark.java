@@ -37,14 +37,14 @@ public abstract class APasswordHasherBenchmark<E extends IPasswordHasher> {
 
     public abstract E getDefaultInstance();
 
-    public abstract E newHighMemoryInstance();
+    public abstract E newInitialCostInstance();
 
-    public abstract E newIterationsInstance(E previousInstance, int iterations);
+    public abstract E newCostInstance(E previousInstance, int iterations);
 
     /**
      * Should throw an exception if this is not possible or not desired.
      */
-    protected abstract E newReducedMemoryInstance(E previousInstance);
+    protected abstract E newReducedOtherCostInstance(E previousInstance);
 
     public PasswordHasherBenchmarkResult<E> benchmark() {
         return benchmark(getDefaultInstance());
@@ -56,16 +56,17 @@ public abstract class APasswordHasherBenchmark<E extends IPasswordHasher> {
             instance.hash(SALT, PASSWORD, LENGTH);
         }
         final Duration duration = start.toDuration().divide(BENCHMARK_ROUNDS);
-        return new PasswordHasherBenchmarkResult<E>(duration, instance);
+        return new PasswordHasherBenchmarkResult<E>(duration, null, -1, instance);
     }
 
     public PasswordHasherBenchmarkResult<E> benchmarkIterations(final Duration maxDuration, final boolean logProgress) {
         final long maxMilliseconds = maxDuration.longValue(FTimeUnit.MILLISECONDS);
         long finalElapsed = -1;
-        int iterations = getInitialIterations();
+        int cost = getInitialCost();
+        int suitableCost = cost;
         E suitableInstance = null;
 
-        E currentInstance = newIterationsInstance(newHighMemoryInstance(), iterations);
+        E currentInstance = newCostInstance(newInitialCostInstance(), cost);
 
         for (int i = 0; i < MAX_TRIES; i++) {
             while (true) {
@@ -78,36 +79,41 @@ public abstract class APasswordHasherBenchmark<E extends IPasswordHasher> {
 
                 if (elapsed > maxMilliseconds) {
                     if (logProgress) {
-                        log.info("Exceeded: %s", new PasswordHasherBenchmarkResult<E>(
-                                new Duration(elapsed, FTimeUnit.MILLISECONDS), currentInstance));
+                        final Duration duration = new Duration(elapsed, FTimeUnit.MILLISECONDS);
+                        log.info("Exceeded: %s",
+                                new PasswordHasherBenchmarkResult<E>(duration, getCostName(), cost, currentInstance));
                     }
                     break;
                 } else {
                     finalElapsed = elapsed;
                     suitableInstance = currentInstance;
+                    suitableCost = cost;
                     if (logProgress) {
-                        log.info("Increased: %s", new PasswordHasherBenchmarkResult<E>(
-                                new Duration(elapsed, FTimeUnit.MILLISECONDS), currentInstance));
+                        final Duration duration = new Duration(elapsed, FTimeUnit.MILLISECONDS);
+                        log.info("Increased: %s", new PasswordHasherBenchmarkResult<E>(duration, getCostName(),
+                                suitableCost, currentInstance));
                     }
-                    iterations = increaseIterations(iterations);
-                    currentInstance = newIterationsInstance(currentInstance, iterations);
+                    cost = increaseCost(cost);
+                    currentInstance = newCostInstance(currentInstance, cost);
                 }
             }
 
             if (finalElapsed == -1) {
-                currentInstance = newReducedMemoryInstance(currentInstance);
+                currentInstance = newReducedOtherCostInstance(currentInstance);
             } else {
                 break;
             }
         }
 
-        return new PasswordHasherBenchmarkResult<>(new Duration(finalElapsed, FTimeUnit.MILLISECONDS),
-                suitableInstance);
+        final Duration duration = new Duration(finalElapsed, FTimeUnit.MILLISECONDS);
+        return new PasswordHasherBenchmarkResult<>(duration, getCostName(), suitableCost, suitableInstance);
     }
 
-    protected abstract int increaseIterations(int iterations);
+    protected abstract String getCostName();
 
-    protected abstract int getInitialIterations();
+    protected abstract int getInitialCost();
+
+    protected abstract int increaseCost(int cost);
 
     public PasswordHasherBenchmarkResult<E> benchmarkReport(final Duration maxDuration) {
         log.info("MaxDuration: %s", maxDuration);

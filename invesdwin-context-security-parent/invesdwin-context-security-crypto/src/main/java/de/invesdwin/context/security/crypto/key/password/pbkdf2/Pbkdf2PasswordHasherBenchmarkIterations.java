@@ -13,28 +13,32 @@ public class Pbkdf2PasswordHasherBenchmarkIterations extends APasswordHasherBenc
     }
 
     @Override
-    public Pbkdf2PasswordHasher newHighMemoryInstance() {
+    public Pbkdf2PasswordHasher newInitialCostInstance() {
         return getDefaultInstance();
     }
 
     @Override
-    public Pbkdf2PasswordHasher newIterationsInstance(final Pbkdf2PasswordHasher previousInstance,
-            final int iterations) {
+    public Pbkdf2PasswordHasher newCostInstance(final Pbkdf2PasswordHasher previousInstance, final int iterations) {
         return new Pbkdf2PasswordHasher(previousInstance.getPepper(), iterations, previousInstance.getMacAlgorithm());
     }
 
     @Override
-    protected Pbkdf2PasswordHasher newReducedMemoryInstance(final Pbkdf2PasswordHasher previousInstance) {
+    protected Pbkdf2PasswordHasher newReducedOtherCostInstance(final Pbkdf2PasswordHasher previousInstance) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected int increaseIterations(final int iterations) {
-        return iterations + getInitialIterations();
+    protected String getCostName() {
+        return "iterations";
     }
 
     @Override
-    protected int getInitialIterations() {
+    protected int increaseCost(final int iterations) {
+        return iterations + getInitialCost();
+    }
+
+    @Override
+    protected int getInitialCost() {
         return 2500;
     }
 

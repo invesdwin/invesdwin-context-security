@@ -17,17 +17,36 @@ public class ScryptPasswordHasherTest {
     @Test
     public void testDuration() {
         final Duration maxDuration = new Duration(200, FTimeUnit.MILLISECONDS);
-        final ScryptPasswordHasherBenchmarkWorkFactor benchmarkWorkFactor = new ScryptPasswordHasherBenchmarkWorkFactor();
-        final PasswordHasherBenchmarkResult<ScryptPasswordHasher> benchmarkWorkFactorResult = benchmarkWorkFactor
+        final ScryptPasswordHasherBenchmarkWorkFactor benchmarkFirst = new ScryptPasswordHasherBenchmarkWorkFactor();
+        final PasswordHasherBenchmarkResult<ScryptPasswordHasher> benchmarkWorkFactorResult = benchmarkFirst
                 .benchmarkReport(maxDuration);
 
-        final ScryptPasswordHasherBenchmarkResources benchmarkResources = new ScryptPasswordHasherBenchmarkResources() {
+        final ScryptPasswordHasherBenchmarkResources benchmarkSecond = new ScryptPasswordHasherBenchmarkResources() {
             @Override
-            public ScryptPasswordHasher newHighMemoryInstance() {
+            public ScryptPasswordHasher newInitialCostInstance() {
                 return benchmarkWorkFactorResult.getInstance();
             }
         };
-        benchmarkResources.benchmarkReport(maxDuration);
+        benchmarkSecond.benchmarkReport(maxDuration);
+    }
+
+    /**
+     * first test work factor, then resources: https://github.com/Password4j/password4j/wiki/Recommended-settings#scrypt
+     */
+    @Test
+    public void testDurationReverse() {
+        final Duration maxDuration = new Duration(200, FTimeUnit.MILLISECONDS);
+        final ScryptPasswordHasherBenchmarkResources benchmarkFirst = new ScryptPasswordHasherBenchmarkResources();
+        final PasswordHasherBenchmarkResult<ScryptPasswordHasher> benchmarkWorkFactorResult = benchmarkFirst
+                .benchmarkReport(maxDuration);
+
+        final ScryptPasswordHasherBenchmarkWorkFactor benchmarkSecond = new ScryptPasswordHasherBenchmarkWorkFactor() {
+            @Override
+            public ScryptPasswordHasher newInitialCostInstance() {
+                return benchmarkWorkFactorResult.getInstance();
+            }
+        };
+        benchmarkSecond.benchmarkReport(maxDuration);
     }
 
 }

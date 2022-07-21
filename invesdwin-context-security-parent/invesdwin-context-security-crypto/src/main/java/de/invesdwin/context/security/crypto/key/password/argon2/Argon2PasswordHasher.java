@@ -10,11 +10,6 @@ public class Argon2PasswordHasher implements IPasswordHasher {
     public static final Argon2PasswordHasher INSTANCE = new Argon2PasswordHasher();
 
     @Override
-    public int getIterations() {
-        return 0;
-    }
-
-    @Override
     public byte[] hash(final byte[] salt, final byte[] password, final int length) {
         return null;
     }

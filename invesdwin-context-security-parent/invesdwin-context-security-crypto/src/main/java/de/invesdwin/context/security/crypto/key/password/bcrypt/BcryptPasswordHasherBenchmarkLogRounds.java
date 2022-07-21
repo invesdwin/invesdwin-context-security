@@ -13,29 +13,33 @@ public class BcryptPasswordHasherBenchmarkLogRounds extends APasswordHasherBench
     }
 
     @Override
-    public BcryptPasswordHasher newHighMemoryInstance() {
+    public BcryptPasswordHasher newInitialCostInstance() {
         return getDefaultInstance();
     }
 
     @Override
-    public BcryptPasswordHasher newIterationsInstance(final BcryptPasswordHasher previousInstance,
-            final int iterations) {
+    public BcryptPasswordHasher newCostInstance(final BcryptPasswordHasher previousInstance, final int iterations) {
         return new BcryptPasswordHasher(previousInstance.getPepper(),
                 new RawBcryptFunction(previousInstance.getBcrypt().getType(), iterations));
     }
 
     @Override
-    protected BcryptPasswordHasher newReducedMemoryInstance(final BcryptPasswordHasher previousInstance) {
+    protected BcryptPasswordHasher newReducedOtherCostInstance(final BcryptPasswordHasher previousInstance) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected int increaseIterations(final int iterations) {
+    protected String getCostName() {
+        return "logRounds";
+    }
+
+    @Override
+    protected int increaseCost(final int iterations) {
         return iterations + 1;
     }
 
     @Override
-    protected int getInitialIterations() {
+    protected int getInitialCost() {
         return 4;
     }
 

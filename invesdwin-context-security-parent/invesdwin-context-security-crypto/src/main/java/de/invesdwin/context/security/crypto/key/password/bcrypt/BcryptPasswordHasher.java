@@ -34,6 +34,7 @@ public class BcryptPasswordHasher implements IPasswordHasher {
         this.bcrypt = bcrypt;
     }
 
+    @Override
     public byte[] getPepper() {
         return pepper;
     }
@@ -42,13 +43,9 @@ public class BcryptPasswordHasher implements IPasswordHasher {
         return bcrypt;
     }
 
-    public int getLogRounds() {
-        return bcrypt.getLogarithmicRounds();
-    }
-
     @Override
     public byte[] hash(final byte[] salt, final byte[] password, final int length) {
-        final byte[] hashed = bcrypt.cryptRaw(password, salt);
+        final byte[] hashed = bcrypt.cryptRaw(password, Bytes.concat(salt, pepper));
 
         assert hashed.length == BCRYPT_HASH_LENGTH : "Expecting " + BCRYPT_HASH_LENGTH
                 + " hash length from bcrypt but got: " + hashed.length;
@@ -67,7 +64,10 @@ public class BcryptPasswordHasher implements IPasswordHasher {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).add("type", bcrypt.getType()).add("logRounds", getLogRounds()).toString();
+        return Objects.toStringHelper(this)
+                .add("type", bcrypt.getType())
+                .add("logRounds", bcrypt.getLogarithmicRounds())
+                .toString();
     }
 
 }
