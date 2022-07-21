@@ -390,7 +390,7 @@ public class FastArgon2Function {
             byte[] blockHashBytes = blake2bLong(blake2b, initialHashWithZeros, ARGON2_BLOCK_SIZE);
             blockMemory[i * laneLength] = Utils.fromBytesToLongs(blockHashBytes);
 
-            blockHashBytes = blake2bLong(initialHashWithOnes, ARGON2_BLOCK_SIZE);
+            blockHashBytes = blake2bLong(blake2b, initialHashWithOnes, ARGON2_BLOCK_SIZE);
             blockMemory[i * laneLength + 1] = Utils.fromBytesToLongs(blockHashBytes);
         }
 
@@ -636,7 +636,7 @@ public class FastArgon2Function {
             System.arraycopy(bytes, 0, finalBlockBytes, i * bytes.length, bytes.length);
         }
 
-        final byte[] finalResult = blake2bLong(finalBlockBytes, outputLength);
+        final byte[] finalResult = blake2bLong(data.getBlake2b(), finalBlockBytes, outputLength);
 
         return finalResult;
     }
