@@ -5,7 +5,6 @@ import javax.annotation.concurrent.Immutable;
 import de.invesdwin.context.security.crypto.key.derivation.HkdfDerivationFactory;
 import de.invesdwin.context.security.crypto.key.derivation.IDerivationFactory;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
-import de.invesdwin.context.security.crypto.key.password.pbkdf2.Pbkdf2PasswordHasher;
 
 /**
  * Key derivation techniques are: Password+PBKDF2+HKDFexpands or Random+HKDFextract+HKDFexpands
@@ -43,11 +42,11 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
     }
 
     public static DerivedKeyProvider fromPassword(final byte[] salt, final String password) {
-        return fromPassword(salt, password, HkdfDerivationFactory.INSTANCE, Pbkdf2PasswordHasher.INSTANCE);
+        return fromPassword(salt, password, HkdfDerivationFactory.INSTANCE, IPasswordHasher.INSTANCE);
     }
 
     public static DerivedKeyProvider fromPassword(final byte[] salt, final byte[] password) {
-        return fromPassword(salt, password, HkdfDerivationFactory.INSTANCE, Pbkdf2PasswordHasher.INSTANCE);
+        return fromPassword(salt, password, HkdfDerivationFactory.INSTANCE, IPasswordHasher.INSTANCE);
     }
 
     public static DerivedKeyProvider fromRandom(final byte[] salt, final byte[] random) {

@@ -1,5 +1,7 @@
 package de.invesdwin.context.security.crypto.key.password;
 
+import de.invesdwin.context.security.crypto.key.password.argon2.unsafe.NativeArgon2PasswordHasher;
+
 /**
  * Only hashes to strengthen and stretch a weak password in order to apply HKDF on it to derive multiple keys.
  * 
@@ -15,6 +17,8 @@ package de.invesdwin.context.security.crypto.key.password;
  * https://github.com/Password4j/password4j/wiki/Recommended-settings#responsiveness-3
  */
 public interface IPasswordHasher {
+
+    IPasswordHasher INSTANCE = NativeArgon2PasswordHasher.INSTANCE;
 
     byte[] getPepper();
 

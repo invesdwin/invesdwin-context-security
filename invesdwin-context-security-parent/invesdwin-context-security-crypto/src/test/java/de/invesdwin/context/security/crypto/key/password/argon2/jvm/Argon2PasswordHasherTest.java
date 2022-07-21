@@ -23,29 +23,12 @@ public class Argon2PasswordHasherTest {
 
     private final Log log = new Log(this);
 
+    /**
+     * first test memory, then iterations (do at least 4 iterations):
+     * https://www.twelve21.io/how-to-choose-the-right-parameters-for-argon2/
+     */
     @Test
     public void testDuration() {
-        final Duration maxDuration = new Duration(200, FTimeUnit.MILLISECONDS);
-        final Argon2PasswordHasherBenchmarkIterations benchmarkFirst = new Argon2PasswordHasherBenchmarkIterations() {
-            @Override
-            public IArgon2PasswordHasher getDefaultInstance() {
-                return Argon2PasswordHasher.INSTANCE;
-            }
-        };
-        final PasswordHasherBenchmarkResult<IArgon2PasswordHasher> benchmarkWorkFactorResult = benchmarkFirst
-                .benchmarkReport(maxDuration);
-
-        final Argon2PasswordHasherBenchmarkMemory benchmarkSecond = new Argon2PasswordHasherBenchmarkMemory() {
-            @Override
-            public IArgon2PasswordHasher newInitialCostInstance() {
-                return benchmarkWorkFactorResult.getInstance();
-            }
-        };
-        benchmarkSecond.benchmarkReport(maxDuration);
-    }
-
-    @Test
-    public void testDurationReverse() {
         final Duration maxDuration = new Duration(200, FTimeUnit.MILLISECONDS);
         final Argon2PasswordHasherBenchmarkMemory benchmarkFirst = new Argon2PasswordHasherBenchmarkMemory() {
             @Override
@@ -57,6 +40,27 @@ public class Argon2PasswordHasherTest {
                 .benchmarkReport(maxDuration);
 
         final Argon2PasswordHasherBenchmarkIterations benchmarkSecond = new Argon2PasswordHasherBenchmarkIterations() {
+            @Override
+            public IArgon2PasswordHasher newInitialCostInstance() {
+                return benchmarkWorkFactorResult.getInstance();
+            }
+        };
+        benchmarkSecond.benchmarkReport(maxDuration);
+    }
+
+    @Test
+    public void testDurationReverse() {
+        final Duration maxDuration = new Duration(200, FTimeUnit.MILLISECONDS);
+        final Argon2PasswordHasherBenchmarkIterations benchmarkFirst = new Argon2PasswordHasherBenchmarkIterations() {
+            @Override
+            public IArgon2PasswordHasher getDefaultInstance() {
+                return Argon2PasswordHasher.INSTANCE;
+            }
+        };
+        final PasswordHasherBenchmarkResult<IArgon2PasswordHasher> benchmarkWorkFactorResult = benchmarkFirst
+                .benchmarkReport(maxDuration);
+
+        final Argon2PasswordHasherBenchmarkMemory benchmarkSecond = new Argon2PasswordHasherBenchmarkMemory() {
             @Override
             public IArgon2PasswordHasher newInitialCostInstance() {
                 return benchmarkWorkFactorResult.getInstance();
@@ -82,8 +86,7 @@ public class Argon2PasswordHasherTest {
         for (int parallelisation = 1; parallelisation <= maxParallelisation; parallelisation++) {
             final Argon2PasswordHasher argon2 = new Argon2PasswordHasher(CryptoProperties.DEFAULT_PEPPER,
                     Argon2PasswordHasher.DEFAULT_TYPE, Argon2PasswordHasher.DEFAULT_VERSION,
-                    Argon2PasswordHasher.DEFAULT_MEMORY, Argon2PasswordHasher.DEFAULT_ITERATIONS,
-                    parallelisation);
+                    Argon2PasswordHasher.DEFAULT_MEMORY, Argon2PasswordHasher.DEFAULT_ITERATIONS, parallelisation);
             final byte[] result1 = argon2.hash(salt, password, length);
             final byte[] result2 = argon2.hash(salt, password, length);
             final boolean same = Objects.equals(result1, result2);
