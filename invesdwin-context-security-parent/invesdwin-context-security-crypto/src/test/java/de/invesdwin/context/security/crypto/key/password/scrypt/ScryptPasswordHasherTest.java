@@ -30,9 +30,6 @@ public class ScryptPasswordHasherTest {
         benchmarkSecond.benchmarkReport(maxDuration);
     }
 
-    /**
-     * first test work factor, then resources: https://github.com/Password4j/password4j/wiki/Recommended-settings#scrypt
-     */
     @Test
     public void testDurationReverse() {
         final Duration maxDuration = new Duration(200, FTimeUnit.MILLISECONDS);

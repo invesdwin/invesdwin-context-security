@@ -15,7 +15,7 @@ public class ScryptPasswordHasher implements IPasswordHasher {
     private final byte[] pepper;
     private final FastScryptFunction scrypt;
 
-    public ScryptPasswordHasher() {
+    private ScryptPasswordHasher() {
         this(CryptoProperties.DEFAULT_PEPPER);
     }
 

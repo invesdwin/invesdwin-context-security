@@ -21,7 +21,7 @@ public class BcryptPasswordHasher implements IPasswordHasher {
     private final RawBcryptFunction bcrypt;
     private final byte[] pepper;
 
-    public BcryptPasswordHasher() {
+    private BcryptPasswordHasher() {
         this(CryptoProperties.DEFAULT_PEPPER);
     }
 

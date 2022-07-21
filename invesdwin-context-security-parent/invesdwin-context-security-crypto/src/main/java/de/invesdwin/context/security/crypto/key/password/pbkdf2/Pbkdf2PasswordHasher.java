@@ -35,7 +35,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
     private final String algorithm;
     private final SecretKeyFactoryObjectPool secretKeyFactoryPool;
 
-    public Pbkdf2PasswordHasher() {
+    private Pbkdf2PasswordHasher() {
         this(CryptoProperties.DEFAULT_PEPPER);
     }
 
@@ -59,6 +59,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
         return iterations;
     }
 
+    @Override
     public byte[] getPepper() {
         return pepper;
     }

@@ -15,7 +15,7 @@ public class FastScryptFunction extends ScryptFunction {
      * About 200ms on an I9-9900K
      */
     public static final int DEFAULT_WORK_FACTOR = 8;
-    public static final int DEFAULT_RESOURCES = 16384;
+    public static final int DEFAULT_RESOURCES = 1 << 14;
     public static final int DEFAULT_PARALLELIZATION = 1;
 
     public static final FastScryptFunction INSTANCE = new FastScryptFunction(DEFAULT_WORK_FACTOR, DEFAULT_RESOURCES,
