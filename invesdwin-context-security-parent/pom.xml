@@ -22,6 +22,7 @@
 
 	<modules>
 		<module>invesdwin-context-security</module>
+		<module>invesdwin-context-security-crypto</module>
 		<module>invesdwin-context-security-kerberos</module>
 		<module>invesdwin-context-security-web</module>
 		<module>invesdwin-context-security-web-cas</module>
@@ -43,6 +44,9 @@
 		<version.spring-security-saml>1.0.10.RELEASE</version.spring-security-saml>
 		<version.spring-ws-security>3.0.8.RELEASE</version.spring-ws-security>
 		<version.not-going-to-be-commons-ssl>0.3.20</version.not-going-to-be-commons-ssl>
+
+		<version.commons-crypto>1.1.0</version.commons-crypto>
+		<version.argon2-jvm>2.11</version.argon2-jvm>
 	</properties>
 
 	<dependencyManagement>
@@ -64,6 +68,11 @@
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security</artifactId>
+				<version>${project.version.invesdwin-context-security}</version>
+			</dependency>
+			<dependency>
+				<groupId>de.invesdwin</groupId>
+				<artifactId>invesdwin-context-security-crypto</artifactId>
 				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
 			<dependency>
@@ -375,6 +384,16 @@
 				</exclusions>
 			</dependency>
 
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-crypto</artifactId>
+				<version>${version.commons-crypto}</version>
+			</dependency>
+			<dependency>
+				<groupId>de.mkammerer</groupId>
+				<artifactId>argon2-jvm</artifactId>
+				<version>${version.argon2-jvm}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
