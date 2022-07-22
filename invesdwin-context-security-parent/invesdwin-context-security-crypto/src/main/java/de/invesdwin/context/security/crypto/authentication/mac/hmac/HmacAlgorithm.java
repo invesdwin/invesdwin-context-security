@@ -11,10 +11,19 @@ import de.invesdwin.context.security.crypto.authentication.mac.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
 import de.invesdwin.context.security.crypto.authentication.mac.pool.JceMac;
 import de.invesdwin.context.security.crypto.authentication.mac.pool.MacObjectPool;
+import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
 public enum HmacAlgorithm implements IMacAlgorithm {
+    /**
+     * @deprecated deemed insecure
+     */
+    @Deprecated
     HMAC_MD5(HmacAlgorithms.HMAC_MD5.getName(), 16),
+    /**
+     * @deprecated deemed insecure
+     */
+    @Deprecated
     HMAC_SHA_1(HmacAlgorithms.HMAC_SHA_1.getName(), 20),
     HMAC_SHA_224(HmacAlgorithms.HMAC_SHA_224.getName(), 28),
     HMAC_SHA_256(HmacAlgorithms.HMAC_SHA_256.getName(), 32),
@@ -58,7 +67,7 @@ public enum HmacAlgorithm implements IMacAlgorithm {
     }
 
     @Override
-    public MacObjectPool getMacPool() {
+    public IObjectPool<IMac> getMacPool() {
         return macPool;
     }
 

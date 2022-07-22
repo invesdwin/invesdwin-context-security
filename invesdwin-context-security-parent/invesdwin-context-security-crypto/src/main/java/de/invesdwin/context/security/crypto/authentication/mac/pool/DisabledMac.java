@@ -55,4 +55,8 @@ public final class DisabledMac implements IMac {
     public void doFinal(final byte[] output, final int offset) {
     }
 
+    @Override
+    public void reset() {
+    }
+
 }

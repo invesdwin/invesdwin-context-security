@@ -2,8 +2,9 @@ package de.invesdwin.context.security.crypto.authentication.mac;
 
 import java.security.Key;
 
+import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
 import de.invesdwin.context.security.crypto.authentication.mac.pool.IMacFactory;
-import de.invesdwin.context.security.crypto.authentication.mac.pool.MacObjectPool;
+import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 public interface IMacAlgorithm extends IMacFactory {
 
@@ -13,6 +14,6 @@ public interface IMacAlgorithm extends IMacFactory {
 
     Key wrapKey(byte[] key);
 
-    MacObjectPool getMacPool();
+    IObjectPool<IMac> getMacPool();
 
 }

@@ -45,7 +45,7 @@ public class AuthenticatingDelegateSerde<E> implements ISerde<E> {
         } else {
             final IByteBuffer signedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
             try {
-                final int signedLength = authenticationFactory.sign(buffer, signedBuffer);
+                final int signedLength = authenticationFactory.copyAndSign(buffer, signedBuffer);
                 return delegate.fromBuffer(signedBuffer, signedLength);
             } finally {
                 ByteBuffers.EXPANDABLE_POOL.returnObject(signedBuffer);
@@ -65,7 +65,7 @@ public class AuthenticatingDelegateSerde<E> implements ISerde<E> {
             final IByteBuffer verifiedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
             try {
                 final int verifiedLength = delegate.toBuffer(verifiedBuffer, obj);
-                return authenticationFactory.verify(verifiedBuffer.sliceTo(verifiedLength), buffer);
+                return authenticationFactory.verifyAndCopy(verifiedBuffer.sliceTo(verifiedLength), buffer);
             } finally {
                 ByteBuffers.EXPANDABLE_POOL.returnObject(verifiedBuffer);
             }

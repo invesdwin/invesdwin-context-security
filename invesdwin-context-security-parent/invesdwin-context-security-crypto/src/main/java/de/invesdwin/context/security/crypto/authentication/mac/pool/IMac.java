@@ -8,6 +8,9 @@ public interface IMac {
 
     int getMacLength();
 
+    /**
+     * This will skip init if the same key is used and do a reset instead if needed
+     */
     void init(Key key);
 
     void update(java.nio.ByteBuffer input);
@@ -23,5 +26,10 @@ public interface IMac {
     byte[] doFinal(byte[] input);
 
     void doFinal(byte[] output, int offset);
+
+    /**
+     * Will only reset if needed (pending update data without a reset, doFinal or init call afterwards)
+     */
+    void reset();
 
 }

@@ -11,6 +11,7 @@ import javax.crypto.Cipher;
 
 import org.apache.commons.crypto.cipher.CryptoCipher;
 
+import de.invesdwin.context.ContextProperties;
 import de.invesdwin.context.security.crypto.encryption.EncryptingDelegateSerde;
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
@@ -66,18 +67,24 @@ public class CipherEncryptionFactoryDerivedIV implements IEncryptionFactory {
     }
 
     public static AtomicLong newRandomIvCounter() {
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            /*
-             * start at a random counter, so it does not matter when the classes are initialized, the counter will not
-             * be predictably at 0. So that an attacker does not know how long the communication chnanel has been
-             * established.
-             * 
-             * We anyway either send the IV or the counter over the wire so there is no secret in the counter itself.
-             */
-            return new AtomicLong(random.nextLong());
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
+        if (ContextProperties.IS_TEST_ENVIRONMENT) {
+            //make debugging easier by using 0 counter always during testing
+            return new AtomicLong();
+        } else {
+            final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+            try {
+                /*
+                 * start at a random counter, so it does not matter when the classes are initialized, the counter will
+                 * not be predictably at 0. So that an attacker does not know how long the communication chnanel has
+                 * been established.
+                 * 
+                 * We anyway either send the IV or the counter over the wire so there is no secret in the counter
+                 * itself.
+                 */
+                return new AtomicLong(random.nextLong());
+            } finally {
+                CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
+            }
         }
     }
 

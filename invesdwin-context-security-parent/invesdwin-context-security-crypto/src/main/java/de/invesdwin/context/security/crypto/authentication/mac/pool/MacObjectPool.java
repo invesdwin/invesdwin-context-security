@@ -23,12 +23,14 @@ public final class MacObjectPool extends ATimeoutObjectPool<IMac> {
 
     @Override
     public void invalidateObject(final IMac obj) {
-        //noop
+        //will do a lazy reset only if required
+        obj.reset();
     }
 
     @Override
     protected void passivateObject(final IMac element) {
-        //noop
+        //will do a lazy reset only if required
+        element.reset();
     }
 
 }

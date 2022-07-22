@@ -12,17 +12,15 @@ import de.invesdwin.util.streams.ASimpleDelegateInputStream;
 @NotThreadSafe
 public class LayeredMacInputStream extends ASimpleDelegateInputStream {
     protected final IMac mac;
-    private final Key key;
 
     public LayeredMacInputStream(final InputStream delegate, final IMac mac, final Key key) {
         super(delegate);
         this.mac = mac;
-        this.key = key;
-        init();
+        mac.init(key);
     }
 
     public void init() {
-        mac.init(key);
+        mac.reset();
     }
 
     @Override
@@ -79,8 +77,15 @@ public class LayeredMacInputStream extends ASimpleDelegateInputStream {
         return n;
     }
 
-    public IMac getMac() {
-        return mac;
+    public byte[] doFinal() {
+        //resets the mac to its previous initial state
+        return mac.doFinal();
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        mac.reset();
     }
 
 }

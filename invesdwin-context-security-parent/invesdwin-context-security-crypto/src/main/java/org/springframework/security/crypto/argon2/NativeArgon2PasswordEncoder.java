@@ -76,7 +76,7 @@ public class NativeArgon2PasswordEncoder implements PasswordEncoder {
                         parameters.getIterations(), parameters.getLanes());
         final byte[] hashBytes = decodedArgon2.hash(parameters.getSalt(), Bytes.fromCharSequenceToBytes(rawPassword),
                 decoded.getHash().length);
-        return constantTimeArrayEquals(decoded.getHash(), hashBytes);
+        return Bytes.constantTimeEquals(decoded.getHash(), hashBytes);
     }
 
     @Override
@@ -87,17 +87,6 @@ public class NativeArgon2PasswordEncoder implements PasswordEncoder {
         }
         final Argon2Parameters parameters = Argon2EncodingUtils.decode(encodedPassword).getParameters();
         return parameters.getMemory() < argon2.getMemory() || parameters.getIterations() < argon2.getIterations();
-    }
-
-    private static boolean constantTimeArrayEquals(final byte[] expected, final byte[] actual) {
-        if (expected.length != actual.length) {
-            return false;
-        }
-        int result = 0;
-        for (int i = 0; i < expected.length; i++) {
-            result |= expected[i] ^ actual[i];
-        }
-        return result == 0;
     }
 
 }

@@ -46,7 +46,11 @@ public enum AesAlgorithm implements ICipherAlgorithm {
      * encryption only, full blocks, not streaming capable
      * 
      * input/output stream can only encrypt/decrypt full file and needs to be closed
+     * 
+     * @deprecated deemed insecure
+     *             https://github.com/corretto/amazon-corretto-crypto-provider/blob/develop/DIFFERENCES.md#aes-gcm-supports-ivparameterspec
      */
+    @Deprecated
     AES_CBC_PKCS5Padding("AES/CBC/PKCS5Padding", CryptoCipherFactory.AES_BLOCK_SIZE) {
         @Override
         public OutputStream newEncryptor(final OutputStream out, final byte[] key, final byte[] iv) {
