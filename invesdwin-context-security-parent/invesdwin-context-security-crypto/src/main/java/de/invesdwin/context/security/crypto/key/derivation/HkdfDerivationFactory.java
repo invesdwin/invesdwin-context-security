@@ -2,9 +2,11 @@ package de.invesdwin.context.security.crypto.key.derivation;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.CryptoProperties;
 import de.invesdwin.context.security.crypto.authentication.mac.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.authentication.mac.hmac.HmacAlgorithm;
 import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
+import de.invesdwin.util.math.Bytes;
 
 /**
  * Adapted from: https://github.com/NetRiceCake/HKDF/blob/master/src/main/java/com/github/netricecake/hkdf/HKDF.java
@@ -12,17 +14,37 @@ import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
 @Immutable
 public class HkdfDerivationFactory implements IDerivationFactory {
 
-    public static final HkdfDerivationFactory INSTANCE = new HkdfDerivationFactory(HmacAlgorithm.DEFAULT);
+    public static final HkdfDerivationFactory INSTANCE = new HkdfDerivationFactory();
 
+    private final byte[] pepper;
     private final IMacAlgorithm algorithm;
 
-    public HkdfDerivationFactory(final IMacAlgorithm algorithm) {
+    private HkdfDerivationFactory() {
+        this(CryptoProperties.DEFAULT_PEPPER, HmacAlgorithm.DEFAULT);
+    }
+
+    public HkdfDerivationFactory(final byte[] pepper) {
+        this(pepper, HmacAlgorithm.DEFAULT);
+    }
+
+    public HkdfDerivationFactory(final byte[] pepper, final IMacAlgorithm algorithm) {
+        this.pepper = pepper;
         this.algorithm = algorithm;
     }
 
     @Override
-    public IMacAlgorithm getAlgorithm() {
-        return algorithm;
+    public byte[] getPepper() {
+        return pepper;
+    }
+
+    @Override
+    public String getAlgorithm() {
+        return algorithm.getAlgorithm();
+    }
+
+    @Override
+    public int getExtractLength() {
+        return algorithm.getMacLength();
     }
 
     @Override
@@ -30,7 +52,7 @@ public class HkdfDerivationFactory implements IDerivationFactory {
         if (keyMaterial != null && keyMaterial.length > 0) {
             final IMac mac = algorithm.getMacPool().borrowObject();
             try {
-                mac.init(algorithm.wrapKey(salt));
+                mac.init(algorithm.wrapKey(Bytes.concat(salt, pepper)));
                 return mac.doFinal(keyMaterial);
             } finally {
                 algorithm.getMacPool().returnObject(mac);
@@ -68,24 +90,6 @@ public class HkdfDerivationFactory implements IDerivationFactory {
         } finally {
             algorithm.getMacPool().returnObject(mac);
         }
-    }
-
-    @Override
-    public byte[] expandLabel(final byte[] key, final String label, final byte[] context, final int length) {
-        final byte[] hexLabel = ("tls13 " + label).getBytes();
-        final byte[] info = new byte[hexLabel.length + context.length + 4];
-
-        final byte[] hexLength = new byte[2];
-        hexLength[0] = (byte) (length >> 8);
-        hexLength[1] = (byte) (length);
-
-        System.arraycopy(hexLength, 0, info, 0, 2);
-        info[2] = (byte) hexLabel.length;
-        System.arraycopy(hexLabel, 0, info, 3, hexLabel.length);
-        info[hexLabel.length + 3] = (byte) context.length;
-        System.arraycopy(context, 0, info, hexLabel.length + 4, context.length);
-
-        return expand(key, info, length);
     }
 
 }

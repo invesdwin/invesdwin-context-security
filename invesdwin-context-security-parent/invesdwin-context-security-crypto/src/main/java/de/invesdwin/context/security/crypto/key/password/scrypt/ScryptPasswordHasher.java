@@ -33,6 +33,11 @@ public class ScryptPasswordHasher implements IPasswordHasher {
         return pepper;
     }
 
+    @Override
+    public String getAlgorithm() {
+        return "Scrypt";
+    }
+
     public FastScryptFunction getScrypt() {
         return scrypt;
     }

@@ -60,7 +60,7 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
 
     public static DerivedKeyProvider fromPassword(final byte[] salt, final byte[] password,
             final IDerivationFactory derivationFactory, final IPasswordHasher passwordHasher) {
-        final byte[] key = passwordHasher.hash(salt, password, derivationFactory.getAlgorithm().getMacLength());
+        final byte[] key = passwordHasher.hash(salt, password, derivationFactory.getExtractLength());
         return new DerivedKeyProvider(salt, key, derivationFactory);
     }
 

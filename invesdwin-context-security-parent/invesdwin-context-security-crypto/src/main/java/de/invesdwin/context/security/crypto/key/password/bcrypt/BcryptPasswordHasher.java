@@ -39,6 +39,11 @@ public class BcryptPasswordHasher implements IPasswordHasher {
         return pepper;
     }
 
+    @Override
+    public String getAlgorithm() {
+        return "Bcrypt";
+    }
+
     public RawBcryptFunction getBcrypt() {
         return bcrypt;
     }

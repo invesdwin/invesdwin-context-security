@@ -65,6 +65,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
         return pepper;
     }
 
+    @Override
     public String getAlgorithm() {
         return algorithm;
     }

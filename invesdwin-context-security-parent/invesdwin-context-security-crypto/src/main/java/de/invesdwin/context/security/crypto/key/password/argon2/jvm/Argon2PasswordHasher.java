@@ -125,10 +125,10 @@ public class Argon2PasswordHasher implements IArgon2PasswordHasher {
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("type", type)
+                .add("version", version)
                 .add("memory", memory)
                 .add("iterations", iterations)
                 .add("parallelism", parallelism)
-                .add("version", version)
                 .toString();
     }
 

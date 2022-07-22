@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.params.Argon2Parameters;
 import com.password4j.types.Argon2;
 
 import de.mkammerer.argon2.Argon2Factory.Argon2Types;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 @Immutable
 public enum Argon2Type {
@@ -15,6 +16,14 @@ public enum Argon2Type {
     id(Argon2Parameters.ARGON2_id, Argon2Types.ARGON2id, Argon2.ID);
 
     public static final Argon2Type DEFAULT = id;
+
+    private static final Int2ObjectOpenHashMap<Argon2Type> TYPE_MAP = new Int2ObjectOpenHashMap<>();
+
+    static {
+        for (final Argon2Type type : values()) {
+            TYPE_MAP.put(type.getType(), type);
+        }
+    }
 
     private int type;
     private Argon2Types nativeType;
@@ -36,5 +45,9 @@ public enum Argon2Type {
 
     public Argon2 getJvmType() {
         return jvmType;
+    }
+
+    public static Argon2Type valueOfType(final int type) {
+        return TYPE_MAP.get(type);
     }
 }

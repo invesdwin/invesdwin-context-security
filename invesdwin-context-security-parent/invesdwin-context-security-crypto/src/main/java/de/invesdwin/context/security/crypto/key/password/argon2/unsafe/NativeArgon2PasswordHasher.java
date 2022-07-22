@@ -23,6 +23,12 @@ public class NativeArgon2PasswordHasher implements IArgon2PasswordHasher {
 
     public static final NativeArgon2PasswordHasher INSTANCE = new NativeArgon2PasswordHasher();
 
+    public static final boolean AVAILABLE;
+
+    static {
+        AVAILABLE = determineAvailable();
+    }
+
     private final byte[] pepper;
     private final Argon2Type type;
     private final int memory;
@@ -48,6 +54,15 @@ public class NativeArgon2PasswordHasher implements IArgon2PasswordHasher {
         this.iterations = iterations;
         this.parallelism = parallelism;
         this.argon2 = Argon2Factory.createAdvanced(type.getNativeType());
+    }
+
+    private static boolean determineAvailable() {
+        try {
+            final Argon2Advanced instance = Argon2Factory.createAdvanced(Argon2Type.DEFAULT.getNativeType());
+            return instance != null;
+        } catch (final Throwable t) {
+            return false;
+        }
     }
 
     @Override
@@ -96,10 +111,10 @@ public class NativeArgon2PasswordHasher implements IArgon2PasswordHasher {
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("type", type)
+                .add("version", version)
                 .add("memory", memory)
                 .add("iterations", iterations)
                 .add("parallelism", parallelism)
-                .add("version", version)
                 .toString();
     }
 

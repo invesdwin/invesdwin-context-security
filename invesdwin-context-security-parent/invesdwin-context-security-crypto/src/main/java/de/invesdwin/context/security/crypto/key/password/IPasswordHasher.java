@@ -1,6 +1,6 @@
 package de.invesdwin.context.security.crypto.key.password;
 
-import de.invesdwin.context.security.crypto.key.password.argon2.unsafe.NativeArgon2PasswordHasher;
+import de.invesdwin.context.security.crypto.key.password.argon2.IArgon2PasswordHasher;
 
 /**
  * Only hashes to strengthen and stretch a weak password in order to apply HKDF on it to derive multiple keys.
@@ -20,9 +20,11 @@ import de.invesdwin.context.security.crypto.key.password.argon2.unsafe.NativeArg
  */
 public interface IPasswordHasher {
 
-    IPasswordHasher INSTANCE = NativeArgon2PasswordHasher.INSTANCE;
+    IPasswordHasher INSTANCE = IArgon2PasswordHasher.INSTANCE;
 
     byte[] getPepper();
+
+    String getAlgorithm();
 
     byte[] hash(byte[] salt, byte[] password, int length);
 
