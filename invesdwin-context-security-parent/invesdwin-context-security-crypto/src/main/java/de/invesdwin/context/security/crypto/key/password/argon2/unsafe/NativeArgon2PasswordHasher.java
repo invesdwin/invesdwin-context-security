@@ -11,6 +11,7 @@ import de.invesdwin.context.security.crypto.key.password.argon2.jvm.Argon2Passwo
 import de.invesdwin.util.lang.Objects;
 import de.mkammerer.argon2.Argon2Advanced;
 import de.mkammerer.argon2.Argon2Factory;
+import de.mkammerer.argon2.jna.Argon2Library;
 
 @Immutable
 public class NativeArgon2PasswordHasher implements IArgon2PasswordHasher {
@@ -58,8 +59,8 @@ public class NativeArgon2PasswordHasher implements IArgon2PasswordHasher {
 
     private static boolean determineAvailable() {
         try {
-            final Argon2Advanced instance = Argon2Factory.createAdvanced(Argon2Type.DEFAULT.getNativeType());
-            return instance != null;
+            final String ok = Argon2Library.INSTANCE.argon2_error_message(0);
+            return "OK".equalsIgnoreCase(ok);
         } catch (final Throwable t) {
             return false;
         }
