@@ -2,7 +2,6 @@ package de.invesdwin.context.security.crypto.key;
 
 import javax.annotation.concurrent.Immutable;
 
-import de.invesdwin.context.security.crypto.key.derivation.HkdfDerivationFactory;
 import de.invesdwin.context.security.crypto.key.derivation.IDerivationFactory;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
 
@@ -42,15 +41,15 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
     }
 
     public static DerivedKeyProvider fromPassword(final byte[] salt, final String password) {
-        return fromPassword(salt, password, HkdfDerivationFactory.INSTANCE, IPasswordHasher.INSTANCE);
+        return fromPassword(salt, password, IDerivationFactory.INSTANCE, IPasswordHasher.INSTANCE);
     }
 
     public static DerivedKeyProvider fromPassword(final byte[] salt, final byte[] password) {
-        return fromPassword(salt, password, HkdfDerivationFactory.INSTANCE, IPasswordHasher.INSTANCE);
+        return fromPassword(salt, password, IDerivationFactory.INSTANCE, IPasswordHasher.INSTANCE);
     }
 
     public static DerivedKeyProvider fromRandom(final byte[] salt, final byte[] random) {
-        return fromRandom(salt, random, HkdfDerivationFactory.INSTANCE);
+        return fromRandom(salt, random, IDerivationFactory.INSTANCE);
     }
 
     public static DerivedKeyProvider fromPassword(final byte[] salt, final String password,
