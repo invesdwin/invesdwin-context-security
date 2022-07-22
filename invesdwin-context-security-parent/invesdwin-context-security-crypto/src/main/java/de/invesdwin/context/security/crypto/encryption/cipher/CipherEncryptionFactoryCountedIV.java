@@ -42,7 +42,7 @@ public class CipherEncryptionFactoryCountedIV implements IEncryptionFactory {
         this.key = key;
         this.keyWrapped = algorithm.wrapKey(key);
         this.initIV = newInitIV(algorithm.getIvBytes());
-        this.ivCounter = new AtomicLong();
+        this.ivCounter = newIvCounter();
         if (initIV.length != algorithm.getIvBytes()) {
             throw new IllegalArgumentException(
                     "initIV.length[" + initIV.length + "] != algorithm.getIvBytes[" + algorithm.getIvBytes() + "]");
@@ -63,6 +63,10 @@ public class CipherEncryptionFactoryCountedIV implements IEncryptionFactory {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
         return initIV;
+    }
+
+    protected AtomicLong newIvCounter() {
+        return CipherEncryptionFactoryDerivedIV.newRandomIvCounter();
     }
 
     protected void calculateIV(final byte[] iv) {

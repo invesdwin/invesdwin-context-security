@@ -14,6 +14,8 @@ import org.apache.commons.crypto.cipher.CryptoCipher;
 import de.invesdwin.context.security.crypto.encryption.EncryptingDelegateSerde;
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.ALazyDelegateInputStream;
 import de.invesdwin.util.streams.ALazyDelegateOutputStream;
@@ -47,7 +49,7 @@ public class CipherEncryptionFactoryDerivedIV implements IEncryptionFactory {
         this.key = derivedKey;
         this.keyWrapped = algorithm.wrapKey(derivedKey);
         this.initIV = derivedIv;
-        this.ivCounter = new AtomicLong();
+        this.ivCounter = newIvCounter();
         if (initIV.length != algorithm.getIvBytes()) {
             throw new IllegalArgumentException(
                     "initIV.length[" + initIV.length + "] != algorithm.getIvBytes[" + algorithm.getIvBytes() + "]");
@@ -57,6 +59,26 @@ public class CipherEncryptionFactoryDerivedIV implements IEncryptionFactory {
     @Override
     public ICipherAlgorithm getAlgorithm() {
         return algorithm;
+    }
+
+    protected AtomicLong newIvCounter() {
+        return newRandomIvCounter();
+    }
+
+    public static AtomicLong newRandomIvCounter() {
+        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+        try {
+            /*
+             * start at a random counter, so it does not matter when the classes are initialized, the counter will not
+             * be predictably at 0. So that an attacker does not know how long the communication chnanel has been
+             * established.
+             * 
+             * We anyway either send the IV or the counter over the wire so there is no secret in the counter itself.
+             */
+            return new AtomicLong(random.nextLong());
+        } finally {
+            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
+        }
     }
 
     protected long calculateIV(final byte[] iv) {
