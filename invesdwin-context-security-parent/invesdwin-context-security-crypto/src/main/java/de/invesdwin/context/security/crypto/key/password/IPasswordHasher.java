@@ -6,7 +6,8 @@ import de.invesdwin.context.security.crypto.key.password.argon2.IArgon2PasswordH
  * Only hashes to strengthen and stretch a weak password in order to apply HKDF on it to derive multiple keys.
  * 
  * For encoding passwords for storage, use spring-security-crypto PasswordEncoder instead. It encodes the algorithm
- * parameters in the hash and allows to determine if passwords should be upgraded.
+ * parameters in the hash and allows to determine if passwords should be upgraded. NativeArgon2PasswordEncoder provides
+ * a fast implementation of Argon2 with a graceful fallback to a JVM instance.
  * 
  * Bcrypt is better than Scrypt (until it is proven, which it is by now) and PBKDF2 (easily cracked by GPUs):
  * https://medium.com/@mpreziuso/password-hashing-pbkdf2-scrypt-bcrypt-1ef4bb9c19b3
