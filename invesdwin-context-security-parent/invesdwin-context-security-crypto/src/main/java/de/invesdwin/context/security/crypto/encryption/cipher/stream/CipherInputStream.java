@@ -110,7 +110,8 @@ public class CipherInputStream extends InputStream implements ReadableByteChanne
         this.params = algorithm.wrapIv(iv);
 
         inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
-        outBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize + cipher.getBlockSize());
+        outBuffer = java.nio.ByteBuffer
+                .allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getSignatureSize());
         outBuffer.limit(0);
 
         initCipher();

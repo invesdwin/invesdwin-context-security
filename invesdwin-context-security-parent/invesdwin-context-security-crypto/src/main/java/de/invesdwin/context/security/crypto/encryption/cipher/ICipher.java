@@ -11,6 +11,8 @@ public interface ICipher extends Closeable {
 
     int getBlockSize();
 
+    int getSignatureSize();
+
     String getAlgorithm();
 
     void init(int mode, Key key, AlgorithmParameterSpec params);

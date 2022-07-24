@@ -26,9 +26,9 @@ public class CipherCountedIV implements ICipherIV {
 
     public CipherCountedIV(final ICipherAlgorithm algorithm) {
         this.algorithm = algorithm;
-        this.initIV = newInitIV(algorithm.getIvBytes());
-        assert initIV.length == algorithm.getIvBytes() : "initIV.length[" + initIV.length + "] != algorithm.getIvBytes["
-                + algorithm.getIvBytes() + "]";
+        this.initIV = newInitIV(algorithm.getIvSize());
+        assert initIV.length == algorithm.getIvSize() : "initIV.length[" + initIV.length + "] != algorithm.getIvBytes["
+                + algorithm.getIvSize() + "]";
         this.ivCounter = newIvCounter();
     }
 
@@ -43,7 +43,7 @@ public class CipherCountedIV implements ICipherIV {
 
     @Override
     public int getBlockSizeIV() {
-        return algorithm.getIvBytes();
+        return algorithm.getIvSize();
     }
 
     protected byte[] newInitIV(final int ivBytes) {

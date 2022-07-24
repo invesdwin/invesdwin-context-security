@@ -32,28 +32,28 @@ public interface ICipherIV {
 
     default byte[] putNewIV(final IByteBuffer out) {
         final MutableIvParameterSpec newIv = new MutableIvParameterSpec(
-                ByteBuffers.allocateByteArray(getAlgorithm().getIvBytes()));
+                ByteBuffers.allocateByteArray(getAlgorithm().getIvSize()));
         putIV(out, newIv);
         return newIv.getIV();
     }
 
     default byte[] putNewIV(final OutputStream out) {
         final MutableIvParameterSpec newIv = new MutableIvParameterSpec(
-                ByteBuffers.allocateByteArray(getAlgorithm().getIvBytes()));
+                ByteBuffers.allocateByteArray(getAlgorithm().getIvSize()));
         putIV(out, newIv);
         return newIv.getIV();
     }
 
     default byte[] getNewIV(final IByteBuffer in) {
         final MutableIvParameterSpec newIv = new MutableIvParameterSpec(
-                ByteBuffers.allocateByteArray(getAlgorithm().getIvBytes()));
+                ByteBuffers.allocateByteArray(getAlgorithm().getIvSize()));
         getIV(in, newIv);
         return newIv.getIV();
     }
 
     default byte[] getNewIV(final InputStream in) {
         final MutableIvParameterSpec newIv = new MutableIvParameterSpec(
-                ByteBuffers.allocateByteArray(getAlgorithm().getIvBytes()));
+                ByteBuffers.allocateByteArray(getAlgorithm().getIvSize()));
         getIV(in, newIv);
         return newIv.getIV();
     }

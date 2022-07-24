@@ -31,7 +31,7 @@ public class CipherRandomIV implements ICipherIV {
 
     @Override
     public int getBlockSizeIV() {
-        return algorithm.getIvBytes();
+        return algorithm.getIvSize();
     }
 
     protected void randomizeIV(final byte[] iv) {

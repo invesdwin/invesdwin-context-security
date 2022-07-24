@@ -36,15 +36,15 @@ public class CipherDerivedIV implements ICipherIV {
     private final AtomicLong ivCounter;
 
     public CipherDerivedIV(final ICipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider.newDerivedKey("crypto-iv".getBytes(), algorithm.getIvBytes()));
+        this(algorithm, derivedKeyProvider.newDerivedKey("crypto-iv".getBytes(), algorithm.getIvSize()));
     }
 
     public CipherDerivedIV(final ICipherAlgorithm algorithm, final byte[] derivedIV) {
         this.algorithm = algorithm;
-        this.initIV = newInitIV(algorithm.getIvBytes());
+        this.initIV = newInitIV(algorithm.getIvSize());
         this.ivCounter = newIvCounter();
-        assert initIV.length == algorithm.getIvBytes() : "initIV.length[" + initIV.length + "] != algorithm.getIvBytes["
-                + algorithm.getIvBytes() + "]";
+        assert initIV.length == algorithm.getIvSize() : "initIV.length[" + initIV.length + "] != algorithm.getIvBytes["
+                + algorithm.getIvSize() + "]";
     }
 
     @Override

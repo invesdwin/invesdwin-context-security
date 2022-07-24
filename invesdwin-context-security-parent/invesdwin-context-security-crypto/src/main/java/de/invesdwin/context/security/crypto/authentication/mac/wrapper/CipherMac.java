@@ -29,9 +29,9 @@ public class CipherMac implements IMac {
         this.algorithm = algorithm;
         this.cipher = algorithm.newCipher();
         this.cipherIV = cipherIV;
-        this.iv = new MutableIvParameterSpec(ByteBuffers.allocateByteArray(algorithm.getIvBytes()));
+        this.iv = new MutableIvParameterSpec(ByteBuffers.allocateByteArray(algorithm.getIvSize()));
         this.ivBlock = ByteBuffers.allocate(cipherIV.getBlockSizeIV());
-        this.macLength = cipher.getBlockSize() + cipherIV.getBlockSizeIV();
+        this.macLength = cipher.getBlockSize() + cipher.getSignatureSize() + cipherIV.getBlockSizeIV();
     }
 
     @Override

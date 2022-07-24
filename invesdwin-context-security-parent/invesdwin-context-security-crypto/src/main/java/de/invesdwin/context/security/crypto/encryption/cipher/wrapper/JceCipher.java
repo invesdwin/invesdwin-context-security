@@ -18,14 +18,21 @@ public class JceCipher implements ICipher {
 
     private final byte[] oneByteBuf = new byte[1];
     private final Cipher cipher;
+    private final int signatureSize;
 
-    public JceCipher(final Cipher cipher) {
+    public JceCipher(final Cipher cipher, final int signatureSize) {
         this.cipher = cipher;
+        this.signatureSize = signatureSize;
     }
 
     @Override
     public int getBlockSize() {
         return cipher.getBlockSize();
+    }
+
+    @Override
+    public int getSignatureSize() {
+        return signatureSize;
     }
 
     @Override

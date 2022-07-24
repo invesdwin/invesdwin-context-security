@@ -10,7 +10,6 @@ import javax.annotation.concurrent.Immutable;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.crypto.cipher.CryptoCipherFactory;
 import org.apache.commons.crypto.utils.Utils;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
@@ -50,7 +49,7 @@ public enum AesAlgorithm implements ICipherAlgorithm {
      *             https://docs.microsoft.com/en-us/dotnet/standard/security/vulnerabilities-cbc-mode
      */
     @Deprecated
-    AES_CBC_PKCS5Padding("AES/CBC/PKCS5Padding", CryptoCipherFactory.AES_BLOCK_SIZE) {
+    AES_CBC_PKCS5Padding("AES/CBC/PKCS5Padding", AesKeyLength._128.getBytes(), AesKeyLength._128.getBytes()) {
         @Override
         public AlgorithmParameterSpec wrapIv(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -64,7 +63,7 @@ public enum AesAlgorithm implements ICipherAlgorithm {
     /**
      * encryption only, streaming capable
      */
-    AES_CTR_NoPadding("AES/CTR/NoPadding", CryptoCipherFactory.AES_BLOCK_SIZE) {
+    AES_CTR_NoPadding("AES/CTR/NoPadding", AesKeyLength._128.getBytes(), AesKeyLength._128.getBytes()) {
         @Override
         public AlgorithmParameterSpec wrapIv(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -82,7 +81,7 @@ public enum AesAlgorithm implements ICipherAlgorithm {
      * 
      * https://stackoverflow.com/questions/54659935/java-aes-gcm-very-slow-compared-to-aes-ctr
      */
-    AES_GCM_NoPadding("AES/GCM/NoPadding", 12) {
+    AES_GCM_NoPadding("AES/GCM/NoPadding", 12, AesKeyLength._128.getBytes() + AesKeyLength._128.getBytes()) {
         @Override
         public AlgorithmParameterSpec wrapIv(final byte[] iv) {
             return new GCMParameterSpec(AesKeyLength._128.getBits(), iv);
@@ -97,15 +96,17 @@ public enum AesAlgorithm implements ICipherAlgorithm {
     public static final AesAlgorithm DEFAULT = AES_CTR_NoPadding;
 
     private final String algorithm;
-    private final int ivBytes;
+    private final int ivSize;
+    private final int signatureSize;
     private final CipherObjectPool cipherPool;
     private final MutableIvParameterSpecObjectPool ivParameterSpecPool;
 
-    AesAlgorithm(final String algorithm, final int ivBytes) {
+    AesAlgorithm(final String algorithm, final int ivSize, final int signatureSize) {
         this.algorithm = algorithm;
-        this.ivBytes = ivBytes;
+        this.ivSize = ivSize;
+        this.signatureSize = signatureSize;
         this.cipherPool = new CipherObjectPool(this);
-        this.ivParameterSpecPool = new MutableIvParameterSpecObjectPool(ivBytes);
+        this.ivParameterSpecPool = new MutableIvParameterSpecObjectPool(ivSize);
     }
 
     @Override
@@ -119,8 +120,13 @@ public enum AesAlgorithm implements ICipherAlgorithm {
     }
 
     @Override
-    public int getIvBytes() {
-        return ivBytes;
+    public int getIvSize() {
+        return ivSize;
+    }
+
+    @Override
+    public int getSignatureSize() {
+        return signatureSize;
     }
 
     @Override
@@ -136,7 +142,8 @@ public enum AesAlgorithm implements ICipherAlgorithm {
     @Override
     public ICipher newCipher() {
         try {
-            return new CryptoCipher(Utils.getCipherInstance(getAlgorithm(), SystemProperties.SYSTEM_PROPERTIES));
+            return new CryptoCipher(Utils.getCipherInstance(getAlgorithm(), SystemProperties.SYSTEM_PROPERTIES),
+                    getSignatureSize());
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

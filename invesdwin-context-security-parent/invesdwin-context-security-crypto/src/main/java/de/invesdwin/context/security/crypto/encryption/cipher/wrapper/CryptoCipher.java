@@ -18,14 +18,21 @@ public class CryptoCipher implements ICipher {
 
     private final byte[] oneByteBuf = new byte[1];
     private final org.apache.commons.crypto.cipher.CryptoCipher cipher;
+    private final int signatureSize;
 
-    public CryptoCipher(final org.apache.commons.crypto.cipher.CryptoCipher cipher) {
+    public CryptoCipher(final org.apache.commons.crypto.cipher.CryptoCipher cipher, final int signatureSize) {
         this.cipher = cipher;
+        this.signatureSize = signatureSize;
     }
 
     @Override
     public int getBlockSize() {
         return cipher.getBlockSize();
+    }
+
+    @Override
+    public int getSignatureSize() {
+        return signatureSize;
     }
 
     @Override

@@ -14,9 +14,15 @@ public interface ICipherAlgorithm extends ICipherFactory {
 
     ICipherAlgorithm DEFAULT = AesAlgorithm.DEFAULT;
 
+    @Override
     String getAlgorithm();
 
-    int getIvBytes();
+    int getIvSize();
+
+    /**
+     * GCM has an encoded signature that is 16 bytes long per encrypted message.
+     */
+    int getSignatureSize();
 
     OutputStream newEncryptor(OutputStream out, byte[] key, byte[] iv);
 
