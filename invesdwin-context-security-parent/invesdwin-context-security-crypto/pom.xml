@@ -41,6 +41,11 @@
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk18on</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>software.amazon.cryptools</groupId>
+			<artifactId>AmazonCorrettoCryptoProvider</artifactId>
+			<classifier>linux-x86_64</classifier>
+		</dependency>
 	</dependencies>
 
 </project>

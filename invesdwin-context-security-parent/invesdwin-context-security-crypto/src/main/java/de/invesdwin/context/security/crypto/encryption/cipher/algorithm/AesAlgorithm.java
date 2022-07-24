@@ -103,13 +103,7 @@ public enum AesAlgorithm implements ICipherAlgorithm {
 
                 @Override
                 public ICipher newCipher() {
-                    try {
-                        return new CryptoCipher(
-                                Utils.getCipherInstance(getAlgorithm(), SystemProperties.SYSTEM_PROPERTIES),
-                                getSignatureSize());
-                    } catch (final IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    return newCryptoCipher();
                 }
 
                 @Override
@@ -185,12 +179,7 @@ public enum AesAlgorithm implements ICipherAlgorithm {
 
     @Override
     public ICipher newCipher() {
-        try {
-            return new CryptoCipher(Utils.getCipherInstance(getAlgorithm(), SystemProperties.SYSTEM_PROPERTIES),
-                    getSignatureSize());
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+        return newCryptoCipher();
     }
 
     @Override
@@ -211,6 +200,17 @@ public enum AesAlgorithm implements ICipherAlgorithm {
     public InputStream newDecryptor(final InputStream in, final byte[] key, final byte[] iv) {
         try {
             return new StreamingCipherInputStream(this, in, key, iv);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected ICipher newCryptoCipher() {
+        //ommons-crypto does not yet support openssl 3.0.0: https://issues.apache.org/jira/projects/CRYPTO/issues/CRYPTO-164
+        try {
+            final org.apache.commons.crypto.cipher.CryptoCipher cryptoCipher = Utils.getCipherInstance(getAlgorithm(),
+                    SystemProperties.SYSTEM_PROPERTIES);
+            return new CryptoCipher(cryptoCipher, getSignatureSize());
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

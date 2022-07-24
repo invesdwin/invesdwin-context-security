@@ -48,6 +48,7 @@
 		<version.commons-crypto>1.1.0</version.commons-crypto>
 		<version.argon2-jvm>2.11</version.argon2-jvm>
 		<version.password4j>1.6.0</version.password4j>
+		<version.AmazonCorrettoCryptoProvider>1.6.1</version.AmazonCorrettoCryptoProvider>
 	</properties>
 
 	<dependencyManagement>
@@ -399,6 +400,14 @@
 				<groupId>com.password4j</groupId>
 				<artifactId>password4j</artifactId>
 				<version>${version.password4j}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>software.amazon.cryptools</groupId>
+				<artifactId>AmazonCorrettoCryptoProvider</artifactId>
+				<version>${version.AmazonCorrettoCryptoProvider}</version>
+				<!-- only linux support at the moment -->
+				<classifier>linux-x86_64</classifier>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
