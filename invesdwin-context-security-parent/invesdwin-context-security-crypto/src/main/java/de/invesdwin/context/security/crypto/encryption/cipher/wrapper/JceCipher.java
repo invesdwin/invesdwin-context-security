@@ -12,11 +12,11 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.ShortBufferException;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
 public class JceCipher implements ICipher {
 
+    private final byte[] oneByteBuf = new byte[1];
     private final Cipher cipher;
 
     public JceCipher(final Cipher cipher) {
@@ -43,9 +43,9 @@ public class JceCipher implements ICipher {
     }
 
     @Override
-    public int update(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
+    public int update(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
         try {
-            return cipher.update(inBuffer.asNioByteBuffer(), outBuffer.asNioByteBuffer());
+            return cipher.update(inBuffer, outBuffer);
         } catch (final ShortBufferException e) {
             throw new RuntimeException(e);
         }
@@ -71,9 +71,9 @@ public class JceCipher implements ICipher {
     }
 
     @Override
-    public int doFinal(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
+    public int doFinal(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
         try {
-            return cipher.doFinal(inBuffer.asNioByteBuffer(), outBuffer.asNioByteBuffer());
+            return cipher.doFinal(inBuffer, outBuffer);
         } catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
             throw new RuntimeException(e);
         }
@@ -117,6 +117,12 @@ public class JceCipher implements ICipher {
     }
 
     @Override
+    public void updateAAD(final byte aad) {
+        oneByteBuf[0] = aad;
+        cipher.updateAAD(oneByteBuf);
+    }
+
+    @Override
     public void updateAAD(final byte[] aad) {
         cipher.updateAAD(aad);
     }
@@ -127,8 +133,8 @@ public class JceCipher implements ICipher {
     }
 
     @Override
-    public void updateAAD(final IByteBuffer aad) {
-        cipher.updateAAD(aad.asNioByteBuffer());
+    public void updateAAD(final java.nio.ByteBuffer aad) {
+        cipher.updateAAD(aad);
     }
 
     @Override

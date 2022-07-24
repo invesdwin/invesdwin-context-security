@@ -11,16 +11,14 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.crypto.cipher.CryptoCipherFactory;
-import org.apache.commons.crypto.stream.CryptoInputStream;
-import org.apache.commons.crypto.stream.CryptoOutputStream;
-import org.apache.commons.crypto.stream.CtrCryptoInputStream;
-import org.apache.commons.crypto.stream.CtrCryptoOutputStream;
 import org.apache.commons.crypto.utils.Utils;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
+import de.invesdwin.context.security.crypto.encryption.cipher.stream.StreamingCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.stream.StreamingCipherOutputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.CryptoCipher;
 import de.invesdwin.context.system.properties.SystemProperties;
 
@@ -47,31 +45,12 @@ public enum AesAlgorithm implements ICipherAlgorithm {
      * 
      * input/output stream can only encrypt/decrypt full file and needs to be closed
      * 
-     * @deprecated deemed insecure
+     * @deprecated deemed insecure when not authenticated
      *             https://github.com/corretto/amazon-corretto-crypto-provider/blob/develop/DIFFERENCES.md#aes-gcm-supports-ivparameterspec
+     *             https://docs.microsoft.com/en-us/dotnet/standard/security/vulnerabilities-cbc-mode
      */
     @Deprecated
     AES_CBC_PKCS5Padding("AES/CBC/PKCS5Padding", CryptoCipherFactory.AES_BLOCK_SIZE) {
-        @Override
-        public OutputStream newEncryptor(final OutputStream out, final byte[] key, final byte[] iv) {
-            try {
-                return new CryptoOutputStream(getAlgorithm(), SystemProperties.SYSTEM_PROPERTIES, out, wrapKey(key),
-                        wrapIv(iv));
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public InputStream newDecryptor(final InputStream in, final byte[] key, final byte[] iv) {
-            try {
-                return new CryptoInputStream(getAlgorithm(), SystemProperties.SYSTEM_PROPERTIES, in, wrapKey(key),
-                        wrapIv(iv));
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         @Override
         public AlgorithmParameterSpec wrapIv(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -86,24 +65,6 @@ public enum AesAlgorithm implements ICipherAlgorithm {
      * encryption only, streaming capable
      */
     AES_CTR_NoPadding("AES/CTR/NoPadding", CryptoCipherFactory.AES_BLOCK_SIZE) {
-        @Override
-        public OutputStream newEncryptor(final OutputStream out, final byte[] key, final byte[] iv) {
-            try {
-                return new CtrCryptoOutputStream(SystemProperties.SYSTEM_PROPERTIES, out, key, iv);
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public InputStream newDecryptor(final InputStream in, final byte[] key, final byte[] iv) {
-            try {
-                return new CtrCryptoInputStream(SystemProperties.SYSTEM_PROPERTIES, in, key, iv);
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         @Override
         public AlgorithmParameterSpec wrapIv(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -122,16 +83,6 @@ public enum AesAlgorithm implements ICipherAlgorithm {
      * https://stackoverflow.com/questions/54659935/java-aes-gcm-very-slow-compared-to-aes-ctr
      */
     AES_GCM_NoPadding("AES/GCM/NoPadding", 12) {
-        @Override
-        public OutputStream newEncryptor(final OutputStream out, final byte[] key, final byte[] iv) {
-            throw new UnsupportedOperationException("streams not yet supported for GCM in commons-crypto");
-        }
-
-        @Override
-        public InputStream newDecryptor(final InputStream in, final byte[] key, final byte[] iv) {
-            throw new UnsupportedOperationException("streams not yet supported for GCM in commons-crypto");
-        }
-
         @Override
         public AlgorithmParameterSpec wrapIv(final byte[] iv) {
             return new GCMParameterSpec(AesKeyLength._128.getBits(), iv);
@@ -194,6 +145,24 @@ public enum AesAlgorithm implements ICipherAlgorithm {
     @Override
     public Key wrapKey(final byte[] key) {
         return new SecretKeySpec(key, "AES");
+    }
+
+    @Override
+    public OutputStream newEncryptor(final OutputStream out, final byte[] key, final byte[] iv) {
+        try {
+            return new StreamingCipherOutputStream(this, out, key, iv);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public InputStream newDecryptor(final InputStream in, final byte[] key, final byte[] iv) {
+        try {
+            return new StreamingCipherInputStream(this, in, key, iv);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
