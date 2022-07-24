@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.authentication.mac.hmac;
+package de.invesdwin.context.security.crypto.authentication.mac.algorithm;
 
 import java.security.Key;
 
@@ -7,10 +7,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.digest.HmacAlgorithms;
 
-import de.invesdwin.context.security.crypto.authentication.mac.IMacAlgorithm;
-import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
-import de.invesdwin.context.security.crypto.authentication.mac.pool.JceMac;
+import de.invesdwin.context.security.crypto.authentication.mac.IMac;
 import de.invesdwin.context.security.crypto.authentication.mac.pool.MacObjectPool;
+import de.invesdwin.context.security.crypto.authentication.mac.wrapper.JceMac;
+import de.invesdwin.context.security.crypto.authentication.mac.wrapper.LazyDelegateMac;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
@@ -58,7 +58,7 @@ public enum HmacAlgorithm implements IMacAlgorithm {
 
     @Override
     public IMac newMac() {
-        return new JceMac(getAlgorithm());
+        return new LazyDelegateMac(new JceMac(getAlgorithm()));
     }
 
     @Override

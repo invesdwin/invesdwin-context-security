@@ -7,7 +7,7 @@ import java.security.Key;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
+import de.invesdwin.context.security.crypto.authentication.mac.IMac;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @NotThreadSafe
@@ -29,7 +29,7 @@ public class ChannelLayeredMacInputStream extends LayeredMacInputStream implemen
     public int read(final java.nio.ByteBuffer dst) throws IOException {
         final int positionBefore = dst.position();
         final int length = delegateChannel.read(dst);
-        mac.update(ByteBuffers.slice(dst, positionBefore, length));
+        mac.update(ByteBuffers.wrap(dst, positionBefore, length));
         return length;
     }
 

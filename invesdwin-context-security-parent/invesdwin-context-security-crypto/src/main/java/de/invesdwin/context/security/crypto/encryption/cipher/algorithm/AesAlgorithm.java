@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.aes;
+package de.invesdwin.context.security.crypto.encryption.cipher.algorithm;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +10,6 @@ import javax.annotation.concurrent.Immutable;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.crypto.cipher.CryptoCipher;
 import org.apache.commons.crypto.cipher.CryptoCipherFactory;
 import org.apache.commons.crypto.stream.CryptoInputStream;
 import org.apache.commons.crypto.stream.CryptoOutputStream;
@@ -18,10 +17,11 @@ import org.apache.commons.crypto.stream.CtrCryptoInputStream;
 import org.apache.commons.crypto.stream.CtrCryptoOutputStream;
 import org.apache.commons.crypto.utils.Utils;
 
-import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.CryptoCipherObjectPool;
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.CryptoCipher;
 import de.invesdwin.context.system.properties.SystemProperties;
 
 /**
@@ -147,13 +147,13 @@ public enum AesAlgorithm implements ICipherAlgorithm {
 
     private final String algorithm;
     private final int ivBytes;
-    private final CryptoCipherObjectPool cipherPool;
+    private final CipherObjectPool cipherPool;
     private final MutableIvParameterSpecObjectPool ivParameterSpecPool;
 
     AesAlgorithm(final String algorithm, final int ivBytes) {
         this.algorithm = algorithm;
         this.ivBytes = ivBytes;
-        this.cipherPool = new CryptoCipherObjectPool(this);
+        this.cipherPool = new CipherObjectPool(this);
         this.ivParameterSpecPool = new MutableIvParameterSpecObjectPool(ivBytes);
     }
 
@@ -173,7 +173,7 @@ public enum AesAlgorithm implements ICipherAlgorithm {
     }
 
     @Override
-    public CryptoCipherObjectPool getCipherPool() {
+    public CipherObjectPool getCipherPool() {
         return cipherPool;
     }
 
@@ -183,9 +183,9 @@ public enum AesAlgorithm implements ICipherAlgorithm {
     }
 
     @Override
-    public CryptoCipher newCryptoCipher() {
+    public ICipher newCipher() {
         try {
-            return Utils.getCipherInstance(getAlgorithm(), SystemProperties.SYSTEM_PROPERTIES);
+            return new CryptoCipher(Utils.getCipherInstance(getAlgorithm(), SystemProperties.SYSTEM_PROPERTIES));
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

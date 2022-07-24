@@ -1,10 +1,11 @@
-package de.invesdwin.context.security.crypto.authentication.mac.pool;
+package de.invesdwin.context.security.crypto.authentication.mac;
 
 import java.security.Key;
 
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.util.math.Bytes;
+import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
 public final class DisabledMac implements IMac {
@@ -26,7 +27,7 @@ public final class DisabledMac implements IMac {
     }
 
     @Override
-    public void update(final java.nio.ByteBuffer input) {
+    public void update(final IByteBuffer input) {
     }
 
     @Override
@@ -52,11 +53,26 @@ public final class DisabledMac implements IMac {
     }
 
     @Override
-    public void doFinal(final byte[] output, final int offset) {
+    public int doFinal(final byte[] output, final int offset) {
+        return 0;
+    }
+
+    @Override
+    public boolean verify(final byte[] input, final byte[] signature) {
+        return true;
+    }
+
+    @Override
+    public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
+        return true;
     }
 
     @Override
     public void reset() {
+    }
+
+    @Override
+    public void close() {
     }
 
 }

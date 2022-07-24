@@ -3,7 +3,7 @@ package de.invesdwin.context.security.crypto.key.password;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.log.Log;
-import de.invesdwin.context.security.crypto.authentication.mac.hmac.HmacAlgorithm;
+import de.invesdwin.context.security.crypto.authentication.mac.algorithm.HmacAlgorithm;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
 import de.invesdwin.util.time.Instant;

@@ -1,14 +1,12 @@
-package de.invesdwin.context.security.crypto.authentication.mac;
+package de.invesdwin.context.security.crypto.authentication.mac.algorithm;
 
 import java.security.Key;
 
-import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
+import de.invesdwin.context.security.crypto.authentication.mac.IMac;
 import de.invesdwin.context.security.crypto.authentication.mac.pool.IMacFactory;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 public interface IMacAlgorithm extends IMacFactory {
-
-    String getAlgorithm();
 
     int getMacLength();
 

@@ -6,7 +6,7 @@ import java.security.Key;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
+import de.invesdwin.context.security.crypto.authentication.mac.IMac;
 import de.invesdwin.util.streams.ASimpleDelegateOutputStream;
 
 @NotThreadSafe
@@ -49,7 +49,7 @@ public class LayeredMacOutputStream extends ASimpleDelegateOutputStream {
     @Override
     public void close() throws IOException {
         super.close();
-        mac.reset();
+        mac.close();
     }
 
 }

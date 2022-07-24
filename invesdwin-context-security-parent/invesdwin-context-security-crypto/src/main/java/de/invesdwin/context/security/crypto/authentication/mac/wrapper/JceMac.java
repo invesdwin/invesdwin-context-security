@@ -1,17 +1,21 @@
-package de.invesdwin.context.security.crypto.authentication.mac.pool;
+package de.invesdwin.context.security.crypto.authentication.mac.wrapper;
 
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.Mac;
+import javax.crypto.ShortBufferException;
+
+import de.invesdwin.context.security.crypto.authentication.mac.IMac;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
+import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
 public class JceMac implements IMac {
 
     private final Mac mac;
-    private boolean needsReset;
-    private int prevKeyIdentity;
 
     public JceMac(final String algorithm) {
         this(getJceMacInstance(algorithm));
@@ -41,76 +45,74 @@ public class JceMac implements IMac {
 
     @Override
     public void init(final Key key) {
-        final int keyIdentity = System.identityHashCode(key);
-        if (prevKeyIdentity == keyIdentity) {
-            //init not needed if it is the same key
-            reset(); //checks itself if reset is needed
-            return;
-        }
         try {
             mac.init(key);
-        } catch (final Exception e) {
+        } catch (final InvalidKeyException e) {
             throw new RuntimeException(e);
         }
-        prevKeyIdentity = keyIdentity;
-        needsReset = false;
     }
 
     @Override
     public void update(final byte input) {
-        needsReset = true;
         mac.update(input);
-        needsReset = true;
     }
 
     @Override
-    public void update(final java.nio.ByteBuffer input) {
-        needsReset = true;
-        mac.update(input);
+    public void update(final IByteBuffer input) {
+        mac.update(input.asNioByteBuffer());
     }
 
     @Override
     public void update(final byte[] input) {
-        needsReset = true;
         mac.update(input);
     }
 
     @Override
     public void update(final byte[] input, final int inputOffset, final int inputLen) {
-        needsReset = true;
         mac.update(input, inputOffset, inputLen);
     }
 
     @Override
     public byte[] doFinal() {
-        final byte[] result = mac.doFinal();
-        needsReset = false;
-        return result;
+        return mac.doFinal();
     }
 
     @Override
     public byte[] doFinal(final byte[] input) {
-        final byte[] result = mac.doFinal(input);
-        needsReset = false;
-        return result;
+        return mac.doFinal(input);
     }
 
     @Override
-    public void doFinal(final byte[] output, final int offset) {
+    public int doFinal(final byte[] output, final int offset) {
         try {
             mac.doFinal(output, offset);
-        } catch (final Exception e) {
+            return getMacLength();
+        } catch (ShortBufferException | IllegalStateException e) {
             throw new RuntimeException(e);
         }
-        needsReset = false;
     }
 
     @Override
     public void reset() {
-        if (needsReset) {
-            mac.reset();
-        }
-        needsReset = false;
+        mac.reset();
+    }
+
+    @Override
+    public void close() {
+    }
+
+    @Override
+    public boolean verify(final byte[] input, final byte[] signature) {
+        update(input);
+        final byte[] calculatedSignature = doFinal();
+        return ByteBuffers.constantTimeEquals(signature, calculatedSignature);
+    }
+
+    @Override
+    public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
+        update(input);
+        final byte[] calculatedSignature = doFinal();
+        return ByteBuffers.constantTimeEquals(signature, calculatedSignature);
     }
 
 }

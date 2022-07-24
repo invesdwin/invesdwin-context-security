@@ -4,7 +4,7 @@ import javax.annotation.concurrent.Immutable;
 
 import com.password4j.ScryptFunction;
 
-import de.invesdwin.context.security.crypto.authentication.mac.hmac.HmacAlgorithm;
+import de.invesdwin.context.security.crypto.authentication.mac.algorithm.HmacAlgorithm;
 import de.invesdwin.context.security.crypto.key.password.pbkdf2.Pbkdf2PasswordHasher;
 import de.invesdwin.util.math.Bytes;
 

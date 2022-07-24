@@ -3,9 +3,9 @@ package de.invesdwin.context.security.crypto.key.derivation;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.CryptoProperties;
-import de.invesdwin.context.security.crypto.authentication.mac.IMacAlgorithm;
-import de.invesdwin.context.security.crypto.authentication.mac.hmac.HmacAlgorithm;
-import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
+import de.invesdwin.context.security.crypto.authentication.mac.IMac;
+import de.invesdwin.context.security.crypto.authentication.mac.algorithm.HmacAlgorithm;
+import de.invesdwin.context.security.crypto.authentication.mac.algorithm.IMacAlgorithm;
 import de.invesdwin.util.math.Bytes;
 
 /**

@@ -11,6 +11,7 @@ import de.invesdwin.context.security.crypto.key.password.argon2.Argon2Version;
 import de.invesdwin.context.security.crypto.key.password.argon2.IArgon2PasswordHasher;
 import de.invesdwin.context.security.crypto.random.CryptoRandomBytesKeyGenerator;
 import de.invesdwin.util.math.Bytes;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @Immutable
 public class NativeArgon2PasswordEncoder implements PasswordEncoder {
@@ -76,7 +77,7 @@ public class NativeArgon2PasswordEncoder implements PasswordEncoder {
                         parameters.getIterations(), parameters.getLanes());
         final byte[] hashBytes = decodedArgon2.hash(parameters.getSalt(), Bytes.fromCharSequenceToBytes(rawPassword),
                 decoded.getHash().length);
-        return Bytes.constantTimeEquals(decoded.getHash(), hashBytes);
+        return ByteBuffers.constantTimeEquals(decoded.getHash(), hashBytes);
     }
 
     @Override

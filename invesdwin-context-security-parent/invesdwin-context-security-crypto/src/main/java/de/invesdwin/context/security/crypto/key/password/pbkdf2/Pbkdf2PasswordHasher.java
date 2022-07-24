@@ -7,8 +7,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import de.invesdwin.context.security.crypto.CryptoProperties;
-import de.invesdwin.context.security.crypto.authentication.mac.IMacAlgorithm;
-import de.invesdwin.context.security.crypto.authentication.mac.hmac.HmacAlgorithm;
+import de.invesdwin.context.security.crypto.authentication.mac.algorithm.HmacAlgorithm;
+import de.invesdwin.context.security.crypto.authentication.mac.algorithm.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
 import de.invesdwin.util.lang.Objects;
 import de.invesdwin.util.math.Bytes;

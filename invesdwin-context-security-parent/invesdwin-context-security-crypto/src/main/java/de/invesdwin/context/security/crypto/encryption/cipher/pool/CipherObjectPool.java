@@ -2,35 +2,34 @@ package de.invesdwin.context.security.crypto.encryption.cipher.pool;
 
 import javax.annotation.concurrent.ThreadSafe;
 
-import org.apache.commons.crypto.cipher.CryptoCipher;
-
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.util.concurrent.pool.timeout.ATimeoutObjectPool;
 import de.invesdwin.util.lang.Closeables;
 import de.invesdwin.util.time.date.FTimeUnit;
 import de.invesdwin.util.time.duration.Duration;
 
 @ThreadSafe
-public final class CryptoCipherObjectPool extends ATimeoutObjectPool<CryptoCipher> {
+public final class CipherObjectPool extends ATimeoutObjectPool<ICipher> {
 
-    private final ICryptoCipherFactory factory;
+    private final ICipherFactory factory;
 
-    public CryptoCipherObjectPool(final ICryptoCipherFactory factory) {
+    public CipherObjectPool(final ICipherFactory factory) {
         super(Duration.ONE_MINUTE, new Duration(10, FTimeUnit.SECONDS));
         this.factory = factory;
     }
 
     @Override
-    protected CryptoCipher newObject() {
-        return factory.newCryptoCipher();
+    protected ICipher newObject() {
+        return factory.newCipher();
     }
 
     @Override
-    public void invalidateObject(final CryptoCipher obj) {
+    public void invalidateObject(final ICipher obj) {
         Closeables.closeQuietly(obj);
     }
 
     @Override
-    protected void passivateObject(final CryptoCipher element) {
+    protected void passivateObject(final ICipher element) {
         //noop
     }
 

@@ -3,8 +3,8 @@ package de.invesdwin.context.security.crypto.authentication;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import de.invesdwin.context.security.crypto.authentication.mac.IMacAlgorithm;
-import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
+import de.invesdwin.context.security.crypto.authentication.mac.IMac;
+import de.invesdwin.context.security.crypto.authentication.mac.algorithm.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.authentication.mac.stream.LayeredMacInputStream;
 import de.invesdwin.context.security.crypto.authentication.mac.stream.LayeredMacOutputStream;
 import de.invesdwin.util.marshallers.serde.ISerde;

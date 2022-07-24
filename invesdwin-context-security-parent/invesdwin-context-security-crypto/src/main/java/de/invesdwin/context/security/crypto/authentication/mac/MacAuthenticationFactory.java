@@ -8,8 +8,8 @@ import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.authentication.AuthenticatingDelegateSerde;
 import de.invesdwin.context.security.crypto.authentication.IAuthenticationFactory;
-import de.invesdwin.context.security.crypto.authentication.mac.hmac.HmacAlgorithm;
-import de.invesdwin.context.security.crypto.authentication.mac.pool.IMac;
+import de.invesdwin.context.security.crypto.authentication.mac.algorithm.HmacAlgorithm;
+import de.invesdwin.context.security.crypto.authentication.mac.algorithm.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.authentication.mac.stream.ChannelLayeredMacInputStream;
 import de.invesdwin.context.security.crypto.authentication.mac.stream.ChannelLayeredMacOutputStream;
 import de.invesdwin.context.security.crypto.authentication.mac.stream.LayeredMacInputStream;
@@ -70,7 +70,7 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
     @Override
     public byte[] newSignature(final IByteBuffer src, final IMac mac) {
         mac.init(key);
-        mac.update(src.asNioByteBuffer());
+        mac.update(src);
         return mac.doFinal();
     }
 
@@ -104,7 +104,7 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
     @Override
     public int copyAndSign(final IByteBuffer src, final IByteBuffer dest, final IMac mac) {
         mac.init(key);
-        mac.update(src.asNioByteBuffer());
+        mac.update(src);
         final byte[] signature = mac.doFinal();
         dest.putBytes(0, src);
         final int signatureIndex = src.capacity();
@@ -127,7 +127,7 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
         mac.init(key);
         final int signatureIndex = src.remaining(mac.getMacLength());
         final IByteBuffer payloadBuffer = src.sliceTo(signatureIndex);
-        mac.update(payloadBuffer.asNioByteBuffer());
+        mac.update(payloadBuffer);
         final byte[] calculatedSignature = mac.doFinal();
         if (!ByteBuffers.constantTimeEquals(src.sliceFrom(signatureIndex), calculatedSignature)) {
             throw new IllegalArgumentException("Signature mismatch");
@@ -151,7 +151,7 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
         mac.init(key);
         final int signatureIndex = src.remaining(mac.getMacLength());
         final IByteBuffer payloadBuffer = src.sliceTo(signatureIndex);
-        mac.update(payloadBuffer.asNioByteBuffer());
+        mac.update(payloadBuffer);
         final byte[] calculatedSignature = mac.doFinal();
         if (!ByteBuffers.constantTimeEquals(src.sliceFrom(signatureIndex), calculatedSignature)) {
             throw new IllegalArgumentException("Signature mismatch");
