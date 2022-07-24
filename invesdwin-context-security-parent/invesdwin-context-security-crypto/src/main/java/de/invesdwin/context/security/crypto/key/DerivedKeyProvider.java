@@ -31,6 +31,12 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
         this.derivationFactory = derivationFactory;
     }
 
+    @Override
+    public byte[] getKey() {
+        return key;
+    }
+
+    @Override
     public byte[] getSalt() {
         return salt;
     }

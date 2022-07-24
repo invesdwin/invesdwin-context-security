@@ -23,7 +23,7 @@ public class CipherPresharedIV implements ICipherIV {
     public CipherPresharedIV(final ICipherAlgorithm algorithm, final byte[] presharedIV) {
         this.algorithm = algorithm;
         this.presharedIV = new MutableIvParameterSpec(presharedIV);
-        assert presharedIV.length != algorithm.getIvSize() : "iv.length[" + presharedIV.length
+        assert presharedIV.length == algorithm.getIvSize() : "iv.length[" + presharedIV.length
                 + "] != algorithm.getIvBytes[" + algorithm.getIvSize() + "]";
     }
 

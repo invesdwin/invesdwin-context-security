@@ -96,7 +96,7 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
         try {
             cipherIV.putIV(dest, iv);
             cipher.init(Cipher.ENCRYPT_MODE, keyWrapped, algorithm.wrapIv(iv));
-            final IByteBuffer payloadBuffer = dest.sliceFrom(Long.BYTES);
+            final IByteBuffer payloadBuffer = dest.sliceFrom(cipherIV.getBlockSizeIV());
             final int length = cipher.doFinal(src, payloadBuffer);
             return cipherIV.getBlockSizeIV() + length;
         } catch (final Exception e) {
@@ -110,17 +110,17 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
     @Override
     public int decrypt(final IByteBuffer src, final IByteBuffer dest) {
         final ICipher cipher = algorithm.getCipherPool().borrowObject();
-        final MutableIvParameterSpec iv = algorithm.getIvParameterSpecPool().borrowObject();
+        final MutableIvParameterSpec iv = cipherIV.borrowDestIV();
         try {
             cipherIV.getIV(src, iv);
             cipher.init(Cipher.DECRYPT_MODE, keyWrapped, algorithm.wrapIv(iv));
-            final IByteBuffer payloadBuffer = src.sliceFrom(Long.BYTES);
+            final IByteBuffer payloadBuffer = src.sliceFrom(cipherIV.getBlockSizeIV());
             final int length = cipher.doFinal(payloadBuffer, dest);
             return length;
         } catch (final Exception e) {
             throw new RuntimeException(e);
         } finally {
-            algorithm.getIvParameterSpecPool().returnObject(iv);
+            cipherIV.returnDestIV(iv);
             algorithm.getCipherPool().returnObject(cipher);
         }
     }
