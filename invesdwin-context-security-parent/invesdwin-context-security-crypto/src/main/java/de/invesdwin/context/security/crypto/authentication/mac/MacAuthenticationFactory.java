@@ -8,7 +8,6 @@ import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.authentication.AuthenticatingDelegateSerde;
 import de.invesdwin.context.security.crypto.authentication.IAuthenticationFactory;
-import de.invesdwin.context.security.crypto.authentication.mac.algorithm.HmacAlgorithm;
 import de.invesdwin.context.security.crypto.authentication.mac.algorithm.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.authentication.mac.stream.ChannelLayeredMacInputStream;
 import de.invesdwin.context.security.crypto.authentication.mac.stream.ChannelLayeredMacOutputStream;
@@ -24,13 +23,14 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
 
     private final IMacAlgorithm algorithm;
     private final Key key;
+    private byte[] derivedIV;
 
     public MacAuthenticationFactory(final byte[] key) {
-        this(HmacAlgorithm.DEFAULT, key);
+        this(IMacAlgorithm.DEFAULT, key);
     }
 
     public MacAuthenticationFactory(final IDerivedKeyProvider derivedKeyProvider) {
-        this(HmacAlgorithm.DEFAULT, derivedKeyProvider);
+        this(IMacAlgorithm.DEFAULT, derivedKeyProvider);
     }
 
     public MacAuthenticationFactory(final IMacAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {

@@ -12,6 +12,8 @@ import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvPara
 
 public interface ICipherAlgorithm extends ICipherFactory {
 
+    ICipherAlgorithm DEFAULT = AesAlgorithm.DEFAULT;
+
     String getAlgorithm();
 
     int getIvBytes();

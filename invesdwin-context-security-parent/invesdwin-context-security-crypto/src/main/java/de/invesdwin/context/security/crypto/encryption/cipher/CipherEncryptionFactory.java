@@ -9,7 +9,6 @@ import javax.crypto.Cipher;
 
 import de.invesdwin.context.security.crypto.encryption.EncryptingDelegateSerde;
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.AesAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.AesKeyLength;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherDerivedIV;
@@ -40,11 +39,11 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
     private final ICipherIV cipherIV;
 
     public CipherEncryptionFactory(final byte[] derivedKey, final byte[] derivedIV) {
-        this(AesAlgorithm.DEFAULT, derivedKey, new CipherDerivedIV(AesAlgorithm.DEFAULT, derivedIV));
+        this(ICipherAlgorithm.DEFAULT, derivedKey, new CipherDerivedIV(ICipherAlgorithm.DEFAULT, derivedIV));
     }
 
     public CipherEncryptionFactory(final IDerivedKeyProvider derivedKeyProvider) {
-        this(AesAlgorithm.DEFAULT, derivedKeyProvider);
+        this(ICipherAlgorithm.DEFAULT, derivedKeyProvider);
     }
 
     public CipherEncryptionFactory(final ICipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
