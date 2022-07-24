@@ -48,7 +48,9 @@
 		<version.commons-crypto>1.1.0</version.commons-crypto>
 		<version.argon2-jvm>2.11</version.argon2-jvm>
 		<version.password4j>1.6.0</version.password4j>
+		
 		<version.AmazonCorrettoCryptoProvider>1.6.1</version.AmazonCorrettoCryptoProvider>
+		<version.wildfly-openssl>2.2.1.Final</version.wildfly-openssl>
 	</properties>
 
 	<dependencyManagement>
@@ -408,6 +410,12 @@
 				<version>${version.AmazonCorrettoCryptoProvider}</version>
 				<!-- only linux support at the moment -->
 				<classifier>linux-x86_64</classifier>
+			</dependency>
+
+			<dependency>
+				<groupId>org.wildfly.openssl</groupId>
+				<artifactId>wildfly-openssl</artifactId>
+				<version>${version.wildfly-openssl}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
