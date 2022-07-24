@@ -45,13 +45,14 @@ public class CipherEncryptionFactoryTest extends ATest {
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
                 final CipherEncryptionFactory factory = new CipherEncryptionFactory(algorithm,
                         derivedKeyProvider.getKey(), iv);
-                testEncryptionAndDecryption(factory);
+                testEncryptionAndDecryption(factory, "1234567890");
+                testEncryptionAndDecryption(factory, "0987654321");
             }
         }
     }
 
-    private void testEncryptionAndDecryption(final CipherEncryptionFactory factory) {
-        final String srcStr = "1234567890";
+    private void testEncryptionAndDecryption(final CipherEncryptionFactory factory, final String payload) {
+        final String srcStr = payload;
         final IByteBuffer src = ByteBuffers.wrap(srcStr.getBytes());
         final IByteBuffer encrypted = ByteBuffers.allocateExpandable();
         final int encryptedSize = factory.encrypt(src, encrypted);

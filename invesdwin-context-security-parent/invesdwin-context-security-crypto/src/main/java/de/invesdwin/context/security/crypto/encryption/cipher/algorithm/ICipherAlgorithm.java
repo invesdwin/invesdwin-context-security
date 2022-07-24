@@ -17,6 +17,8 @@ public interface ICipherAlgorithm extends ICipherFactory {
     @Override
     String getAlgorithm();
 
+    int getBlockSize();
+
     int getIvSize();
 
     /**
