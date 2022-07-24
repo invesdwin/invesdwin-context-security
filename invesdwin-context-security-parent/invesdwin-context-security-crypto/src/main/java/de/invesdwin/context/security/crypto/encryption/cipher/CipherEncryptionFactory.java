@@ -98,7 +98,7 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
             cipher.init(Cipher.ENCRYPT_MODE, keyWrapped, algorithm.wrapIv(iv));
             final IByteBuffer payloadBuffer = dest.sliceFrom(Long.BYTES);
             final int length = cipher.doFinal(src, payloadBuffer);
-            return algorithm.getIvBytes() + length;
+            return cipherIV.getBlockSizeIV() + length;
         } catch (final Exception e) {
             throw new RuntimeException(e);
         } finally {

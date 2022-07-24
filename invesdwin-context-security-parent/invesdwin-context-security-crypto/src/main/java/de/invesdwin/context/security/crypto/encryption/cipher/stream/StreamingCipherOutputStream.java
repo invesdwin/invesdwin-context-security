@@ -6,7 +6,6 @@ import java.nio.channels.WritableByteChannel;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
 
 import org.apache.commons.crypto.stream.CryptoOutputStream;
 import org.apache.commons.crypto.stream.output.ChannelOutput;
@@ -17,6 +16,7 @@ import org.apache.commons.crypto.utils.Utils;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherDerivedIV;
+import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 
 /**
  * <p>
@@ -52,7 +52,7 @@ public class StreamingCipherOutputStream extends CipherOutputStream {
     /**
      * Initialization vector for the cipher.
      */
-    private final byte[] iv;
+    private final MutableIvParameterSpec iv;
 
     /**
      * Padding = pos%(algorithm blocksize); Padding is put into {@link #inBuffer} before any other data goes in. The
@@ -120,7 +120,7 @@ public class StreamingCipherOutputStream extends CipherOutputStream {
 
         this.streamOffset = streamOffset;
         this.initIV = iv.clone();
-        this.iv = iv.clone();
+        this.iv = new MutableIvParameterSpec(iv.clone());
 
         resetCipher();
     }
@@ -195,8 +195,8 @@ public class StreamingCipherOutputStream extends CipherOutputStream {
         padding = (byte) (streamOffset % cipher.getBlockSize());
         inBuffer.position(padding); // Set proper position for input data.
 
-        CipherDerivedIV.calculateIV(initIV, counter, iv);
-        cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
+        CipherDerivedIV.calculateIV(initIV, counter, iv.getIV());
+        cipher.init(Cipher.ENCRYPT_MODE, key, algorithm.wrapIv(iv));
         cipherReset = false;
     }
 

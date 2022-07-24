@@ -6,7 +6,6 @@ import java.nio.channels.ReadableByteChannel;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
 
 import org.apache.commons.crypto.stream.CryptoInputStream;
 import org.apache.commons.crypto.stream.input.ChannelInput;
@@ -17,6 +16,7 @@ import org.apache.commons.crypto.utils.Utils;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherDerivedIV;
+import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 
 /**
  * <p>
@@ -47,7 +47,7 @@ public class StreamingCipherInputStream extends CipherInputStream {
     /**
      * Initialization vector for the cipher.
      */
-    private final byte[] iv;
+    private final MutableIvParameterSpec iv;
 
     /**
      * Padding = pos%(algorithm blocksize); Padding is put into {@link #inBuffer} before any other data goes in. The
@@ -113,7 +113,7 @@ public class StreamingCipherInputStream extends CipherInputStream {
         super(algorithm, input, cipher, bufferSize, key, iv);
 
         this.initIV = iv.clone();
-        this.iv = iv.clone();
+        this.iv = new MutableIvParameterSpec(iv.clone());
 
         resetStreamOffset(streamOffset);
     }
@@ -442,9 +442,9 @@ public class StreamingCipherInputStream extends CipherInputStream {
      */
     protected void resetCipher(final long position) throws IOException {
         final long counter = getCounter(position);
-        CipherDerivedIV.calculateIV(initIV, counter, iv);
+        CipherDerivedIV.calculateIV(initIV, counter, iv.getIV());
         try {
-            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+            cipher.init(Cipher.DECRYPT_MODE, key, algorithm.wrapIv(iv));
         } catch (final Exception e) {
             throw new IOException(e);
         }

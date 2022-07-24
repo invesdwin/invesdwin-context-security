@@ -94,7 +94,7 @@ public enum AesAlgorithm implements ICipherAlgorithm {
         }
     };
 
-    public static final AesAlgorithm DEFAULT = AES_CTR_NoPadding;
+    public static final AesAlgorithm DEFAULT = AES_GCM_NoPadding;
 
     private final String algorithm;
     private final int ivBytes;
