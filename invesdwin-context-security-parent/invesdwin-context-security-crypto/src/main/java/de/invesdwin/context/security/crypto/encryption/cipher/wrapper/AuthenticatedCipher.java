@@ -8,6 +8,9 @@ import javax.annotation.concurrent.NotThreadSafe;
 import de.invesdwin.context.security.crypto.authentication.IAuthenticationFactory;
 import de.invesdwin.context.security.crypto.authentication.mac.IMac;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.util.math.Bytes;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
+import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
 public class AuthenticatedCipher implements ICipher {
@@ -45,65 +48,116 @@ public class AuthenticatedCipher implements ICipher {
 
     @Override
     public int update(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
-        cipher.update(inBuffer, outBuffer);
-        return 0;
+        final int positionBefore = inBuffer.position();
+        final int length = cipher.update(inBuffer, outBuffer);
+        ByteBuffers.position(inBuffer, positionBefore);
+        mac.update(inBuffer);
+        return length;
+    }
+
+    @Override
+    public int update(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
+        final int length = cipher.update(inBuffer, outBuffer);
+        mac.update(inBuffer);
+        return length;
     }
 
     @Override
     public int update(final byte[] input, final int inputOffset, final int inputLen, final byte[] output) {
-        return 0;
+        final int length = cipher.update(input, inputOffset, inputLen, output);
+        mac.update(input, inputOffset, inputLen);
+        return length;
     }
 
     @Override
     public int update(final byte[] input, final int inputOffset, final int inputLen, final byte[] output,
             final int outputOffset) {
-        return 0;
+        final int length = cipher.update(input, inputOffset, inputLen, output, outputOffset);
+        mac.update(input, inputOffset, inputLen);
+        return length;
     }
 
     @Override
     public int doFinal(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
-        return 0;
+        final int positionBefore = inBuffer.position();
+        final int written = cipher.doFinal(inBuffer, outBuffer);
+        ByteBuffers.position(inBuffer, positionBefore);
+        mac.update(inBuffer);
+        final byte[] signature = mac.doFinal();
+        outBuffer.put(signature);
+        return written + signature.length;
+    }
+
+    @Override
+    public int doFinal(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
+        return ICipher.super.doFinal(inBuffer, outBuffer);
     }
 
     @Override
     public int doFinal(final byte[] input, final int inputOffset, final int inputLen, final byte[] output) {
-        return 0;
+        int written = cipher.doFinal(input, inputOffset, inputLen, output);
+        mac.update(input, inputOffset, inputLen);
+        written += mac.doFinal(output, written);
+        return written;
     }
 
     @Override
     public int doFinal(final byte[] input, final int inputOffset, final int inputLen, final byte[] output,
             final int outputOffset) {
-        return 0;
+        int written = cipher.doFinal(input, inputOffset, inputLen, output, outputOffset);
+        mac.update(input, inputOffset, inputLen);
+        written += mac.doFinal(output, outputOffset + written);
+        return written;
     }
 
     @Override
     public int doFinal(final byte[] output, final int offset) {
-        return 0;
+        int written = cipher.doFinal(output, offset);
+        written += mac.doFinal(output, offset + written);
+        return written;
     }
 
     @Override
     public byte[] doFinal() {
-        return null;
+        final byte[] payload = cipher.doFinal();
+        final byte[] signature = mac.doFinal();
+        return Bytes.concat(payload, signature);
     }
 
     @Override
     public void updateAAD(final byte aad) {
+        cipher.updateAAD(aad);
+        mac.update(aad);
     }
 
     @Override
     public void updateAAD(final byte[] aad) {
+        cipher.updateAAD(aad);
+        mac.update(aad);
     }
 
     @Override
     public void updateAAD(final byte[] aad, final int inputOffset, final int inputLen) {
+        cipher.updateAAD(aad, inputOffset, inputLen);
+        mac.update(aad, inputOffset, inputLen);
     }
 
     @Override
     public void updateAAD(final java.nio.ByteBuffer aad) {
+        cipher.updateAAD(aad);
+        mac.update(aad);
+    }
+
+    @Override
+    public void updateAAD(final IByteBuffer aad) {
+        cipher.updateAAD(aad);
+        mac.update(aad);
     }
 
     @Override
     public void close() {
+        cipher.close();
+        mac.close();
     }
 
 }

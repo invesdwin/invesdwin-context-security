@@ -21,6 +21,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.system.properties.SystemProperties;
 import de.invesdwin.util.assertions.Assertions;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 /**
  * CryptoInputStream reads input data and decrypts data in stream manner. It supports any mode of operations such as AES
@@ -208,7 +209,7 @@ public class CipherInputStream extends InputStream implements ReadableByteChanne
             if (remaining <= outBuffer.remaining()) {
                 // Skip in the remaining buffer
                 final int pos = outBuffer.position() + (int) remaining;
-                outBuffer.position(pos);
+                ByteBuffers.position(outBuffer, pos);
 
                 remaining = 0;
                 break;

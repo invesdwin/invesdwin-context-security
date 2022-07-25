@@ -8,6 +8,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.ICipherFactory;
+import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
  * Does not reuse cipher instances (e.g. GCM will refuse to encrypt twice in a row with the same IV)
@@ -56,6 +57,11 @@ public class RefreshingDelegateCipher implements ICipher {
     }
 
     @Override
+    public int update(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
+        return delegate.update(inBuffer, outBuffer);
+    }
+
+    @Override
     public int update(final byte[] input, final int inputOffset, final int inputLen, final byte[] output) {
         return delegate.update(input, inputOffset, inputLen, output);
     }
@@ -68,6 +74,11 @@ public class RefreshingDelegateCipher implements ICipher {
 
     @Override
     public int doFinal(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
+        return delegate.doFinal(inBuffer, outBuffer);
+    }
+
+    @Override
+    public int doFinal(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
         return delegate.doFinal(inBuffer, outBuffer);
     }
 
@@ -109,6 +120,11 @@ public class RefreshingDelegateCipher implements ICipher {
 
     @Override
     public void updateAAD(final java.nio.ByteBuffer aad) {
+        delegate.updateAAD(aad);
+    }
+
+    @Override
+    public void updateAAD(final IByteBuffer aad) {
         delegate.updateAAD(aad);
     }
 

@@ -12,6 +12,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherA
 import de.invesdwin.context.security.crypto.encryption.cipher.iv.ICipherIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
+import de.invesdwin.util.streams.buffer.bytes.EmptyByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
@@ -60,6 +61,11 @@ public class CipherMac implements IMac {
     }
 
     @Override
+    public void update(final IByteBuffer input) {
+        cipher.updateAAD(input);
+    }
+
+    @Override
     public void update(final byte input) {
         cipher.updateAAD(input);
     }
@@ -84,7 +90,7 @@ public class CipherMac implements IMac {
             buffer.putBytes(0, ivBlock);
             int written = macIndex;
             try {
-                written += cipher.doFinal(null, buffer.sliceFrom(macIndex));
+                written += cipher.doFinal(EmptyByteBuffer.INSTANCE, buffer.sliceFrom(macIndex));
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }

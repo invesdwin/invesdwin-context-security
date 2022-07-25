@@ -17,6 +17,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 /**
  * <p>
@@ -131,7 +132,7 @@ public class StreamingCipherInputStream extends CipherInputStream {
             return 0;
         } else if (n <= outBuffer.remaining()) {
             final int pos = outBuffer.position() + (int) n;
-            outBuffer.position(pos);
+            ByteBuffers.position(outBuffer, pos);
             return n;
         } else {
             /*
@@ -215,7 +216,7 @@ public class StreamingCipherInputStream extends CipherInputStream {
         if (position >= getStreamPosition() && position <= getStreamOffset()) {
             final int forward = (int) (position - getStreamPosition());
             if (forward > 0) {
-                outBuffer.position(outBuffer.position() + forward);
+                ByteBuffers.position(outBuffer, outBuffer.position() + forward);
             }
         } else {
             input.seek(position);
@@ -333,13 +334,13 @@ public class StreamingCipherInputStream extends CipherInputStream {
         final int limit = buf.limit();
         int n = 0;
         while (n < len) {
-            buf.position(offset + n);
+            ByteBuffers.position(buf, offset + n);
             buf.limit(offset + n + Math.min(len - n, inBuffer.remaining()));
             inBuffer.put(buf);
             // Do decryption
             try {
                 decrypt();
-                buf.position(offset + n);
+                ByteBuffers.position(buf, offset + n);
                 buf.limit(limit);
                 n += outBuffer.remaining();
                 buf.put(outBuffer);
@@ -347,7 +348,7 @@ public class StreamingCipherInputStream extends CipherInputStream {
                 postDecryption(streamOffset - (len - n));
             }
         }
-        buf.position(pos);
+        ByteBuffers.position(buf, pos);
     }
 
     /**

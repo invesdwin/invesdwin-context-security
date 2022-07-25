@@ -20,7 +20,18 @@ public interface ICipher extends Closeable {
     int update(java.nio.ByteBuffer inBuffer, java.nio.ByteBuffer outBuffer);
 
     default int update(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
-        return update(inBuffer.asNioByteBuffer(), outBuffer.asNioByteBuffer());
+        final java.nio.ByteBuffer inBufferNio = inBuffer.asNioByteBuffer();
+        final java.nio.ByteBuffer outBufferNio = outBuffer.asNioByteBuffer();
+
+        final int inPositionBefore = inBufferNio.position();
+        final int outPositionBefore = outBufferNio.position();
+
+        final int length = update(inBufferNio, outBufferNio);
+
+        ByteBuffers.position(inBufferNio, inPositionBefore);
+        ByteBuffers.position(outBufferNio, outPositionBefore);
+
+        return length;
     }
 
     int update(byte[] input, int inputOffset, int inputLen, byte[] output);
@@ -30,7 +41,18 @@ public interface ICipher extends Closeable {
     int doFinal(java.nio.ByteBuffer inBuffer, java.nio.ByteBuffer outBuffer);
 
     default int doFinal(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
-        return doFinal(ByteBuffers.asNioByteBuffer(inBuffer), outBuffer.asNioByteBuffer());
+        final java.nio.ByteBuffer inBufferNio = inBuffer.asNioByteBuffer();
+        final java.nio.ByteBuffer outBufferNio = outBuffer.asNioByteBuffer();
+
+        final int inPositionBefore = inBufferNio.position();
+        final int outPositionBefore = outBufferNio.position();
+
+        final int length = doFinal(inBufferNio, outBufferNio);
+
+        ByteBuffers.position(inBufferNio, inPositionBefore);
+        ByteBuffers.position(outBufferNio, outPositionBefore);
+
+        return length;
     }
 
     int doFinal(byte[] input, int inputOffset, int inputLen, byte[] output);
@@ -50,7 +72,10 @@ public interface ICipher extends Closeable {
     void updateAAD(java.nio.ByteBuffer aad);
 
     default void updateAAD(final IByteBuffer aad) {
-        updateAAD(aad.asNioByteBuffer());
+        final java.nio.ByteBuffer aadNio = aad.asNioByteBuffer();
+        final int positionBefore = aadNio.position();
+        updateAAD(aadNio);
+        ByteBuffers.position(aadNio, positionBefore);
     }
 
     @Override
