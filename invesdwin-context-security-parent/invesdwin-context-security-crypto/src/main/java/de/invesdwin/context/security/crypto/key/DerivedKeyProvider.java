@@ -32,16 +32,6 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
     }
 
     @Override
-    public byte[] getKey() {
-        return key;
-    }
-
-    @Override
-    public byte[] getSalt() {
-        return salt;
-    }
-
-    @Override
     public byte[] newDerivedKey(final byte[] info, final int length) {
         return derivationFactory.expand(key, info, length);
     }

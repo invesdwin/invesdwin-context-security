@@ -36,6 +36,7 @@ public class CipherEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
+        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength._256.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(algorithm);
@@ -43,8 +44,7 @@ public class CipherEncryptionFactoryTest extends ATest {
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize()));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
-                final CipherEncryptionFactory factory = new CipherEncryptionFactory(algorithm,
-                        derivedKeyProvider.getKey(), iv);
+                final CipherEncryptionFactory factory = new CipherEncryptionFactory(algorithm, key, iv);
                 testEncryptionAndDecryption(factory, "1234567890");
                 testEncryptionAndDecryption(factory, "0987654321");
             }
