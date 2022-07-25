@@ -32,6 +32,8 @@ import de.invesdwin.context.system.properties.SystemProperties;
  * https://blog.synopse.info/?post/2021/02/13/Fastest-AES-PRNG%2C-AES-CTR-and-AES-GCM-Delphi-implementation
  * 
  * https://stackoverflow.com/questions/54659935/java-aes-gcm-very-slow-compared-to-aes-ctr
+ * 
+ * AES/ECB should never be used: https://crypto.stackexchange.com/questions/20941/why-shouldnt-i-use-ecb-encryption
  */
 @Immutable
 public enum AesAlgorithm implements ICipherAlgorithm {
