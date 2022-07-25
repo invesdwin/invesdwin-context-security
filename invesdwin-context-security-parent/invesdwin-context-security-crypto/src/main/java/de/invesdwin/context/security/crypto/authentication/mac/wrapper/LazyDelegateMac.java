@@ -51,7 +51,7 @@ public class LazyDelegateMac implements IMac {
     }
 
     @Override
-    public void update(final IByteBuffer input) {
+    public void update(final java.nio.ByteBuffer input) {
         needsReset = true;
         delegate.update(input);
     }

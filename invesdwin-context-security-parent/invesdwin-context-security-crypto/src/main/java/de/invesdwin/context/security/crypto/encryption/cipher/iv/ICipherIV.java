@@ -3,6 +3,7 @@ package de.invesdwin.context.security.crypto.encryption.cipher.iv;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
@@ -28,6 +29,14 @@ public interface ICipherIV {
 
     default void returnDestIV(final MutableIvParameterSpec iv) {
         getAlgorithm().getIvParameterSpecPool().returnObject(iv);
+    }
+
+    default ICipher borrowCipher() {
+        return getAlgorithm().getCipherPool().borrowObject();
+    }
+
+    default void returnCipher(final ICipher cipher) {
+        getAlgorithm().getCipherPool().returnObject(cipher);
     }
 
     default byte[] putNewIV(final IByteBuffer out) {

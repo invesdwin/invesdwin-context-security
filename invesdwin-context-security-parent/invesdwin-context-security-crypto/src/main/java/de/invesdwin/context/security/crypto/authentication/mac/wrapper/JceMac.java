@@ -58,8 +58,8 @@ public class JceMac implements IMac {
     }
 
     @Override
-    public void update(final IByteBuffer input) {
-        mac.update(input.asNioByteBuffer());
+    public void update(final java.nio.ByteBuffer input) {
+        mac.update(input);
     }
 
     @Override

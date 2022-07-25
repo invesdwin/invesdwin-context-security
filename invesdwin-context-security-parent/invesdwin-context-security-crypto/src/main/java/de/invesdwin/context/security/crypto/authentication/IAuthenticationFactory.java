@@ -17,6 +17,8 @@ public interface IAuthenticationFactory {
 
     IMacAlgorithm getAlgorithm();
 
+    void init(IMac mac);
+
     LayeredMacOutputStream newSignatureOutputStream(OutputStream out);
 
     LayeredMacInputStream newVerificationInputStream(InputStream in);

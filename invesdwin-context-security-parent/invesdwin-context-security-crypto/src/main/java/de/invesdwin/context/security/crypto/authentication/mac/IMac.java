@@ -20,7 +20,11 @@ public interface IMac extends Closeable {
      */
     void init(Key key);
 
-    void update(IByteBuffer input);
+    default void update(final IByteBuffer input) {
+        update(input.asNioByteBuffer());
+    }
+
+    void update(java.nio.ByteBuffer input);
 
     void update(byte input);
 

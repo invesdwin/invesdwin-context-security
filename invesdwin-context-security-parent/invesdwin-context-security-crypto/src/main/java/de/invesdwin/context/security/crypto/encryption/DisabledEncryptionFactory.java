@@ -2,9 +2,11 @@ package de.invesdwin.context.security.crypto.encryption;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -21,6 +23,10 @@ public final class DisabledEncryptionFactory implements IEncryptionFactory {
     @Override
     public ICipherAlgorithm getAlgorithm() {
         return null;
+    }
+
+    @Override
+    public void init(final ICipher cipher, final int mode, final AlgorithmParameterSpec iv) {
     }
 
     @Override

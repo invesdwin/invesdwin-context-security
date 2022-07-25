@@ -55,7 +55,7 @@ public class CipherMac implements IMac {
     }
 
     @Override
-    public void update(final IByteBuffer input) {
+    public void update(final java.nio.ByteBuffer input) {
         cipher.updateAAD(input);
     }
 

@@ -14,13 +14,11 @@ import org.apache.commons.crypto.utils.Utils;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.ICipherFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.stream.StreamingCipherInputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.stream.StreamingCipherOutputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.CryptoCipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.RefreshingDelegateCipher;
 import de.invesdwin.context.system.properties.SystemProperties;
 
 /**
@@ -96,22 +94,6 @@ public enum AesAlgorithm implements ICipherAlgorithm {
             AesKeyLength._128.getBytes(),
             12,
             AesKeyLength._128.getBytes() + AesKeyLength._128.getBytes()) {
-
-        @Override
-        public ICipher newCipher() {
-            return new RefreshingDelegateCipher(this, new ICipherFactory() {
-
-                @Override
-                public ICipher newCipher() {
-                    return newCryptoCipher();
-                }
-
-                @Override
-                public String getAlgorithm() {
-                    return AES_GCM_NoPadding.getAlgorithm();
-                }
-            });
-        }
 
         @Override
         public AlgorithmParameterSpec wrapIv(final byte[] iv) {

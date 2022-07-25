@@ -5,8 +5,10 @@ import java.io.OutputStream;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.util.lang.Closeables;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
@@ -63,6 +65,17 @@ public class CipherPresharedIV implements ICipherIV {
     @Override
     public void returnDestIV(final MutableIvParameterSpec iv) {
         //noop
+    }
+
+    @Override
+    public ICipher borrowCipher() {
+        //can not reuse IV with AES/GCM/NoPadding, thus create a new instance
+        return getAlgorithm().newCipher();
+    }
+
+    @Override
+    public void returnCipher(final ICipher cipher) {
+        Closeables.close(cipher);
     }
 
     @Override

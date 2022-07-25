@@ -3,6 +3,7 @@ package de.invesdwin.context.security.crypto.encryption.cipher;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.Immutable;
 import javax.crypto.Cipher;
@@ -68,6 +69,11 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
+    public void init(final ICipher cipher, final int mode, final AlgorithmParameterSpec iv) {
+        cipher.init(mode, keyWrapped, iv);
+    }
+
+    @Override
     public OutputStream newEncryptor(final OutputStream out) {
         return new ALazyDelegateOutputStream() {
             @Override
@@ -91,11 +97,11 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
 
     @Override
     public int encrypt(final IByteBuffer src, final IByteBuffer dest) {
-        final ICipher cipher = algorithm.getCipherPool().borrowObject();
+        final ICipher cipher = cipherIV.borrowCipher();
         final MutableIvParameterSpec iv = cipherIV.borrowDestIV();
         try {
             cipherIV.putIV(dest, iv);
-            cipher.init(Cipher.ENCRYPT_MODE, keyWrapped, algorithm.wrapIv(iv));
+            init(cipher, Cipher.ENCRYPT_MODE, algorithm.wrapIv(iv));
             final IByteBuffer payloadBuffer = dest.sliceFrom(cipherIV.getBlockSizeIV());
             final int length = cipher.doFinal(src, payloadBuffer);
             return cipherIV.getBlockSizeIV() + length;
@@ -103,17 +109,17 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
             throw new RuntimeException(e);
         } finally {
             cipherIV.returnDestIV(iv);
-            algorithm.getCipherPool().returnObject(cipher);
+            cipherIV.returnCipher(cipher);
         }
     }
 
     @Override
     public int decrypt(final IByteBuffer src, final IByteBuffer dest) {
-        final ICipher cipher = algorithm.getCipherPool().borrowObject();
+        final ICipher cipher = cipherIV.borrowCipher();
         final MutableIvParameterSpec iv = cipherIV.borrowDestIV();
         try {
             cipherIV.getIV(src, iv);
-            cipher.init(Cipher.DECRYPT_MODE, keyWrapped, algorithm.wrapIv(iv));
+            init(cipher, Cipher.DECRYPT_MODE, algorithm.wrapIv(iv));
             final IByteBuffer payloadBuffer = src.sliceFrom(cipherIV.getBlockSizeIV());
             final int length = cipher.doFinal(payloadBuffer, dest);
             return length;
@@ -121,7 +127,7 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
             throw new RuntimeException(e);
         } finally {
             cipherIV.returnDestIV(iv);
-            algorithm.getCipherPool().returnObject(cipher);
+            cipherIV.returnCipher(cipher);
         }
     }
 

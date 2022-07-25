@@ -47,6 +47,11 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
     }
 
     @Override
+    public void init(final IMac mac) {
+        mac.init(key);
+    }
+
+    @Override
     public LayeredMacOutputStream newSignatureOutputStream(final OutputStream out) {
         return ChannelLayeredMacOutputStream.maybeWrap(out, algorithm.newMac(), key);
     }
@@ -68,7 +73,7 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
 
     @Override
     public byte[] newSignature(final IByteBuffer src, final IMac mac) {
-        mac.init(key);
+        init(mac);
         mac.update(src);
         return mac.doFinal();
     }
@@ -102,7 +107,7 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
 
     @Override
     public int copyAndSign(final IByteBuffer src, final IByteBuffer dest, final IMac mac) {
-        mac.init(key);
+        init(mac);
         mac.update(src);
         final byte[] signature = mac.doFinal();
         dest.putBytes(0, src);
@@ -140,7 +145,7 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
 
     @Override
     public IByteBuffer verifyAndSlice(final IByteBuffer src, final IMac mac) {
-        mac.init(key);
+        init(mac);
         final IByteBuffer payloadBuffer = mac.verifyAndSlice(src);
         return payloadBuffer;
     }

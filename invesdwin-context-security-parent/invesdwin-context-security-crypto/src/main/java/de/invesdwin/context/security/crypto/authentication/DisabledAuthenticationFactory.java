@@ -29,6 +29,10 @@ public final class DisabledAuthenticationFactory implements IAuthenticationFacto
     }
 
     @Override
+    public void init(final IMac mac) {
+    }
+
+    @Override
     public LayeredMacOutputStream newSignatureOutputStream(final OutputStream out) {
         //buffering is better for write throughput to file
         return new LayeredMacOutputStream(PooledFastBufferedOutputStream.newInstance(out), DisabledMac.INSTANCE, null);
