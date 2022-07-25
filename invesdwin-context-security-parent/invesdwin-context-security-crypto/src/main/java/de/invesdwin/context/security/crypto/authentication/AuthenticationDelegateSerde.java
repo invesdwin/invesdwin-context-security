@@ -5,11 +5,10 @@ import javax.annotation.concurrent.Immutable;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.marshallers.serde.SerdeBaseMethods;
-import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
-public class AuthenticatingDelegateSerde<E> implements ISerde<E> {
+public class AuthenticationDelegateSerde<E> implements ISerde<E> {
 
     private final ISerde<E> delegate;
     private final IAuthenticationFactory authenticationFactory;
@@ -18,8 +17,8 @@ public class AuthenticatingDelegateSerde<E> implements ISerde<E> {
      * WARNING: for internal use only. Use maybeWrap() instead.
      */
     @Deprecated
-    public AuthenticatingDelegateSerde(final ISerde<E> delegate, final IAuthenticationFactory authenticationFactory) {
-        Assertions.assertThat(delegate).isNotInstanceOf(AuthenticatingDelegateSerde.class);
+    public AuthenticationDelegateSerde(final ISerde<E> delegate, final IAuthenticationFactory authenticationFactory) {
+        Assertions.assertThat(delegate).isNotInstanceOf(AuthenticationDelegateSerde.class);
         this.delegate = delegate;
         this.authenticationFactory = authenticationFactory;
     }
@@ -43,13 +42,8 @@ public class AuthenticatingDelegateSerde<E> implements ISerde<E> {
             //we can save a copy here
             return delegate.fromBuffer(buffer, length);
         } else {
-            final IByteBuffer signedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-            try {
-                final int signedLength = authenticationFactory.copyAndSign(buffer, signedBuffer);
-                return delegate.fromBuffer(signedBuffer, signedLength);
-            } finally {
-                ByteBuffers.EXPANDABLE_POOL.returnObject(signedBuffer);
-            }
+            final IByteBuffer verifiedBuffer = authenticationFactory.verifyAndSlice(buffer.sliceTo(length));
+            return delegate.fromBuffer(verifiedBuffer, verifiedBuffer.capacity());
         }
     }
 
@@ -62,13 +56,9 @@ public class AuthenticatingDelegateSerde<E> implements ISerde<E> {
             //we can save a copy here
             return delegate.toBuffer(buffer, obj);
         } else {
-            final IByteBuffer verifiedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-            try {
-                final int verifiedLength = delegate.toBuffer(verifiedBuffer, obj);
-                return authenticationFactory.verifyAndCopy(verifiedBuffer.sliceTo(verifiedLength), buffer);
-            } finally {
-                ByteBuffers.EXPANDABLE_POOL.returnObject(verifiedBuffer);
-            }
+            final int signatureIndex = delegate.toBuffer(buffer, obj);
+            final int signatureLength = authenticationFactory.putSignature(buffer, signatureIndex);
+            return signatureIndex + signatureLength;
         }
     }
 

@@ -6,7 +6,7 @@ import java.security.Key;
 
 import javax.annotation.concurrent.Immutable;
 
-import de.invesdwin.context.security.crypto.authentication.AuthenticatingDelegateSerde;
+import de.invesdwin.context.security.crypto.authentication.AuthenticationDelegateSerde;
 import de.invesdwin.context.security.crypto.authentication.IAuthenticationFactory;
 import de.invesdwin.context.security.crypto.authentication.mac.algorithm.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.authentication.mac.stream.ChannelLayeredMacInputStream;
@@ -15,7 +15,6 @@ import de.invesdwin.context.security.crypto.authentication.mac.stream.LayeredMac
 import de.invesdwin.context.security.crypto.authentication.mac.stream.LayeredMacOutputStream;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.util.marshallers.serde.ISerde;
-import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
@@ -124,14 +123,7 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
 
     @Override
     public int verifyAndCopy(final IByteBuffer src, final IByteBuffer dest, final IMac mac) {
-        mac.init(key);
-        final int signatureIndex = src.remaining(mac.getMacLength());
-        final IByteBuffer payloadBuffer = src.sliceTo(signatureIndex);
-        mac.update(payloadBuffer);
-        final byte[] calculatedSignature = mac.doFinal();
-        if (!ByteBuffers.constantTimeEquals(src.sliceFrom(signatureIndex), calculatedSignature)) {
-            throw new IllegalArgumentException("Signature mismatch");
-        }
+        final IByteBuffer payloadBuffer = verifyAndSlice(src, mac);
         dest.putBytes(0, payloadBuffer);
         return payloadBuffer.capacity();
     }
@@ -149,20 +141,14 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
     @Override
     public IByteBuffer verifyAndSlice(final IByteBuffer src, final IMac mac) {
         mac.init(key);
-        final int signatureIndex = src.remaining(mac.getMacLength());
-        final IByteBuffer payloadBuffer = src.sliceTo(signatureIndex);
-        mac.update(payloadBuffer);
-        final byte[] calculatedSignature = mac.doFinal();
-        if (!ByteBuffers.constantTimeEquals(src.sliceFrom(signatureIndex), calculatedSignature)) {
-            throw new IllegalArgumentException("Signature mismatch");
-        }
-        return src.sliceTo(signatureIndex);
+        final IByteBuffer payloadBuffer = mac.verifyAndSlice(src);
+        return payloadBuffer;
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public <T> ISerde<T> maybeWrap(final ISerde<T> delegate) {
-        return new AuthenticatingDelegateSerde<>(delegate, this);
+        return new AuthenticationDelegateSerde<>(delegate, this);
     }
 
 }

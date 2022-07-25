@@ -9,7 +9,7 @@ import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
-public class EncryptingDelegateSerde<E> implements ISerde<E> {
+public class EncryptionDelegateSerde<E> implements ISerde<E> {
 
     private final ISerde<E> delegate;
     private final IEncryptionFactory encryptionFactory;
@@ -18,8 +18,8 @@ public class EncryptingDelegateSerde<E> implements ISerde<E> {
      * WARNING: for internal use only. Use maybeWrap() instead.
      */
     @Deprecated
-    public EncryptingDelegateSerde(final ISerde<E> delegate, final IEncryptionFactory encryptionFactory) {
-        Assertions.assertThat(delegate).isNotInstanceOf(EncryptingDelegateSerde.class);
+    public EncryptionDelegateSerde(final ISerde<E> delegate, final IEncryptionFactory encryptionFactory) {
+        Assertions.assertThat(delegate).isNotInstanceOf(EncryptionDelegateSerde.class);
         this.delegate = delegate;
         this.encryptionFactory = encryptionFactory;
     }

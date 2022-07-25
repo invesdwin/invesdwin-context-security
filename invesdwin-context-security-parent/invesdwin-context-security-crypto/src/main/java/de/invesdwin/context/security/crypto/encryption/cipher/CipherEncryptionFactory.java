@@ -7,7 +7,7 @@ import java.security.Key;
 import javax.annotation.concurrent.Immutable;
 import javax.crypto.Cipher;
 
-import de.invesdwin.context.security.crypto.encryption.EncryptingDelegateSerde;
+import de.invesdwin.context.security.crypto.encryption.EncryptionDelegateSerde;
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.AesKeyLength;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
@@ -128,7 +128,7 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
     @SuppressWarnings("deprecation")
     @Override
     public <T> ISerde<T> maybeWrap(final ISerde<T> serde) {
-        return new EncryptingDelegateSerde<>(serde, this);
+        return new EncryptionDelegateSerde<>(serde, this);
     }
 
 }
