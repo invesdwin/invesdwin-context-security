@@ -36,8 +36,18 @@ public class CompressionAsEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
+    public OutputStream newEncryptor(final OutputStream out, final ICipher cipher) {
+        return newEncryptor(out);
+    }
+
+    @Override
     public InputStream newDecryptor(final InputStream in) {
         return compressionFactory.newDecompressor(in);
+    }
+
+    @Override
+    public InputStream newDecryptor(final InputStream in, final ICipher cipher) {
+        return newDecryptor(in);
     }
 
     @Override
@@ -46,8 +56,18 @@ public class CompressionAsEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
+    public int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
+        return encrypt(src, dest);
+    }
+
+    @Override
     public int decrypt(final IByteBuffer src, final IByteBuffer dest) {
         return compressionFactory.decompress(src, dest);
+    }
+
+    @Override
+    public int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
+        return decrypt(src, dest);
     }
 
     @Override

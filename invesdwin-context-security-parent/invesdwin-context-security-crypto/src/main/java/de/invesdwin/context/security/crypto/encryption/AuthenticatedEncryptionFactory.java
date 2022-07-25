@@ -8,13 +8,16 @@ import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.authentication.IAuthenticationFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.AuthenticatedCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.AuthenticatedCipher;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
 public class AuthenticatedEncryptionFactory implements IEncryptionFactory {
 
+    private final AuthenticatedCipherAlgorithm algorithm;
     private final IEncryptionFactory encryptionFactory;
     private final IAuthenticationFactory authenticationFactory;
 
@@ -22,11 +25,12 @@ public class AuthenticatedEncryptionFactory implements IEncryptionFactory {
             final IAuthenticationFactory authenticationFactory) {
         this.encryptionFactory = encryptionFactory;
         this.authenticationFactory = authenticationFactory;
+        this.algorithm = new AuthenticatedCipherAlgorithm(getAlgorithm(), authenticationFactory);
     }
 
     @Override
     public ICipherAlgorithm getAlgorithm() {
-        return encryptionFactory.getAlgorithm();
+        return algorithm;
     }
 
     @Override
@@ -40,12 +44,22 @@ public class AuthenticatedEncryptionFactory implements IEncryptionFactory {
 
     @Override
     public OutputStream newEncryptor(final OutputStream out) {
-        throw new UnsupportedOperationException();
+        return newEncryptor(out, algorithm.newCipher());
+    }
+
+    @Override
+    public OutputStream newEncryptor(final OutputStream out, final ICipher cipher) {
+        return encryptionFactory.newEncryptor(out, cipher);
     }
 
     @Override
     public InputStream newDecryptor(final InputStream in) {
-        throw new UnsupportedOperationException();
+        return newDecryptor(in, algorithm.newCipher());
+    }
+
+    @Override
+    public InputStream newDecryptor(final InputStream in, final ICipher cipher) {
+        return encryptionFactory.newDecryptor(in, cipher);
     }
 
     @Override
@@ -56,10 +70,26 @@ public class AuthenticatedEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
-    public int decrypt(final IByteBuffer src, final IByteBuffer dest) {
-        final int encryptedLength = encryptionFactory.encrypt(src, dest);
-        final int signatureLength = authenticationFactory.putSignature(dest, encryptedLength);
+    public int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
+        final AuthenticatedCipher cCipher = (AuthenticatedCipher) cipher;
+        final int encryptedLength = encryptionFactory.encrypt(src, dest, cCipher.getDelegate());
+        final int signatureLength = authenticationFactory.putSignature(dest, encryptedLength, cCipher.getMac());
         return encryptedLength + signatureLength;
+    }
+
+    @Override
+    public int decrypt(final IByteBuffer src, final IByteBuffer dest) {
+        final IByteBuffer payload = authenticationFactory.verifyAndSlice(src);
+        final int decryptedLength = encryptionFactory.decrypt(payload, dest);
+        return decryptedLength;
+    }
+
+    @Override
+    public int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
+        final AuthenticatedCipher cCipher = (AuthenticatedCipher) cipher;
+        final IByteBuffer payload = authenticationFactory.verifyAndSlice(src, cCipher.getMac());
+        final int decryptedLength = encryptionFactory.decrypt(payload, dest, cCipher.getDelegate());
+        return decryptedLength;
     }
 
     @Override

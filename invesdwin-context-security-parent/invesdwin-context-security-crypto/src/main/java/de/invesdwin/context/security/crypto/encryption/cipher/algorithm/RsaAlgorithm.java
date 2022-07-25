@@ -62,12 +62,12 @@ public enum RsaAlgorithm implements ICipherAlgorithm {
     }
 
     @Override
-    public OutputStream newEncryptor(final OutputStream out, final byte[] key, final byte[] iv) {
+    public OutputStream newEncryptor(final OutputStream out, final ICipher cipher, final byte[] key, final byte[] iv) {
         return null;
     }
 
     @Override
-    public InputStream newDecryptor(final InputStream in, final byte[] key, final byte[] iv) {
+    public InputStream newDecryptor(final InputStream in, final ICipher cipher, final byte[] key, final byte[] iv) {
         return null;
     }
 

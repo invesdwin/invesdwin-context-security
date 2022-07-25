@@ -75,22 +75,32 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
 
     @Override
     public OutputStream newEncryptor(final OutputStream out) {
+        return newEncryptor(out, algorithm.newCipher());
+    }
+
+    @Override
+    public OutputStream newEncryptor(final OutputStream out, final ICipher cipher) {
         return new ALazyDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
                 final byte[] iv = cipherIV.putNewIV(out);
-                return algorithm.newEncryptor(out, key, iv);
+                return algorithm.newEncryptor(out, cipher, key, iv);
             }
         };
     }
 
     @Override
     public InputStream newDecryptor(final InputStream in) {
+        return newDecryptor(in, algorithm.newCipher());
+    }
+
+    @Override
+    public InputStream newDecryptor(final InputStream in, final ICipher cipher) {
         return new ALazyDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
                 final byte[] iv = cipherIV.getNewIV(in);
-                return algorithm.newDecryptor(in, key, iv);
+                return algorithm.newDecryptor(in, cipher, key, iv);
             }
         };
     }
@@ -98,6 +108,15 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
     @Override
     public int encrypt(final IByteBuffer src, final IByteBuffer dest) {
         final ICipher cipher = cipherIV.borrowCipher();
+        try {
+            return encrypt(src, dest, cipher);
+        } finally {
+            cipherIV.returnCipher(cipher);
+        }
+    }
+
+    @Override
+    public int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
         final MutableIvParameterSpec iv = cipherIV.borrowDestIV();
         try {
             cipherIV.putIV(dest, iv);
@@ -109,13 +128,21 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
             throw new RuntimeException(e);
         } finally {
             cipherIV.returnDestIV(iv);
-            cipherIV.returnCipher(cipher);
         }
     }
 
     @Override
     public int decrypt(final IByteBuffer src, final IByteBuffer dest) {
         final ICipher cipher = cipherIV.borrowCipher();
+        try {
+            return decrypt(src, dest, cipher);
+        } finally {
+            cipherIV.returnCipher(cipher);
+        }
+    }
+
+    @Override
+    public int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
         final MutableIvParameterSpec iv = cipherIV.borrowDestIV();
         try {
             cipherIV.getIV(src, iv);
@@ -127,7 +154,6 @@ public class CipherEncryptionFactory implements IEncryptionFactory {
             throw new RuntimeException(e);
         } finally {
             cipherIV.returnDestIV(iv);
-            cipherIV.returnCipher(cipher);
         }
     }
 

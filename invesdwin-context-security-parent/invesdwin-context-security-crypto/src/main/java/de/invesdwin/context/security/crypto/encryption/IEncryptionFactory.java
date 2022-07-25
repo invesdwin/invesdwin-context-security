@@ -17,11 +17,19 @@ public interface IEncryptionFactory {
 
     OutputStream newEncryptor(OutputStream out);
 
+    OutputStream newEncryptor(OutputStream out, ICipher cipher);
+
     InputStream newDecryptor(InputStream in);
+
+    InputStream newDecryptor(InputStream in, ICipher cipher);
 
     int encrypt(IByteBuffer src, IByteBuffer dest);
 
+    int encrypt(IByteBuffer src, IByteBuffer dest, ICipher cipher);
+
     int decrypt(IByteBuffer src, IByteBuffer dest);
+
+    int decrypt(IByteBuffer src, IByteBuffer dest, ICipher cipher);
 
     <T> ISerde<T> maybeWrap(ISerde<T> delegate);
 

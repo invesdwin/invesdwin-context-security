@@ -64,6 +64,11 @@ public class StreamingCipherInputStream extends CipherInputStream {
         this(algorithm, channel, key, iv, 0);
     }
 
+    public StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
+            final ICipher cipher, final byte[] key, final byte[] iv) throws IOException {
+        this(algorithm, inputStream, cipher, CipherInputStream.getDefaultBufferSize(), key, iv, 0);
+    }
+
     protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, inputStream, cipher, bufferSize, key, iv, 0);

@@ -36,8 +36,18 @@ public final class DisabledEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
+    public OutputStream newEncryptor(final OutputStream out, final ICipher cipher) {
+        return newEncryptor(out);
+    }
+
+    @Override
     public InputStream newDecryptor(final InputStream in) {
         return in;
+    }
+
+    @Override
+    public InputStream newDecryptor(final InputStream in, final ICipher cipher) {
+        return newDecryptor(in);
     }
 
     @Override
@@ -47,9 +57,19 @@ public final class DisabledEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
+    public int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
+        return encrypt(src, dest);
+    }
+
+    @Override
     public int decrypt(final IByteBuffer src, final IByteBuffer dest) {
         dest.putBytes(0, src);
         return src.capacity();
+    }
+
+    @Override
+    public int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
+        return decrypt(src, dest);
     }
 
     @Override
