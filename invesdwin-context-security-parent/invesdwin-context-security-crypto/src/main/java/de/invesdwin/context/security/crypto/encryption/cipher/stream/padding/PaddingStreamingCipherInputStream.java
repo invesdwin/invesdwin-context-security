@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.stream;
+package de.invesdwin.context.security.crypto.encryption.cipher.stream.padding;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,22 +17,24 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.context.security.crypto.encryption.cipher.stream.CipherInputStream;
 
 /**
  * <p>
  * CtrCryptoInputStream decrypts data. AES CTR mode is required in order to ensure that the plain text and cipher text
  * have a 1:1 mapping. CTR crypto stream has stream characteristic which is useful for implement features like random
- * seek. The decryption is buffer based. The key point of the decryption is calculating the counter:
+ * seek. The decryption is buffer based. The key points of the decryption are (1) calculating the counter and (2)
+ * padding through stream position:
  * </p>
  * <p>
- * counter = base + pos/(algorithm blocksize);
+ * counter = base + pos/(algorithm blocksize); padding = pos%(algorithm blocksize);
  * </p>
  * The underlying stream offset is maintained as state. It is not thread-safe.
  * 
  * Adapted from: org.apache.commons.crypto.stream.CtrCryptoInputStream
  */
 @NotThreadSafe
-public class StreamingCipherInputStream extends CipherInputStream {
+public class PaddingStreamingCipherInputStream extends CipherInputStream {
     /**
      * Underlying stream offset
      */
@@ -49,60 +51,67 @@ public class StreamingCipherInputStream extends CipherInputStream {
     private final MutableIvParameterSpec iv;
 
     /**
+     * Padding = pos%(algorithm blocksize); Padding is put into {@link #inBuffer} before any other data goes in. The
+     * purpose of padding is to put the input data at proper position.
+     */
+    private byte padding;
+
+    /**
      * Flag to mark whether the cipher has been reset
      */
     private boolean cipherReset = false;
 
-    public StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream, final byte[] key,
-            final byte[] iv) throws IOException {
+    public PaddingStreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
+            final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, inputStream, key, iv, 0);
     }
 
-    public StreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel,
+    public PaddingStreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel,
             final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, channel, key, iv, 0);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
+    protected PaddingStreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, inputStream, cipher, bufferSize, key, iv, 0);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel,
+    protected PaddingStreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, channel, cipher, bufferSize, key, iv, 0);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final Input input, final ICipher cipher,
-            final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
+    protected PaddingStreamingCipherInputStream(final ICipherAlgorithm algorithm, final Input input,
+            final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, input, cipher, bufferSize, key, iv, 0);
     }
 
-    public StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream, final byte[] key,
-            final byte[] iv, final long streamOffset) throws IOException {
+    public PaddingStreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
+            final byte[] key, final byte[] iv, final long streamOffset) throws IOException {
         this(algorithm, inputStream, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv,
                 streamOffset);
     }
 
-    public StreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel in, final byte[] key,
-            final byte[] iv, final long streamOffset) throws IOException {
+    public PaddingStreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel in,
+            final byte[] key, final byte[] iv, final long streamOffset) throws IOException {
         this(algorithm, in, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv, streamOffset);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
+    protected PaddingStreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv, final long streamOffset)
             throws IOException {
         this(algorithm, new StreamInput(inputStream, bufferSize), cipher, bufferSize, key, iv, streamOffset);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel,
+    protected PaddingStreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv, final long streamOffset)
             throws IOException {
         this(algorithm, new ChannelInput(channel), cipher, bufferSize, key, iv, streamOffset);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final Input input, final ICipher cipher,
-            final int bufferSize, final byte[] key, final byte[] iv, final long streamOffset) throws IOException {
+    protected PaddingStreamingCipherInputStream(final ICipherAlgorithm algorithm, final Input input,
+            final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv, final long streamOffset)
+            throws IOException {
         super(algorithm, input, cipher, bufferSize, key, iv);
 
         this.initIV = iv.clone();
@@ -172,15 +181,15 @@ public class StreamingCipherInputStream extends CipherInputStream {
             }
 
             streamOffset += n; // Read n bytes
-            if (buf.isDirect() && buf.remaining() >= inBuffer.position()) {
+            if (buf.isDirect() && buf.remaining() >= inBuffer.position() && padding == 0) {
                 // Use buf as the output buffer directly
                 decryptInPlace(buf);
-                postDecryption(streamOffset);
+                padding = postDecryption(streamOffset);
                 return n;
             }
             // Use outBuffer as the output buffer
             decrypt();
-            postDecryption(streamOffset);
+            padding = postDecryption(streamOffset);
         }
 
         // Copy decrypted data from outBuffer to buf
@@ -267,7 +276,7 @@ public class StreamingCipherInputStream extends CipherInputStream {
 
         streamOffset += n; // Read n bytes
         decrypt();
-        postDecryption(streamOffset);
+        padding = postDecryption(streamOffset);
         return outBuffer.remaining();
     }
 
@@ -280,7 +289,8 @@ public class StreamingCipherInputStream extends CipherInputStream {
      */
     @Override
     protected void decrypt() throws IOException {
-        if (inBuffer.position() == 0) {
+        Utils.checkState(inBuffer.position() >= padding);
+        if (inBuffer.position() == padding) {
             // There is no real data in inBuffer.
             return;
         }
@@ -290,6 +300,13 @@ public class StreamingCipherInputStream extends CipherInputStream {
         decryptBuffer(outBuffer);
         inBuffer.clear();
         outBuffer.flip();
+
+        if (padding > 0) {
+            /*
+             * The plain text and cipher text have a 1:1 mapping, they start at the same position.
+             */
+            outBuffer.position(padding);
+        }
     }
 
     /**
@@ -303,10 +320,12 @@ public class StreamingCipherInputStream extends CipherInputStream {
      *             if an I/O error occurs.
      */
     protected void decryptInPlace(final java.nio.ByteBuffer buf) throws IOException {
+        Utils.checkState(inBuffer.position() >= padding);
         Utils.checkState(buf.isDirect());
         Utils.checkState(buf.remaining() >= inBuffer.position());
+        Utils.checkState(padding == 0);
 
-        if (inBuffer.position() == 0) {
+        if (inBuffer.position() == padding) {
             // There is no real data in inBuffer.
             return;
         }
@@ -344,14 +363,15 @@ public class StreamingCipherInputStream extends CipherInputStream {
                 n += outBuffer.remaining();
                 buf.put(outBuffer);
             } finally {
-                postDecryption(streamOffset - (len - n));
+                padding = postDecryption(streamOffset - (len - n));
             }
         }
         buf.position(pos);
     }
 
     /**
-     * This method is executed immediately after decryption. Checks whether cipher should be updated.
+     * This method is executed immediately after decryption. Checks whether cipher should be updated and recalculate
+     * padding if needed.
      *
      * @param position
      *            the given position in the data..
@@ -359,7 +379,8 @@ public class StreamingCipherInputStream extends CipherInputStream {
      * @throws IOException
      *             if an I/O error occurs.
      */
-    protected void postDecryption(final long position) throws IOException {
+    protected byte postDecryption(final long position) throws IOException {
+        byte padding = 0;
         if (cipherReset) {
             /*
              * This code is generally not executed since the cipher usually maintains cipher context (e.g. the counter)
@@ -367,7 +388,10 @@ public class StreamingCipherInputStream extends CipherInputStream {
              * decryption call.
              */
             resetCipher(position);
+            padding = getPadding(position);
+            inBuffer.position(padding);
         }
+        return padding;
     }
 
     /**
@@ -391,7 +415,18 @@ public class StreamingCipherInputStream extends CipherInputStream {
     }
 
     /**
-     * Overrides the {@link StreamingCipherInputStream#initCipher()}. Initializes the cipher.
+     * Gets the padding for input stream position.
+     *
+     * @param position
+     *            the given position in the data.
+     * @return the padding for input stream position.
+     */
+    protected byte getPadding(final long position) {
+        return (byte) (position % cipher.getBlockSize());
+    }
+
+    /**
+     * Overrides the {@link PaddingStreamingCipherInputStream#initCipher()}. Initializes the cipher.
      */
     @Override
     protected void initCipher() {
@@ -433,6 +468,8 @@ public class StreamingCipherInputStream extends CipherInputStream {
         outBuffer.clear();
         outBuffer.limit(0);
         resetCipher(offset);
+        padding = getPadding(offset);
+        inBuffer.position(padding); // Set proper position for input data.
     }
 
     /**

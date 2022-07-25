@@ -2,6 +2,8 @@ package de.invesdwin.context.security.crypto.encryption.cipher.stream;
 
 import java.io.IOException;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +20,7 @@ import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 
+@NotThreadSafe
 public class StreamingCipherInputStreamTest extends ATest {
 
     @Test
@@ -26,7 +29,7 @@ public class StreamingCipherInputStreamTest extends ATest {
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
             final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength._256.getBytes());
-            random.nextBytes(key);
+            //            random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(CipherEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
@@ -34,11 +37,6 @@ public class StreamingCipherInputStreamTest extends ATest {
         }
         final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength._256.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_GCM_NoPadding) {
-                //not working right now
-                continue;
-            }
-
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
             try {
                 testEncryptionAndDecryption(algorithm, key, iv, "1234567890", "0987654321");

@@ -7,7 +7,6 @@ import de.invesdwin.context.security.crypto.key.password.argon2.Argon2Type;
 import de.invesdwin.context.security.crypto.key.password.argon2.Argon2Version;
 import de.invesdwin.context.security.crypto.key.password.argon2.IArgon2PasswordHasher;
 import de.invesdwin.context.security.crypto.key.password.argon2.IArgon2PasswordHasherFactory;
-import de.invesdwin.context.security.crypto.key.password.argon2.jvm.Argon2PasswordHasher;
 import de.invesdwin.util.lang.Objects;
 import de.mkammerer.argon2.Argon2Advanced;
 import de.mkammerer.argon2.Argon2Factory;
@@ -15,12 +14,6 @@ import de.mkammerer.argon2.jna.Argon2Library;
 
 @Immutable
 public class NativeArgon2PasswordHasher implements IArgon2PasswordHasher {
-
-    public static final Argon2Type DEFAULT_TYPE = Argon2PasswordHasher.DEFAULT_TYPE;
-    public static final Argon2Version DEFAULT_VERSION = Argon2PasswordHasher.DEFAULT_VERSION;
-    public static final int DEFAULT_MEMORY = Argon2PasswordHasher.DEFAULT_MEMORY;
-    public static final int DEFAULT_ITERATIONS = Argon2PasswordHasher.DEFAULT_ITERATIONS;
-    public static final int DEFAULT_PARALLELISM = Argon2PasswordHasher.DEFAULT_PARALLELISM;
 
     public static final NativeArgon2PasswordHasher INSTANCE = new NativeArgon2PasswordHasher();
 
