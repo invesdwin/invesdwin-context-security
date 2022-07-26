@@ -124,24 +124,24 @@ public class JceCipher implements ICipher {
     }
 
     @Override
-    public void updateAAD(final byte aad) {
-        oneByteBuf[0] = aad;
+    public void updateAAD(final byte input) {
+        oneByteBuf[0] = input;
         cipher.updateAAD(oneByteBuf);
     }
 
     @Override
-    public void updateAAD(final byte[] aad) {
-        cipher.updateAAD(aad);
+    public void updateAAD(final byte[] input) {
+        cipher.updateAAD(input);
     }
 
     @Override
-    public void updateAAD(final byte[] aad, final int inputOffset, final int inputLen) {
-        cipher.updateAAD(aad, inputOffset, inputLen);
+    public void updateAAD(final byte[] input, final int inputOffset, final int inputLen) {
+        cipher.updateAAD(input, inputOffset, inputLen);
     }
 
     @Override
-    public void updateAAD(final java.nio.ByteBuffer aad) {
-        cipher.updateAAD(aad);
+    public void updateAAD(final java.nio.ByteBuffer input) {
+        cipher.updateAAD(input);
     }
 
     @Override

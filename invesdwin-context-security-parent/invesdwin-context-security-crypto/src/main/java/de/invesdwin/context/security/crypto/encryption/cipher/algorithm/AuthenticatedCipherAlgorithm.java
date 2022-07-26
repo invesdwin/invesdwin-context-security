@@ -10,24 +10,27 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
-import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.AuthenticatedCipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.authenticated.AuthenticatedCipher;
+import de.invesdwin.util.assertions.Assertions;
 
 @Immutable
 public class AuthenticatedCipherAlgorithm implements ICipherAlgorithm {
 
-    private final ICipherAlgorithm delegate;
+    private final ICipherAlgorithm cipherAlgorithm;
     private final IAuthenticationFactory authenticationFactory;
     private final CipherObjectPool cipherPool;
 
-    public AuthenticatedCipherAlgorithm(final ICipherAlgorithm delegate,
+    public AuthenticatedCipherAlgorithm(final ICipherAlgorithm cipherAlgorithm,
             final IAuthenticationFactory authenticationFactory) {
-        this.delegate = delegate;
+        Assertions.checkNotNull(cipherAlgorithm);
+        Assertions.checkNotNull(authenticationFactory);
+        this.cipherAlgorithm = cipherAlgorithm;
         this.authenticationFactory = authenticationFactory;
         this.cipherPool = new CipherObjectPool(this);
     }
 
-    public ICipherAlgorithm getDelegate() {
-        return delegate;
+    public ICipherAlgorithm getCipherAlgorithm() {
+        return cipherAlgorithm;
     }
 
     public IAuthenticationFactory getAuthenticationFactory() {
@@ -36,27 +39,27 @@ public class AuthenticatedCipherAlgorithm implements ICipherAlgorithm {
 
     @Override
     public ICipher newCipher() {
-        return new AuthenticatedCipher(delegate.newCipher(), authenticationFactory);
+        return new AuthenticatedCipher(cipherAlgorithm.newCipher(), authenticationFactory);
     }
 
     @Override
     public String getAlgorithm() {
-        return delegate.getAlgorithm() + "With" + authenticationFactory.getAlgorithm().getAlgorithm();
+        return cipherAlgorithm.getAlgorithm() + "With" + authenticationFactory.getAlgorithm().getAlgorithm();
     }
 
     @Override
     public int getBlockSize() {
-        return delegate.getBlockSize();
+        return cipherAlgorithm.getBlockSize();
     }
 
     @Override
     public int getIvSize() {
-        return delegate.getIvSize();
+        return cipherAlgorithm.getIvSize();
     }
 
     @Override
     public int getSignatureSize() {
-        return delegate.getSignatureSize() + authenticationFactory.getAlgorithm().getMacLength();
+        return cipherAlgorithm.getSignatureSize() + authenticationFactory.getAlgorithm().getMacLength();
     }
 
     @Override
@@ -66,22 +69,22 @@ public class AuthenticatedCipherAlgorithm implements ICipherAlgorithm {
 
     @Override
     public MutableIvParameterSpecObjectPool getIvParameterSpecPool() {
-        return delegate.getIvParameterSpecPool();
+        return cipherAlgorithm.getIvParameterSpecPool();
     }
 
     @Override
     public Key wrapKey(final byte[] key) {
-        return delegate.wrapKey(key);
+        return cipherAlgorithm.wrapKey(key);
     }
 
     @Override
     public AlgorithmParameterSpec wrapIv(final byte[] iv) {
-        return delegate.wrapIv(iv);
+        return cipherAlgorithm.wrapIv(iv);
     }
 
     @Override
     public AlgorithmParameterSpec wrapIv(final MutableIvParameterSpec iv) {
-        return delegate.wrapIv(iv);
+        return cipherAlgorithm.wrapIv(iv);
     }
 
 }

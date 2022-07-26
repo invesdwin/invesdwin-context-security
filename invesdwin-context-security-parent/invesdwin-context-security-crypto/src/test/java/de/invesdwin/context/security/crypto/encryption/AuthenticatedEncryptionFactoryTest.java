@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher;
+package de.invesdwin.context.security.crypto.encryption;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -8,8 +8,12 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
+import de.invesdwin.context.security.crypto.authentication.mac.MacAuthenticationFactory;
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherEncryptionFactory;
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherEncryptionFactoryTest;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.AesAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.AesKeyLength;
+import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.AuthenticatedCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherCountedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherPresharedIV;
@@ -31,7 +35,7 @@ import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 
 @NotThreadSafe
-public class CipherEncryptionFactoryTest extends ATest {
+public class AuthenticatedEncryptionFactoryTest extends ATest {
 
     @Test
     public void testEncryptionAndDecryption() {
@@ -53,14 +57,17 @@ public class CipherEncryptionFactoryTest extends ATest {
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize()));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
-                final CipherEncryptionFactory factory = new CipherEncryptionFactory(algorithm, key, iv);
+                final CipherEncryptionFactory cipherFactory = new CipherEncryptionFactory(algorithm, key, iv);
+                final MacAuthenticationFactory authenticationFactory = new MacAuthenticationFactory(derivedKeyProvider);
+                final AuthenticatedEncryptionFactory factory = new AuthenticatedEncryptionFactory(cipherFactory,
+                        authenticationFactory);
                 testEncryptionAndDecryption(factory, "1234567890");
                 testEncryptionAndDecryption(factory, "0987654321");
             }
         }
     }
 
-    private void testEncryptionAndDecryption(final CipherEncryptionFactory factory, final String payload) {
+    private void testEncryptionAndDecryption(final AuthenticatedEncryptionFactory factory, final String payload) {
         final String srcStr = payload;
         final IByteBuffer src = ByteBuffers.wrap(srcStr.getBytes());
         final IByteBuffer encrypted = ByteBuffers.allocateExpandable();
@@ -86,16 +93,21 @@ public class CipherEncryptionFactoryTest extends ATest {
         final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength._256.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
+            final CipherEncryptionFactory cipherFactory = new CipherEncryptionFactory(algorithm, key,
+                    new CipherPresharedIV(algorithm, iv));
+            final MacAuthenticationFactory authenticationFactory = new MacAuthenticationFactory(derivedKeyProvider);
+            final AuthenticatedEncryptionFactory factory = new AuthenticatedEncryptionFactory(cipherFactory,
+                    authenticationFactory);
             try {
-                testCipherStream(algorithm, key, iv, "1234567890", "0987654321");
-                testCipherStream(algorithm, key, iv, "0987654321", "1234567890");
+                testCipherStream(factory.getAlgorithm(), key, iv, "1234567890", "0987654321");
+                testCipherStream(factory.getAlgorithm(), key, iv, "0987654321", "1234567890");
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    private void testCipherStream(final AesAlgorithm algorithm, final byte[] key, final byte[] iv,
+    private void testCipherStream(final AuthenticatedCipherAlgorithm algorithm, final byte[] key, final byte[] iv,
             final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
         final CipherOutputStream encryptingStream = new CipherOutputStream(algorithm, encryptedOutputStream, key, iv);
@@ -146,17 +158,22 @@ public class CipherEncryptionFactoryTest extends ATest {
         final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength._256.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
+            final CipherEncryptionFactory cipherFactory = new CipherEncryptionFactory(algorithm, key,
+                    new CipherPresharedIV(algorithm, iv));
+            final MacAuthenticationFactory authenticationFactory = new MacAuthenticationFactory(derivedKeyProvider);
+            final AuthenticatedEncryptionFactory factory = new AuthenticatedEncryptionFactory(cipherFactory,
+                    authenticationFactory);
             try {
-                testStreamingCipherStream(algorithm, key, iv, "1234567890", "0987654321");
-                testStreamingCipherStream(algorithm, key, iv, "0987654321", "1234567890");
+                testStreamingCipherStream(factory.getAlgorithm(), key, iv, "1234567890", "0987654321");
+                testStreamingCipherStream(factory.getAlgorithm(), key, iv, "0987654321", "1234567890");
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    private void testStreamingCipherStream(final AesAlgorithm algorithm, final byte[] key, final byte[] iv,
-            final String... payloads) throws IOException {
+    private void testStreamingCipherStream(final AuthenticatedCipherAlgorithm algorithm, final byte[] key,
+            final byte[] iv, final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
         final StreamingCipherOutputStream encryptingStream = new StreamingCipherOutputStream(algorithm,
                 encryptedOutputStream, key, iv);

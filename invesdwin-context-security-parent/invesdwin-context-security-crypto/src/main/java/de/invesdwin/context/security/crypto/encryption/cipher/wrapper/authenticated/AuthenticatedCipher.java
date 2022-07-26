@@ -1,53 +1,75 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.wrapper;
+package de.invesdwin.context.security.crypto.encryption.cipher.wrapper.authenticated;
 
 import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import javax.crypto.Cipher;
 
+import de.invesdwin.context.security.crypto.authentication.IAuthenticationFactory;
+import de.invesdwin.context.security.crypto.authentication.mac.IMac;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.ICipherFactory;
+import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
-/**
- * Does not reuse cipher instances (e.g. GCM will refuse to encrypt twice in a row with the same IV)
- * 
- * This will cause a significant drop in performance because cipher instances can not be reused.
- */
 @NotThreadSafe
-public class RefreshingDelegateCipher implements ICipher {
+public class AuthenticatedCipher implements ICipher {
 
-    private final ICipherAlgorithm algorithm;
-    private final ICipherFactory factory;
+    private final ICipher unauthenticatedCipher;
+    private final IMac mac;
+    private final EncryptingAuthenticatedCipher encryptingDelegate;
+    private final DecryptingAuthenticatedCipher decryptingDelegate;
+    private final IAuthenticationFactory authenticationFactory;
     private ICipher delegate;
 
-    public RefreshingDelegateCipher(final ICipherAlgorithm algorithm, final ICipherFactory factory) {
-        this.algorithm = algorithm;
-        this.factory = factory;
+    public AuthenticatedCipher(final ICipher unauthenticatedCipher,
+            final IAuthenticationFactory authenticationFactory) {
+        this.unauthenticatedCipher = unauthenticatedCipher;
+        this.mac = authenticationFactory.getAlgorithm().newMac();
+        this.encryptingDelegate = new EncryptingAuthenticatedCipher(unauthenticatedCipher, authenticationFactory, mac);
+        this.decryptingDelegate = new DecryptingAuthenticatedCipher(unauthenticatedCipher, authenticationFactory, mac);
+        this.authenticationFactory = authenticationFactory;
+    }
+
+    public ICipher getUnauthenticatedCipher() {
+        return unauthenticatedCipher;
+    }
+
+    public IMac getMac() {
+        return mac;
+    }
+
+    public IAuthenticationFactory getAuthenticationFactory() {
+        return authenticationFactory;
     }
 
     @Override
     public int getBlockSize() {
-        return algorithm.getBlockSize();
+        return unauthenticatedCipher.getBlockSize();
     }
 
     @Override
     public int getSignatureSize() {
-        return algorithm.getSignatureSize();
+        return unauthenticatedCipher.getSignatureSize() + mac.getMacLength();
     }
 
     @Override
     public String getAlgorithm() {
-        return algorithm.getAlgorithm();
+        return unauthenticatedCipher.getAlgorithm() + "With" + mac.getAlgorithm();
     }
 
     @Override
     public void init(final int mode, final Key key, final AlgorithmParameterSpec params) {
-        if (delegate != null) {
-            delegate.close();
+        switch (mode) {
+        case Cipher.ENCRYPT_MODE:
+            delegate = encryptingDelegate;
+            break;
+        case Cipher.DECRYPT_MODE:
+            delegate = decryptingDelegate;
+            break;
+        default:
+            throw UnknownArgumentException.newInstance(int.class, mode);
         }
-        delegate = factory.newCipher();
         delegate.init(mode, key, params);
     }
 
@@ -84,7 +106,10 @@ public class RefreshingDelegateCipher implements ICipher {
 
     @Override
     public int doFinal(final byte[] input, final int inputOffset, final int inputLen, final byte[] output) {
-        return delegate.doFinal(input, inputOffset, inputLen, output);
+        int written = delegate.doFinal(input, inputOffset, inputLen, output);
+        mac.update(input, inputOffset, inputLen);
+        written += mac.doFinal(output, written);
+        return written;
     }
 
     @Override
@@ -130,10 +155,10 @@ public class RefreshingDelegateCipher implements ICipher {
 
     @Override
     public void close() {
-        if (delegate != null) {
-            delegate.close();
-            delegate = null;
-        }
+        unauthenticatedCipher.close();
+        mac.close();
+        encryptingDelegate.reset();
+        decryptingDelegate.reset();
     }
 
 }

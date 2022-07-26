@@ -79,6 +79,13 @@ public interface IMac extends Closeable {
 
     boolean verify(IByteBuffer input, IByteBuffer signature);
 
+    default void verifyThrow(final IByteBuffer signedInput) {
+        final int signatureIndex = signedInput.remaining(getMacLength());
+        final IByteBuffer input = signedInput.newSlice(0, signatureIndex);
+        final IByteBuffer signature = signedInput.sliceFrom(signatureIndex);
+        verifyThrow(input, signature);
+    }
+
     default void verifyThrow(final IByteBuffer input, final IByteBuffer signature) {
         if (!verify(input, signature)) {
             throw new IllegalArgumentException("Signature mismatch");

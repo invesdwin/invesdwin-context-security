@@ -9,8 +9,7 @@ import javax.annotation.concurrent.Immutable;
 import de.invesdwin.context.security.crypto.authentication.IAuthenticationFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.AuthenticatedCipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.AuthenticatedCipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.authenticated.AuthenticatedCipher;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -25,11 +24,11 @@ public class AuthenticatedEncryptionFactory implements IEncryptionFactory {
             final IAuthenticationFactory authenticationFactory) {
         this.encryptionFactory = encryptionFactory;
         this.authenticationFactory = authenticationFactory;
-        this.algorithm = new AuthenticatedCipherAlgorithm(getAlgorithm(), authenticationFactory);
+        this.algorithm = new AuthenticatedCipherAlgorithm(encryptionFactory.getAlgorithm(), authenticationFactory);
     }
 
     @Override
-    public ICipherAlgorithm getAlgorithm() {
+    public AuthenticatedCipherAlgorithm getAlgorithm() {
         return algorithm;
     }
 
@@ -72,7 +71,7 @@ public class AuthenticatedEncryptionFactory implements IEncryptionFactory {
     @Override
     public int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
         final AuthenticatedCipher cCipher = (AuthenticatedCipher) cipher;
-        final int encryptedLength = encryptionFactory.encrypt(src, dest, cCipher.getDelegate());
+        final int encryptedLength = encryptionFactory.encrypt(src, dest, cCipher.getUnauthenticatedCipher());
         final int signatureLength = authenticationFactory.putSignature(dest, encryptedLength, cCipher.getMac());
         return encryptedLength + signatureLength;
     }
@@ -88,7 +87,7 @@ public class AuthenticatedEncryptionFactory implements IEncryptionFactory {
     public int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
         final AuthenticatedCipher cCipher = (AuthenticatedCipher) cipher;
         final IByteBuffer payload = authenticationFactory.verifyAndSlice(src, cCipher.getMac());
-        final int decryptedLength = encryptionFactory.decrypt(payload, dest, cCipher.getDelegate());
+        final int decryptedLength = encryptionFactory.decrypt(payload, dest, cCipher.getUnauthenticatedCipher());
         return decryptedLength;
     }
 

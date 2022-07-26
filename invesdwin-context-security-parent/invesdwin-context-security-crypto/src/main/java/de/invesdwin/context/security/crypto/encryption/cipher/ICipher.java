@@ -63,19 +63,19 @@ public interface ICipher extends Closeable {
 
     byte[] doFinal();
 
-    void updateAAD(byte aad);
+    void updateAAD(byte input);
 
-    void updateAAD(byte[] aad);
+    void updateAAD(byte[] input);
 
-    void updateAAD(byte[] aad, int inputOffset, int inputLen);
+    void updateAAD(byte[] input, int inputOffset, int inputLen);
 
-    void updateAAD(java.nio.ByteBuffer aad);
+    void updateAAD(java.nio.ByteBuffer input);
 
-    default void updateAAD(final IByteBuffer aad) {
-        final java.nio.ByteBuffer aadNio = aad.asNioByteBuffer();
-        final int positionBefore = aadNio.position();
-        updateAAD(aadNio);
-        ByteBuffers.position(aadNio, positionBefore);
+    default void updateAAD(final IByteBuffer input) {
+        final java.nio.ByteBuffer inputNio = input.asNioByteBuffer();
+        final int positionBefore = inputNio.position();
+        updateAAD(inputNio);
+        ByteBuffers.position(inputNio, positionBefore);
     }
 
     @Override

@@ -22,7 +22,6 @@ public class MacAuthenticationFactory implements IAuthenticationFactory {
 
     private final IMacAlgorithm algorithm;
     private final Key key;
-    private byte[] derivedIV;
 
     public MacAuthenticationFactory(final byte[] key) {
         this(IMacAlgorithm.DEFAULT, key);
