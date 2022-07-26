@@ -13,9 +13,10 @@ import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
- * WARNING: AuthenticatedCipher update calls always return a written length of 0 despite writing to the given output.
- * This makes using the cipher directly unsuitable. It is only useful inside AuthenticatedEncryptionFactory (with its
- * own drawbacks).
+ * WARNING: AuthenticatedCipher update calls always return a written length of 0 despite writing to the given output
+ * (same as com.sun.crypto.provider.GaloisCounterMode.GCMDecrypt.doUpdate(byte[], int, int, byte[], int)). This makes
+ * using the cipher directly unsuitable. It is only useful inside AuthenticatedEncryptionFactory (with its own
+ * drawbacks).
  */
 @NotThreadSafe
 public class AuthenticatedCipher implements ICipher {

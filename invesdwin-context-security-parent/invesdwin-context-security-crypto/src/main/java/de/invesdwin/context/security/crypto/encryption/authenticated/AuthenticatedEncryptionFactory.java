@@ -22,9 +22,9 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
  * 
  * Though for normal encrypt/decrypt calls this class is fine.
  * 
- * Also the AuthenticatedCipher update calls always return a written length of 0 despite writing to the given output.
- * This makes using the cipher directly unsuitable (except for java.nio.ByteBuffer which stores the output position
- * internally).
+ * Also the AuthenticatedCipher update calls always return a written length of 0 despite writing to the given output
+ * (same as com.sun.crypto.provider.GaloisCounterMode.GCMDecrypt.doUpdate(byte[], int, int, byte[], int)). This makes
+ * using the cipher directly unsuitable (except for java.nio.ByteBuffer which stores the output position internally).
  */
 @Immutable
 public class AuthenticatedEncryptionFactory implements IEncryptionFactory {
