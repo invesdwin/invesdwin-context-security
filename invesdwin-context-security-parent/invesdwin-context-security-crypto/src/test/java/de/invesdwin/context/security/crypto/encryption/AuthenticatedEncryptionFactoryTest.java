@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import de.invesdwin.context.security.crypto.authentication.mac.MacAuthenticationFactory;
+import de.invesdwin.context.security.crypto.encryption.authenticated.AuthenticatedEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherEncryptionFactoryTest;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.AesAlgorithm;

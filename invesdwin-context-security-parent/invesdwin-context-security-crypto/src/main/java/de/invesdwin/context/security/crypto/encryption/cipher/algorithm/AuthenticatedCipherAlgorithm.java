@@ -6,11 +6,11 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.authentication.IAuthenticationFactory;
+import de.invesdwin.context.security.crypto.encryption.authenticated.AuthenticatedCipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
-import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.authenticated.AuthenticatedCipher;
 import de.invesdwin.util.assertions.Assertions;
 
 @Immutable

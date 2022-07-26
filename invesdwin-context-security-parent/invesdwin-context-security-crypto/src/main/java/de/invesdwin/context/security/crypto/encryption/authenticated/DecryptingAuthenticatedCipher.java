@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.wrapper.authenticated;
+package de.invesdwin.context.security.crypto.encryption.authenticated;
 
 import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;

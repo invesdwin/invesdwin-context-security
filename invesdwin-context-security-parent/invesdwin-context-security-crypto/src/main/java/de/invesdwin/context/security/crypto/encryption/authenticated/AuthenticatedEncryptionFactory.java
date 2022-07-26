@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption;
+package de.invesdwin.context.security.crypto.encryption.authenticated;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,9 +7,9 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.authentication.IAuthenticationFactory;
+import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.AuthenticatedCipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.authenticated.AuthenticatedCipher;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
