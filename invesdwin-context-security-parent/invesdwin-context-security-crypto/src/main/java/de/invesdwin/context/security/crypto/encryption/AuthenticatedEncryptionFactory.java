@@ -13,6 +13,17 @@ import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.authentica
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
+/**
+ * WARNING: using this is less efficient for streams than doing the authentication from the outside. Thus is because
+ * decryption has to buffer the input for the authentication before actually starting to decrypt
+ * (https://moxie.org/2011/12/13/the-cryptographic-doom-principle.html). This copy can be prevented when using the
+ * approach of: AuthenticatedEncryptionSynchronousReader & AuthenticatedEncryptionSynchronousReader
+ * 
+ * Though for normal encrypt/decrypt calls this class is fine.
+ * 
+ * Also the AuthenticatedCipher update calls always return a written length of 0 despite writing to the given output.
+ * This makes using the cipher directly unsuitable.
+ */
 @Immutable
 public class AuthenticatedEncryptionFactory implements IEncryptionFactory {
 
