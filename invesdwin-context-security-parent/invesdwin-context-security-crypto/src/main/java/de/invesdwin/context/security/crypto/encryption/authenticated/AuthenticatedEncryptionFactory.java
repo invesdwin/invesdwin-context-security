@@ -17,7 +17,8 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
  * WARNING: using this is less efficient for streams than doing the authentication from the outside. Thus is because
  * decryption has to buffer the input for the authentication before actually starting to decrypt
  * (https://moxie.org/2011/12/13/the-cryptographic-doom-principle.html). This copy can be prevented when using the
- * approach of: AuthenticatedEncryptionSynchronousReader & AuthenticatedEncryptionSynchronousReader
+ * approach of: AuthenticatedEncryptionSynchronousReader & AuthenticatedEncryptionSynchronousReader from
+ * invesdwin-context-integration-channel
  * 
  * Though for normal encrypt/decrypt calls this class is fine.
  * 
