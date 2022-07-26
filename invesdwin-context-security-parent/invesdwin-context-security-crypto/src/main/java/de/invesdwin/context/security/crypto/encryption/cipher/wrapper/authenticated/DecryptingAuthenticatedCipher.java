@@ -200,6 +200,7 @@ public class DecryptingAuthenticatedCipher implements ICipher {
         inputBuffer.putBytes(position, input, input.position(), length);
         inputBufferPosition += length;
         inputBufferTasks.add(() -> drainAAD(position, length));
+        ByteBuffers.position(input, input.position() + length);
     }
 
     @Override
@@ -225,6 +226,7 @@ public class DecryptingAuthenticatedCipher implements ICipher {
         inputBuffer.putBytes(position, input, input.position(), length);
         inputBufferPosition += length;
         inputBufferTasks.add(() -> drainOutput(position, length));
+        ByteBuffers.position(input, input.position() + length);
     }
 
     private void update(final IByteBuffer input) {

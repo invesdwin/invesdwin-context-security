@@ -69,21 +69,27 @@ public class EncryptingAuthenticatedCipher implements ICipher {
         final int positionBefore = outBuffer.position();
         final int length = delegate.update(inBuffer, outBuffer);
         mac.update(ByteBuffers.slice(outBuffer, positionBefore, length));
-        return length;
+        /*
+         * we need to force StreamingCipherOutputBuffer to call doFinal in the same intervals as
+         * StreamingCipherInputBuffer, thus use the settings of DecryptingAuthenticatedCipher. Smaller chunks will make
+         * sure that the buffering in DecryptingAuthenticatedCipher does not grow too large, though it will cause more
+         * network overhead.
+         */
+        return 0;
     }
 
     @Override
     public int update(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
         final int length = delegate.update(inBuffer, outBuffer);
         mac.update(outBuffer.sliceTo(length));
-        return length;
+        return 0;
     }
 
     @Override
     public int update(final byte[] input, final int inputOffset, final int inputLen, final byte[] output) {
         final int length = delegate.update(input, inputOffset, inputLen, output);
         mac.update(output, 0, length);
-        return length;
+        return 0;
     }
 
     @Override
@@ -91,7 +97,7 @@ public class EncryptingAuthenticatedCipher implements ICipher {
             final int outputOffset) {
         final int length = delegate.update(input, inputOffset, inputLen, output, outputOffset);
         mac.update(output, outputOffset, length);
-        return length;
+        return 0;
     }
 
     @Override
