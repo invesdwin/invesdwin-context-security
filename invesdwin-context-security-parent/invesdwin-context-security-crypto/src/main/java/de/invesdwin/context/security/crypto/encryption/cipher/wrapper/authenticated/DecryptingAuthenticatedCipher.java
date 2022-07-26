@@ -14,6 +14,7 @@ import de.invesdwin.util.collections.iterable.buffer.BufferingIterator;
 import de.invesdwin.util.collections.iterable.buffer.IBufferingIterator;
 import de.invesdwin.util.math.Integers;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
+import de.invesdwin.util.streams.buffer.bytes.EmptyByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
@@ -155,6 +156,8 @@ public class DecryptingAuthenticatedCipher implements ICipher {
         } catch (final NoSuchElementException e) {
             //end reached
         }
+        final int written = delegate.doFinal(EmptyByteBuffer.INSTANCE, outputBuffer.sliceFrom(outputBufferPosition));
+        outputBufferPosition += written;
         return outputBuffer.sliceTo(outputBufferPosition);
     }
 
