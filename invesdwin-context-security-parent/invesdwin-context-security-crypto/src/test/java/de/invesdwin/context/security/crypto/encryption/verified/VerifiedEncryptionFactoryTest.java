@@ -17,10 +17,10 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.Ciphe
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherPresharedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherRandomIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.CipherInputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.CipherOutputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingCipherInputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingCipherOutputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherOutputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.encryption.verified.algorithm.VerifiedSymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
@@ -111,10 +111,10 @@ public class VerifiedEncryptionFactoryTest extends ATest {
     private void testCipherStream(final VerifiedSymmetricCipherAlgorithm algorithm, final byte[] key, final byte[] iv,
             final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
-        final CipherOutputStream encryptingStream = new CipherOutputStream(algorithm, encryptedOutputStream, key, iv);
+        final SymmetricCipherOutputStream encryptingStream = new SymmetricCipherOutputStream(algorithm, encryptedOutputStream, key, iv);
 
         final FastByteArrayInputStream encryptedInputStream = new FastByteArrayInputStream(Bytes.EMPTY_ARRAY);
-        final CipherInputStream decryptingStream = new CipherInputStream(algorithm, encryptedInputStream, key, iv);
+        final SymmetricCipherInputStream decryptingStream = new SymmetricCipherInputStream(algorithm, encryptedInputStream, key, iv);
 
         final FastByteArrayOutputStream payloadsOutputStream = new FastByteArrayOutputStream();
 
@@ -177,11 +177,11 @@ public class VerifiedEncryptionFactoryTest extends ATest {
     private void testStreamingCipherStream(final VerifiedSymmetricCipherAlgorithm algorithm, final byte[] key,
             final byte[] iv, final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
-        final StreamingCipherOutputStream encryptingStream = new StreamingCipherOutputStream(algorithm,
+        final StreamingSymmetricCipherOutputStream encryptingStream = new StreamingSymmetricCipherOutputStream(algorithm,
                 encryptedOutputStream, key, iv);
 
         final FastByteArrayInputStream encryptedInputStream = new FastByteArrayInputStream(Bytes.EMPTY_ARRAY);
-        final StreamingCipherInputStream decryptingStream = new StreamingCipherInputStream(algorithm,
+        final StreamingSymmetricCipherInputStream decryptingStream = new StreamingSymmetricCipherInputStream(algorithm,
                 encryptedInputStream, key, iv);
 
         for (final String payload : payloads) {

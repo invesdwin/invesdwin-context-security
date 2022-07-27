@@ -30,7 +30,7 @@ import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
  * Adapted from: org.apache.commons.crypto.stream.CryptoInputStream
  */
 @NotThreadSafe
-public class CipherInputStream extends InputStream implements ReadableByteChannel {
+public class SymmetricCipherInputStream extends InputStream implements ReadableByteChannel {
 
     /**
      * The configuration key of the buffer size for stream.
@@ -80,32 +80,32 @@ public class CipherInputStream extends InputStream implements ReadableByteChanne
      */
     private boolean finalDone = false;
 
-    public CipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream, final byte[] key,
+    public SymmetricCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream, final byte[] key,
             final byte[] iv) throws IOException {
-        this(algorithm, inputStream, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv);
+        this(algorithm, inputStream, algorithm.newCipher(), SymmetricCipherInputStream.getDefaultBufferSize(), key, iv);
     }
 
-    public CipherInputStream(final ISymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
+    public SymmetricCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
             final byte[] key, final byte[] iv) throws IOException {
-        this(algorithm, channel, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv);
+        this(algorithm, channel, algorithm.newCipher(), SymmetricCipherInputStream.getDefaultBufferSize(), key, iv);
     }
 
-    protected CipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream,
+    protected SymmetricCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, new StreamInput(inputStream, bufferSize), cipher, bufferSize, key, iv);
     }
 
-    protected CipherInputStream(final ISymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
+    protected SymmetricCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, new ChannelInput(channel), cipher, bufferSize, key, iv);
     }
 
-    protected CipherInputStream(final ISymmetricCipherAlgorithm algorithm, final Input input, final ICipher cipher,
+    protected SymmetricCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final Input input, final ICipher cipher,
             final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this.algorithm = algorithm;
         this.input = input;
         this.cipher = cipher;
-        this.bufferSize = CipherInputStream.checkBufferSize(cipher, bufferSize);
+        this.bufferSize = SymmetricCipherInputStream.checkBufferSize(cipher, bufferSize);
 
         this.key = algorithm.wrapKey(key);
         this.params = algorithm.wrapParam(iv);
@@ -481,8 +481,8 @@ public class CipherInputStream extends InputStream implements ReadableByteChanne
 
     /** Forcibly free the direct buffers. */
     protected void freeBuffers() {
-        CipherInputStream.freeDirectBuffer(inBuffer);
-        CipherInputStream.freeDirectBuffer(outBuffer);
+        SymmetricCipherInputStream.freeDirectBuffer(inBuffer);
+        SymmetricCipherInputStream.freeDirectBuffer(outBuffer);
     }
 
     /**
@@ -504,9 +504,9 @@ public class CipherInputStream extends InputStream implements ReadableByteChanne
      */
     public static int getDefaultBufferSize() {
         final String bufferSizeStr = SystemProperties.SYSTEM_PROPERTIES
-                .getProperty(CipherInputStream.STREAM_BUFFER_SIZE_KEY);
+                .getProperty(SymmetricCipherInputStream.STREAM_BUFFER_SIZE_KEY);
         if (bufferSizeStr == null || bufferSizeStr.isEmpty()) {
-            return CipherInputStream.STREAM_BUFFER_SIZE_DEFAULT;
+            return SymmetricCipherInputStream.STREAM_BUFFER_SIZE_DEFAULT;
         }
         return Integer.parseInt(bufferSizeStr);
     }
@@ -521,8 +521,8 @@ public class CipherInputStream extends InputStream implements ReadableByteChanne
      * @return the remaining buffer size.
      */
     public static int checkBufferSize(final ICipher cipher, final int bufferSize) {
-        Utils.checkArgument(bufferSize >= CipherInputStream.MIN_BUFFER_SIZE,
-                "Minimum value of buffer size is " + CipherInputStream.MIN_BUFFER_SIZE + ".");
+        Utils.checkArgument(bufferSize >= SymmetricCipherInputStream.MIN_BUFFER_SIZE,
+                "Minimum value of buffer size is " + SymmetricCipherInputStream.MIN_BUFFER_SIZE + ".");
         return bufferSize - bufferSize % cipher.getBlockSize();
     }
 }

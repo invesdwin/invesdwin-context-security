@@ -18,7 +18,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetr
 import de.invesdwin.util.assertions.Assertions;
 
 /**
- * {@link CipherOutputStream} encrypts data and writes to the under layer output. It supports any mode of operations
+ * {@link SymmetricCipherOutputStream} encrypts data and writes to the under layer output. It supports any mode of operations
  * such as AES CBC/CTR/GCM mode in concept. It is not thread-safe.
  * <p>
  * This class should only be used with blocking sinks. Using this class to wrap a non-blocking sink may lead to high CPU
@@ -28,7 +28,7 @@ import de.invesdwin.util.assertions.Assertions;
  * Adapted from: org.apache.commons.crypto.stream.CryptoOutputStream
  */
 @NotThreadSafe
-public class CipherOutputStream extends OutputStream implements WritableByteChannel {
+public class SymmetricCipherOutputStream extends OutputStream implements WritableByteChannel {
 
     protected final ISymmetricCipherAlgorithm algorithm;
     /** the ICipher instance */
@@ -60,31 +60,31 @@ public class CipherOutputStream extends OutputStream implements WritableByteChan
     /** Flag to mark whether the output stream is closed. */
     private boolean closed;
 
-    public CipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final OutputStream outputStream,
+    public SymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final OutputStream outputStream,
             final byte[] key, final byte[] iv) throws IOException {
-        this(algorithm, outputStream, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv);
+        this(algorithm, outputStream, algorithm.newCipher(), SymmetricCipherInputStream.getDefaultBufferSize(), key, iv);
     }
 
-    public CipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final WritableByteChannel out,
+    public SymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final WritableByteChannel out,
             final byte[] key, final byte[] iv) throws IOException {
-        this(algorithm, out, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv);
+        this(algorithm, out, algorithm.newCipher(), SymmetricCipherInputStream.getDefaultBufferSize(), key, iv);
     }
 
-    protected CipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final OutputStream outputStream,
+    protected SymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final OutputStream outputStream,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, new StreamOutput(outputStream, bufferSize), cipher, bufferSize, key, iv);
     }
 
-    protected CipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final WritableByteChannel channel,
+    protected SymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final WritableByteChannel channel,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, new ChannelOutput(channel), cipher, bufferSize, key, iv);
     }
 
-    protected CipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final Output output, final ICipher cipher,
+    protected SymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final Output output, final ICipher cipher,
             final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this.algorithm = algorithm;
         this.output = output;
-        this.bufferSize = CipherInputStream.checkBufferSize(cipher, bufferSize);
+        this.bufferSize = SymmetricCipherInputStream.checkBufferSize(cipher, bufferSize);
         this.cipher = cipher;
 
         this.key = algorithm.wrapKey(key);
@@ -315,8 +315,8 @@ public class CipherOutputStream extends OutputStream implements WritableByteChan
 
     /** Forcibly free the direct buffers. */
     protected void freeBuffers() {
-        CipherInputStream.freeDirectBuffer(inBuffer);
-        CipherInputStream.freeDirectBuffer(outBuffer);
+        SymmetricCipherInputStream.freeDirectBuffer(inBuffer);
+        SymmetricCipherInputStream.freeDirectBuffer(outBuffer);
     }
 
     /**
