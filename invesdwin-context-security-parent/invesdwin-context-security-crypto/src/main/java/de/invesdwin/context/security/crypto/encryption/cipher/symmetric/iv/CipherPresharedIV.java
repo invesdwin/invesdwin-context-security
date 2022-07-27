@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.iv;
+package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -6,8 +6,8 @@ import java.io.OutputStream;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.util.lang.Closeables;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -19,10 +19,10 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @Immutable
 public class CipherPresharedIV implements ICipherIV {
 
-    private final ICipherAlgorithm algorithm;
+    private final ISymmetricCipherAlgorithm algorithm;
     private final MutableIvParameterSpec presharedIV;
 
-    public CipherPresharedIV(final ICipherAlgorithm algorithm, final byte[] presharedIV) {
+    public CipherPresharedIV(final ISymmetricCipherAlgorithm algorithm, final byte[] presharedIV) {
         this.algorithm = algorithm;
         this.presharedIV = new MutableIvParameterSpec(presharedIV);
         assert presharedIV.length == algorithm.getIvSize() : "iv.length[" + presharedIV.length
@@ -30,7 +30,7 @@ public class CipherPresharedIV implements ICipherIV {
     }
 
     @Override
-    public ICipherAlgorithm getAlgorithm() {
+    public ISymmetricCipherAlgorithm getAlgorithm() {
         return algorithm;
     }
 

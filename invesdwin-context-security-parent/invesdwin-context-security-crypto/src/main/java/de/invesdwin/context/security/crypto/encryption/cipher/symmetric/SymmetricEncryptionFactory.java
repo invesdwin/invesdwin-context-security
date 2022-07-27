@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher;
+package de.invesdwin.context.security.crypto.encryption.cipher.symmetric;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,11 +10,12 @@ import javax.crypto.Cipher;
 
 import de.invesdwin.context.security.crypto.encryption.EncryptionDelegateSerde;
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.aes.AesKeyLength;
-import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherDerivedIV;
-import de.invesdwin.context.security.crypto.encryption.cipher.iv.ICipherIV;
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.ALazyDelegateInputStream;
@@ -34,26 +35,28 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @Immutable
 public class SymmetricEncryptionFactory implements IEncryptionFactory {
 
-    private final ICipherAlgorithm algorithm;
+    private final ISymmetricCipherAlgorithm algorithm;
     private final byte[] key;
     private final Key keyWrapped;
     private final ICipherIV cipherIV;
 
     public SymmetricEncryptionFactory(final byte[] derivedKey, final byte[] derivedIV) {
-        this(ICipherAlgorithm.DEFAULT_SYMMETRIC, derivedKey,
-                new CipherDerivedIV(ICipherAlgorithm.DEFAULT_SYMMETRIC, derivedIV));
+        this(ISymmetricCipherAlgorithm.DEFAULT, derivedKey,
+                new CipherDerivedIV(ISymmetricCipherAlgorithm.DEFAULT, derivedIV));
     }
 
     public SymmetricEncryptionFactory(final IDerivedKeyProvider derivedKeyProvider) {
-        this(ICipherAlgorithm.DEFAULT_SYMMETRIC, derivedKeyProvider);
+        this(ISymmetricCipherAlgorithm.DEFAULT, derivedKeyProvider);
     }
 
-    public SymmetricEncryptionFactory(final ICipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
+    public SymmetricEncryptionFactory(final ISymmetricCipherAlgorithm algorithm,
+            final IDerivedKeyProvider derivedKeyProvider) {
         this(algorithm, derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes()),
                 new CipherDerivedIV(algorithm, derivedKeyProvider));
     }
 
-    public SymmetricEncryptionFactory(final ICipherAlgorithm algorithm, final byte[] key, final ICipherIV cipherIV) {
+    public SymmetricEncryptionFactory(final ISymmetricCipherAlgorithm algorithm, final byte[] key,
+            final ICipherIV cipherIV) {
         this.algorithm = algorithm;
         this.key = key;
         this.keyWrapped = algorithm.wrapKey(key);

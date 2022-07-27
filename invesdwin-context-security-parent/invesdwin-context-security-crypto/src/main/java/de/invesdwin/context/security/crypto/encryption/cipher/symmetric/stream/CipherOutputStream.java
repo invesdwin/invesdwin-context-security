@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.stream;
+package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -14,7 +14,7 @@ import org.apache.commons.crypto.stream.output.Output;
 import org.apache.commons.crypto.stream.output.StreamOutput;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.util.assertions.Assertions;
 
 /**
@@ -30,7 +30,7 @@ import de.invesdwin.util.assertions.Assertions;
 @NotThreadSafe
 public class CipherOutputStream extends OutputStream implements WritableByteChannel {
 
-    protected final ICipherAlgorithm algorithm;
+    protected final ISymmetricCipherAlgorithm algorithm;
     /** the ICipher instance */
     protected final ICipher cipher;
     /** The output. */
@@ -60,27 +60,27 @@ public class CipherOutputStream extends OutputStream implements WritableByteChan
     /** Flag to mark whether the output stream is closed. */
     private boolean closed;
 
-    public CipherOutputStream(final ICipherAlgorithm algorithm, final OutputStream outputStream, final byte[] key,
-            final byte[] iv) throws IOException {
+    public CipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final OutputStream outputStream,
+            final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, outputStream, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv);
     }
 
-    public CipherOutputStream(final ICipherAlgorithm algorithm, final WritableByteChannel out, final byte[] key,
-            final byte[] iv) throws IOException {
+    public CipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final WritableByteChannel out,
+            final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, out, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv);
     }
 
-    protected CipherOutputStream(final ICipherAlgorithm algorithm, final OutputStream outputStream,
+    protected CipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final OutputStream outputStream,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, new StreamOutput(outputStream, bufferSize), cipher, bufferSize, key, iv);
     }
 
-    protected CipherOutputStream(final ICipherAlgorithm algorithm, final WritableByteChannel channel,
+    protected CipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final WritableByteChannel channel,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, new ChannelOutput(channel), cipher, bufferSize, key, iv);
     }
 
-    protected CipherOutputStream(final ICipherAlgorithm algorithm, final Output output, final ICipher cipher,
+    protected CipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final Output output, final ICipher cipher,
             final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this.algorithm = algorithm;
         this.output = output;
@@ -91,8 +91,7 @@ public class CipherOutputStream extends OutputStream implements WritableByteChan
         this.params = algorithm.wrapParam(iv);
 
         inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
-        outBuffer = java.nio.ByteBuffer
-                .allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
+        outBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
 
         initCipher();
     }

@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher;
+package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,8 +12,9 @@ import javax.crypto.Cipher;
 
 import de.invesdwin.context.security.crypto.encryption.EncryptionDelegateSerde;
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.rsa.RsaKeyLength;
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeyLength;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.marshallers.serde.ISerde;
@@ -24,33 +25,34 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @Immutable
 public class AsymmetricEncryptionFactory implements IEncryptionFactory {
 
-    private final ICipherAlgorithm algorithm;
+    private final IAsymmetricCipherAlgorithm algorithm;
     private final PublicKey encryptionKey;
     private final PrivateKey decryptionKey;
 
     public AsymmetricEncryptionFactory(final byte[] publicKey, final byte[] privateKey) {
-        this(ICipherAlgorithm.DEFAULT_ASYMMETRIC, publicKey, privateKey);
+        this(IAsymmetricCipherAlgorithm.DEFAULT, publicKey, privateKey);
     }
 
-    public AsymmetricEncryptionFactory(final ICipherAlgorithm algorithm, final byte[] publicKey,
+    public AsymmetricEncryptionFactory(final IAsymmetricCipherAlgorithm algorithm, final byte[] publicKey,
             final byte[] privateKey) {
         this(algorithm, algorithm.wrapPublicKey(publicKey), algorithm.wrapPrivateKey(privateKey));
     }
 
     public AsymmetricEncryptionFactory(final IDerivedKeyProvider derivedKeyProvider) {
-        this(ICipherAlgorithm.DEFAULT_ASYMMETRIC, derivedKeyProvider);
+        this(IAsymmetricCipherAlgorithm.DEFAULT, derivedKeyProvider);
     }
 
-    public AsymmetricEncryptionFactory(final ICipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
+    public AsymmetricEncryptionFactory(final IAsymmetricCipherAlgorithm algorithm,
+            final IDerivedKeyProvider derivedKeyProvider) {
         this(algorithm, derivedKeyProvider.newDerivedKeyPair(algorithm.getKeyAlgorithm(), "key-pair".getBytes(),
                 RsaKeyLength.DEFAULT.getBytes()));
     }
 
-    public AsymmetricEncryptionFactory(final ICipherAlgorithm algorithm, final KeyPair keyPair) {
+    public AsymmetricEncryptionFactory(final IAsymmetricCipherAlgorithm algorithm, final KeyPair keyPair) {
         this(algorithm, keyPair.getPublic(), keyPair.getPrivate());
     }
 
-    public AsymmetricEncryptionFactory(final ICipherAlgorithm algorithm, final PublicKey encryptionKey,
+    public AsymmetricEncryptionFactory(final IAsymmetricCipherAlgorithm algorithm, final PublicKey encryptionKey,
             final PrivateKey decryptionKey) {
         this.algorithm = algorithm;
         this.encryptionKey = encryptionKey;

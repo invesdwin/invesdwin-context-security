@@ -8,6 +8,7 @@ import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.verified.algorithm.AVerifiedCipherAlgorithm;
 import de.invesdwin.context.security.crypto.verification.IVerificationFactory;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -28,7 +29,7 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @Immutable
 public class VerifiedEncryptionFactory implements IEncryptionFactory {
 
-    private final VerifiedCipherAlgorithm algorithm;
+    private final AVerifiedCipherAlgorithm algorithm;
     private final IEncryptionFactory encryptionFactory;
     private final IVerificationFactory verificationFactory;
 
@@ -36,11 +37,11 @@ public class VerifiedEncryptionFactory implements IEncryptionFactory {
             final IVerificationFactory verificationFactory) {
         this.encryptionFactory = encryptionFactory;
         this.verificationFactory = verificationFactory;
-        this.algorithm = new VerifiedCipherAlgorithm(encryptionFactory.getAlgorithm(), verificationFactory);
+        this.algorithm = AVerifiedCipherAlgorithm.wrap(encryptionFactory.getAlgorithm(), verificationFactory);
     }
 
     @Override
-    public VerifiedCipherAlgorithm getAlgorithm() {
+    public AVerifiedCipherAlgorithm getAlgorithm() {
         return algorithm;
     }
 

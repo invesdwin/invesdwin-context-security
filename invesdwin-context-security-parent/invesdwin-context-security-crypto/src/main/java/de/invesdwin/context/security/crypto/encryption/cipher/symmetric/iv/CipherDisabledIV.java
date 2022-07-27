@@ -1,12 +1,12 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.iv;
+package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.annotation.concurrent.Immutable;
 
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
@@ -18,7 +18,7 @@ public final class CipherDisabledIV implements ICipherIV {
     }
 
     @Override
-    public ICipherAlgorithm getAlgorithm() {
+    public ISymmetricCipherAlgorithm getAlgorithm() {
         return null;
     }
 

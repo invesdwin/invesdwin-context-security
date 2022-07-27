@@ -7,18 +7,18 @@ import javax.crypto.Cipher;
 import javax.crypto.ShortBufferException;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.iv.ICipherIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.EmptyByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
-public class CipherHash implements IHash {
+public class SymmetricCipherHash implements IHash {
 
-    private final ICipherAlgorithm algorithm;
+    private final ISymmetricCipherAlgorithm algorithm;
     private final ICipher cipher;
     private final ICipherIV cipherIV;
     private Key prevKey;
@@ -26,7 +26,7 @@ public class CipherHash implements IHash {
     private final IByteBuffer ivBlock;
     private final int hashSize;
 
-    public CipherHash(final ICipherAlgorithm algorithm, final ICipherIV cipherIV) {
+    public SymmetricCipherHash(final ISymmetricCipherAlgorithm algorithm, final ICipherIV cipherIV) {
         this.algorithm = algorithm;
         this.cipher = algorithm.newCipher();
         this.cipherIV = cipherIV;

@@ -4,13 +4,13 @@ import java.security.Key;
 
 import javax.annotation.concurrent.Immutable;
 
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.aes.AesAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.aes.AesKeyLength;
-import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherCountedIV;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
-import de.invesdwin.context.security.crypto.verification.hash.wrapper.CipherHash;
+import de.invesdwin.context.security.crypto.verification.hash.wrapper.SymmetricCipherHash;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
@@ -20,11 +20,11 @@ public enum GmacAlgorithm implements IHashAlgorithm {
     GMAC_AES_256(AesAlgorithm.AES_GCM_NoPadding, AesKeyLength._256.getBytes());
 
     public static final GmacAlgorithm DEFAULT = GMAC_AES_256;
-    private final ICipherAlgorithm algorithm;
+    private final ISymmetricCipherAlgorithm algorithm;
     private final HashObjectPool hashPool;
     private int hashSize;
 
-    GmacAlgorithm(final ICipherAlgorithm algorithm, final int hashSize) {
+    GmacAlgorithm(final ISymmetricCipherAlgorithm algorithm, final int hashSize) {
         this.algorithm = algorithm;
         this.hashPool = new HashObjectPool(this);
         this.hashSize = hashSize;
@@ -47,7 +47,7 @@ public enum GmacAlgorithm implements IHashAlgorithm {
 
     @Override
     public IHash newHash() {
-        return new CipherHash(algorithm, new CipherCountedIV(algorithm));
+        return new SymmetricCipherHash(algorithm, new CipherCountedIV(algorithm));
     }
 
     @Override

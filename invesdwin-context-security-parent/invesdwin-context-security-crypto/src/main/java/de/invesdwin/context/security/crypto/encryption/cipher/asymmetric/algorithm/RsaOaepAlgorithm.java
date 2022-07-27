@@ -1,6 +1,5 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.algorithm.rsa;
+package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm;
 
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -16,14 +15,12 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.OAEPParameterSpec;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipher;
 
 @Immutable
-public class RsaOaepAlgorithm implements ICipherAlgorithm {
+public class RsaOaepAlgorithm implements IAsymmetricCipherAlgorithm {
 
     public static final RsaOaepAlgorithm DEFAULT = new RsaOaepAlgorithm(OaepPadding.DEFAULT.getCommonParam());
 
@@ -38,7 +35,7 @@ public class RsaOaepAlgorithm implements ICipherAlgorithm {
     @Override
     public ICipher newCipher() {
         try {
-            return new JceCipher(Cipher.getInstance(getAlgorithm()), getHashSize());
+            return new JceCipher(Cipher.getInstance(getAlgorithm()), 0);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new RuntimeException(e);
         }
@@ -60,35 +57,8 @@ public class RsaOaepAlgorithm implements ICipherAlgorithm {
     }
 
     @Override
-    public boolean isSymmetric() {
-        return false;
-    }
-
-    @Override
-    public int getIvSize() {
-        return 0;
-    }
-
-    @Override
-    public int getHashSize() {
-        return 0;
-    }
-
-    @Override
     public CipherObjectPool getCipherPool() {
         return cipherPool;
-    }
-
-    @Deprecated
-    @Override
-    public MutableIvParameterSpecObjectPool getIvParameterSpecPool() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    @Override
-    public Key wrapKey(final byte[] key) {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -115,18 +85,6 @@ public class RsaOaepAlgorithm implements ICipherAlgorithm {
     @Override
     public AlgorithmParameterSpec getParam() {
         return param;
-    }
-
-    @Deprecated
-    @Override
-    public AlgorithmParameterSpec wrapParam(final byte[] iv) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    @Override
-    public AlgorithmParameterSpec wrapParam(final MutableIvParameterSpec iv) {
-        throw new UnsupportedOperationException();
     }
 
 }

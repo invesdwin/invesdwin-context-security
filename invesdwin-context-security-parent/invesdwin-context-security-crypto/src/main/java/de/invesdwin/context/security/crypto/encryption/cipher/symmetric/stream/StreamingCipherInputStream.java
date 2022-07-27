@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.stream;
+package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,9 +14,9 @@ import org.apache.commons.crypto.stream.input.StreamInput;
 import org.apache.commons.crypto.utils.Utils;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 /**
@@ -54,61 +54,62 @@ public class StreamingCipherInputStream extends CipherInputStream {
      */
     private boolean cipherReset = false;
 
-    public StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream, final byte[] key,
-            final byte[] iv) throws IOException {
+    public StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream,
+            final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, inputStream, key, iv, 0);
     }
 
-    public StreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel,
+    public StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
             final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, channel, key, iv, 0);
     }
 
-    public StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
+    public StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream,
             final ICipher cipher, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, inputStream, cipher, CipherInputStream.getDefaultBufferSize(), key, iv, 0);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
+    protected StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, inputStream, cipher, bufferSize, key, iv, 0);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel,
+    protected StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, channel, cipher, bufferSize, key, iv, 0);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final Input input, final ICipher cipher,
-            final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
+    protected StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final Input input,
+            final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, input, cipher, bufferSize, key, iv, 0);
     }
 
-    public StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream, final byte[] key,
-            final byte[] iv, final long streamOffset) throws IOException {
+    public StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream,
+            final byte[] key, final byte[] iv, final long streamOffset) throws IOException {
         this(algorithm, inputStream, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv,
                 streamOffset);
     }
 
-    public StreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel in, final byte[] key,
-            final byte[] iv, final long streamOffset) throws IOException {
+    public StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final ReadableByteChannel in,
+            final byte[] key, final byte[] iv, final long streamOffset) throws IOException {
         this(algorithm, in, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv, streamOffset);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream,
+    protected StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv, final long streamOffset)
             throws IOException {
         this(algorithm, new StreamInput(inputStream, bufferSize), cipher, bufferSize, key, iv, streamOffset);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel,
+    protected StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv, final long streamOffset)
             throws IOException {
         this(algorithm, new ChannelInput(channel), cipher, bufferSize, key, iv, streamOffset);
     }
 
-    protected StreamingCipherInputStream(final ICipherAlgorithm algorithm, final Input input, final ICipher cipher,
-            final int bufferSize, final byte[] key, final byte[] iv, final long streamOffset) throws IOException {
+    protected StreamingCipherInputStream(final ISymmetricCipherAlgorithm algorithm, final Input input,
+            final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv, final long streamOffset)
+            throws IOException {
         super(algorithm, input, cipher, bufferSize, key, iv);
 
         this.initIV = iv.clone();

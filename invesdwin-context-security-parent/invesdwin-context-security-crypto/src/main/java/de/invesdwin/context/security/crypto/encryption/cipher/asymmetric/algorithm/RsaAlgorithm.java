@@ -1,6 +1,5 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.algorithm.rsa;
+package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm;
 
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -15,17 +14,15 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipher;
 
 /**
  * https://github.com/corretto/amazon-corretto-crypto-provider
  */
 @Immutable
-public enum RsaAlgorithm implements ICipherAlgorithm {
+public enum RsaAlgorithm implements IAsymmetricCipherAlgorithm {
     /**
      * RSA requires padding to be secure. Otherwise the same plaintext will be encrypted the same way always.
      * 
@@ -39,7 +36,7 @@ public enum RsaAlgorithm implements ICipherAlgorithm {
     public static final RsaOaepAlgorithm RSA_ECB_OAEPPadding = RsaOaepAlgorithm.DEFAULT;
     //CHECKSTYLE:ON
 
-    public static final ICipherAlgorithm DEFAULT = RSA_ECB_OAEPPadding;
+    public static final IAsymmetricCipherAlgorithm DEFAULT = RSA_ECB_OAEPPadding;
 
     private final String algorithm;
     private final CipherObjectPool cipherPool;
@@ -60,14 +57,9 @@ public enum RsaAlgorithm implements ICipherAlgorithm {
     }
 
     @Override
-    public boolean isSymmetric() {
-        return false;
-    }
-
-    @Override
     public ICipher newCipher() {
         try {
-            return new JceCipher(Cipher.getInstance(getAlgorithm()), getHashSize());
+            return new JceCipher(Cipher.getInstance(getAlgorithm()), 0);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new RuntimeException(e);
         }
@@ -79,30 +71,8 @@ public enum RsaAlgorithm implements ICipherAlgorithm {
     }
 
     @Override
-    public int getIvSize() {
-        return 0;
-    }
-
-    @Override
-    public int getHashSize() {
-        return 0;
-    }
-
-    @Override
     public CipherObjectPool getCipherPool() {
         return cipherPool;
-    }
-
-    @Deprecated
-    @Override
-    public MutableIvParameterSpecObjectPool getIvParameterSpecPool() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    @Override
-    public Key wrapKey(final byte[] key) {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -129,18 +99,6 @@ public enum RsaAlgorithm implements ICipherAlgorithm {
     @Override
     public AlgorithmParameterSpec getParam() {
         return null;
-    }
-
-    @Deprecated
-    @Override
-    public AlgorithmParameterSpec wrapParam(final byte[] iv) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    @Override
-    public AlgorithmParameterSpec wrapParam(final MutableIvParameterSpec iv) {
-        throw new UnsupportedOperationException();
     }
 
 }

@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.algorithm.aes;
+package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm;
 
 import javax.annotation.concurrent.Immutable;
 

@@ -6,7 +6,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.ICipherFactory;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -37,7 +37,7 @@ public class RefreshingDelegateCipher implements ICipher {
 
     @Override
     public int getHashSize() {
-        return algorithm.getHashSize();
+        return delegate.getHashSize();
     }
 
     @Override

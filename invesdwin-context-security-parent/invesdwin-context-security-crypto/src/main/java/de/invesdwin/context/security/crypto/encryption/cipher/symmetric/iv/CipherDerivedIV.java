@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.iv;
+package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import de.invesdwin.context.ContextProperties;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
@@ -31,15 +31,15 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @NotThreadSafe
 public class CipherDerivedIV implements ICipherIV {
 
-    private final ICipherAlgorithm algorithm;
+    private final ISymmetricCipherAlgorithm algorithm;
     private final byte[] initIV;
     private final AtomicLong ivCounter;
 
-    public CipherDerivedIV(final ICipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
+    public CipherDerivedIV(final ISymmetricCipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
         this(algorithm, derivedKeyProvider.newDerivedKey("crypto-iv".getBytes(), algorithm.getIvSize()));
     }
 
-    public CipherDerivedIV(final ICipherAlgorithm algorithm, final byte[] derivedIV) {
+    public CipherDerivedIV(final ISymmetricCipherAlgorithm algorithm, final byte[] derivedIV) {
         this.algorithm = algorithm;
         this.initIV = newInitIV(algorithm.getIvSize());
         this.ivCounter = newIvCounter();
@@ -48,7 +48,7 @@ public class CipherDerivedIV implements ICipherIV {
     }
 
     @Override
-    public ICipherAlgorithm getAlgorithm() {
+    public ISymmetricCipherAlgorithm getAlgorithm() {
         return algorithm;
     }
 

@@ -1,9 +1,7 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.algorithm.aes;
+package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm;
 
 import java.io.IOException;
 import java.security.Key;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.Immutable;
@@ -13,10 +11,10 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.crypto.utils.Utils;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.CryptoCipher;
 import de.invesdwin.context.system.properties.SystemProperties;
 
@@ -39,7 +37,7 @@ import de.invesdwin.context.system.properties.SystemProperties;
  * AES/ECB should never be used: https://crypto.stackexchange.com/questions/20941/why-shouldnt-i-use-ecb-encryption
  */
 @Immutable
-public enum AesAlgorithm implements ICipherAlgorithm {
+public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
     /**
      * encryption only, full blocks, not streaming capable
      * 
@@ -129,11 +127,6 @@ public enum AesAlgorithm implements ICipherAlgorithm {
     }
 
     @Override
-    public boolean isSymmetric() {
-        return true;
-    }
-
-    @Override
     public int getIvSize() {
         return ivSize;
     }
@@ -161,24 +154,6 @@ public enum AesAlgorithm implements ICipherAlgorithm {
     @Override
     public Key wrapKey(final byte[] key) {
         return new SecretKeySpec(key, getKeyAlgorithm());
-    }
-
-    @Deprecated
-    @Override
-    public PublicKey wrapPublicKey(final byte[] publicKey) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    @Override
-    public PrivateKey wrapPrivateKey(final byte[] privateKey) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    @Override
-    public AlgorithmParameterSpec getParam() {
-        throw new UnsupportedOperationException();
     }
 
     protected ICipher newCryptoCipher() {

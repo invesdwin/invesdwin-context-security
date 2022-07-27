@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.stream;
+package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +18,7 @@ import org.apache.commons.crypto.stream.input.StreamInput;
 import org.apache.commons.crypto.utils.Utils;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.system.properties.SystemProperties;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
@@ -45,7 +45,7 @@ public class CipherInputStream extends InputStream implements ReadableByteChanne
 
     private static final int MIN_BUFFER_SIZE = 512;
 
-    protected ICipherAlgorithm algorithm;
+    protected ISymmetricCipherAlgorithm algorithm;
     /** The ICipher instance. */
     protected final ICipher cipher;
 
@@ -80,27 +80,27 @@ public class CipherInputStream extends InputStream implements ReadableByteChanne
      */
     private boolean finalDone = false;
 
-    public CipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream, final byte[] key,
+    public CipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream, final byte[] key,
             final byte[] iv) throws IOException {
         this(algorithm, inputStream, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv);
     }
 
-    public CipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel, final byte[] key,
-            final byte[] iv) throws IOException {
+    public CipherInputStream(final ISymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
+            final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, channel, algorithm.newCipher(), CipherInputStream.getDefaultBufferSize(), key, iv);
     }
 
-    protected CipherInputStream(final ICipherAlgorithm algorithm, final InputStream inputStream, final ICipher cipher,
-            final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
+    protected CipherInputStream(final ISymmetricCipherAlgorithm algorithm, final InputStream inputStream,
+            final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, new StreamInput(inputStream, bufferSize), cipher, bufferSize, key, iv);
     }
 
-    protected CipherInputStream(final ICipherAlgorithm algorithm, final ReadableByteChannel channel,
+    protected CipherInputStream(final ISymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this(algorithm, new ChannelInput(channel), cipher, bufferSize, key, iv);
     }
 
-    protected CipherInputStream(final ICipherAlgorithm algorithm, final Input input, final ICipher cipher,
+    protected CipherInputStream(final ISymmetricCipherAlgorithm algorithm, final Input input, final ICipher cipher,
             final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this.algorithm = algorithm;
         this.input = input;
@@ -111,8 +111,7 @@ public class CipherInputStream extends InputStream implements ReadableByteChanne
         this.params = algorithm.wrapParam(iv);
 
         inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
-        outBuffer = java.nio.ByteBuffer
-                .allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
+        outBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
         outBuffer.limit(0);
 
         initCipher();
