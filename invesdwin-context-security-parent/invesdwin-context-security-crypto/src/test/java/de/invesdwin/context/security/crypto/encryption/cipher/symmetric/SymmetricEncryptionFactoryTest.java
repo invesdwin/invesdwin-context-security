@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher;
+package de.invesdwin.context.security.crypto.encryption.cipher.symmetric;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -8,7 +8,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
