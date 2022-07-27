@@ -1,5 +1,6 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.KeyPair;
@@ -15,11 +16,11 @@ import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeyLength;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.StreamingAsymmetricCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.StreamingAsymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.marshallers.serde.ISerde;
-import de.invesdwin.util.streams.ALazyDelegateInputStream;
-import de.invesdwin.util.streams.ALazyDelegateOutputStream;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
@@ -85,14 +86,11 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
 
     @Override
     public OutputStream newEncryptor(final OutputStream out, final ICipher cipher) {
-        return new ALazyDelegateOutputStream() {
-            @Override
-            protected OutputStream newDelegate() {
-                //                final byte[] iv = cipherIV.putNewIV(out);
-                //                return algorithm.newEncryptor(out, cipher, key, iv);
-                return null;
-            }
-        };
+        try {
+            return new StreamingAsymmetricCipherOutputStream(algorithm, out, cipher, encryptionKey);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -102,14 +100,11 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
 
     @Override
     public InputStream newDecryptor(final InputStream in, final ICipher cipher) {
-        return new ALazyDelegateInputStream() {
-            @Override
-            protected InputStream newDelegate() {
-                //                final byte[] iv = cipherIV.getNewIV(in);
-                //                return algorithm.newDecryptor(in, cipher, key, iv);
-                return null;
-            }
-        };
+        try {
+            return new StreamingAsymmetricCipherInputStream(algorithm, in, cipher, decryptionKey);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

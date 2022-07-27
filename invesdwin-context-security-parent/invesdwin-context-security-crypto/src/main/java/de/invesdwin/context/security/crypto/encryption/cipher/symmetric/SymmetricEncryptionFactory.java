@@ -1,5 +1,6 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.symmetric;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Key;
@@ -16,6 +17,8 @@ import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvPara
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.ALazyDelegateInputStream;
@@ -88,7 +91,11 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
             @Override
             protected OutputStream newDelegate() {
                 final byte[] iv = cipherIV.putNewIV(out);
-                return algorithm.newEncryptor(out, cipher, key, iv);
+                try {
+                    return new StreamingSymmetricCipherOutputStream(algorithm, out, cipher, key, iv);
+                } catch (final IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
     }
@@ -104,7 +111,11 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
             @Override
             protected InputStream newDelegate() {
                 final byte[] iv = cipherIV.getNewIV(in);
-                return algorithm.newDecryptor(in, cipher, key, iv);
+                try {
+                    return new StreamingSymmetricCipherInputStream(algorithm, in, cipher, key, iv);
+                } catch (final IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
     }
