@@ -417,7 +417,7 @@ public class StreamingCipherInputStream extends CipherInputStream {
         final long counter = getCounter(position);
         CipherDerivedIV.calculateIV(initIV, counter, iv.getIV());
         try {
-            cipher.init(Cipher.DECRYPT_MODE, key, algorithm.wrapIv(iv));
+            cipher.init(Cipher.DECRYPT_MODE, key, algorithm.wrapParam(iv));
         } catch (final Exception e) {
             throw new IOException(e);
         }

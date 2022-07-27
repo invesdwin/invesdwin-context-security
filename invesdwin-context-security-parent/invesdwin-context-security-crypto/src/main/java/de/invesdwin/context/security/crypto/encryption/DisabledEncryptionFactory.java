@@ -26,7 +26,7 @@ public final class DisabledEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
-    public void init(final ICipher cipher, final int mode, final AlgorithmParameterSpec iv) {
+    public void init(final ICipher cipher, final int mode, final AlgorithmParameterSpec param) {
     }
 
     @Override

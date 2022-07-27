@@ -1,5 +1,9 @@
 package de.invesdwin.context.security.crypto.key;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.key.derivation.IDerivationFactory;
@@ -22,11 +26,9 @@ import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
 public class DerivedKeyProvider implements IDerivedKeyProvider {
 
     private final IDerivationFactory derivationFactory;
-    private final byte[] salt;
     private final byte[] key;
 
-    public DerivedKeyProvider(final byte[] salt, final byte[] key, final IDerivationFactory derivationFactory) {
-        this.salt = salt;
+    public DerivedKeyProvider(final byte[] key, final IDerivationFactory derivationFactory) {
         this.key = key;
         this.derivationFactory = derivationFactory;
     }
@@ -34,6 +36,22 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
     @Override
     public byte[] newDerivedKey(final byte[] info, final int length) {
         return derivationFactory.expand(key, info, length);
+    }
+
+    @Override
+    public KeyPair newDerivedKeyPair(final String keyAlgorithm, final byte[] info, final int length) {
+        try {
+            final KeyPairGenerator generator = KeyPairGenerator.getInstance(keyAlgorithm);
+            //we need to use a pseudorandom generator in order to be able to seed it
+            final java.security.SecureRandom random = java.security.SecureRandom.getInstance("SHA1PRNG");
+            //we need a deterministic pseudorandom seed
+            final byte[] seed = newDerivedKey(info, length);
+            random.setSeed(seed);
+            generator.initialize(length, random);
+            return generator.generateKeyPair();
+        } catch (final NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static DerivedKeyProvider fromPassword(final byte[] salt, final String password) {
@@ -56,13 +74,13 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
     public static DerivedKeyProvider fromPassword(final byte[] salt, final byte[] password,
             final IDerivationFactory derivationFactory, final IPasswordHasher passwordHasher) {
         final byte[] key = passwordHasher.hash(salt, password, derivationFactory.getExtractLength());
-        return new DerivedKeyProvider(salt, key, derivationFactory);
+        return new DerivedKeyProvider(key, derivationFactory);
     }
 
     public static DerivedKeyProvider fromRandom(final byte[] salt, final byte[] random,
             final IDerivationFactory derivationFactory) {
         final byte[] key = derivationFactory.extract(salt, random);
-        return new DerivedKeyProvider(salt, key, derivationFactory);
+        return new DerivedKeyProvider(key, derivationFactory);
     }
 
 }

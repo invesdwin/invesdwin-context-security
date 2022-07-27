@@ -7,9 +7,9 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import de.invesdwin.context.security.crypto.CryptoProperties;
-import de.invesdwin.context.security.crypto.authentication.mac.algorithm.HmacAlgorithm;
-import de.invesdwin.context.security.crypto.authentication.mac.algorithm.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.HmacAlgorithm;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.util.lang.Objects;
 import de.invesdwin.util.math.Bytes;
 
@@ -27,12 +27,12 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
      * About 200ms on an I9-9900k
      */
     public static final int DEFAULT_ITERATIONS = 200_000;
-    public static final IMacAlgorithm DEFAULT_MAC_ALGORITHM = HmacAlgorithm.HMAC_SHA_512;
+    public static final IHashAlgorithm DEFAULT_MAC_ALGORITHM = HmacAlgorithm.HMAC_SHA_512;
     public static final Pbkdf2PasswordHasher INSTANCE = new Pbkdf2PasswordHasher();
 
     private final int iterations;
     private final byte[] pepper;
-    private final IMacAlgorithm macAlgorithm;
+    private final IHashAlgorithm macAlgorithm;
     private final String algorithm;
     private final SecretKeyFactoryObjectPool secretKeyFactoryPool;
 
@@ -48,7 +48,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
         this(pepper, iterations, DEFAULT_MAC_ALGORITHM);
     }
 
-    public Pbkdf2PasswordHasher(final byte[] pepper, final int iterations, final IMacAlgorithm macAlgorithm) {
+    public Pbkdf2PasswordHasher(final byte[] pepper, final int iterations, final IHashAlgorithm macAlgorithm) {
         this.pepper = pepper;
         this.iterations = iterations;
         this.macAlgorithm = macAlgorithm;
@@ -70,7 +70,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
         return algorithm;
     }
 
-    public IMacAlgorithm getMacAlgorithm() {
+    public IHashAlgorithm getMacAlgorithm() {
         return macAlgorithm;
     }
 

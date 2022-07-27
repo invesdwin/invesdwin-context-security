@@ -3,9 +3,9 @@ package de.invesdwin.context.security.crypto.key.password;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.log.Log;
-import de.invesdwin.context.security.crypto.authentication.mac.algorithm.IMacAlgorithm;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.util.time.Instant;
 import de.invesdwin.util.time.date.FTimeUnit;
 import de.invesdwin.util.time.duration.Duration;
@@ -19,7 +19,7 @@ public abstract class APasswordHasherBenchmark<E extends IPasswordHasher> {
     private static final byte[] PASSWORD = "abcDEF123@~# xyz+-*/=456spqr".getBytes();
     private static final byte[] SALT;
     private static final int BENCHMARK_ROUNDS = 20;
-    private static final int LENGTH = IMacAlgorithm.DEFAULT.getMacLength();
+    private static final int LENGTH = IHashAlgorithm.DEFAULT.getHashSize();
     private static final int MAX_TRIES = 10;
 
     private final Log log = new Log(this);

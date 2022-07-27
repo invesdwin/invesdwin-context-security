@@ -88,11 +88,11 @@ public class CipherOutputStream extends OutputStream implements WritableByteChan
         this.cipher = cipher;
 
         this.key = algorithm.wrapKey(key);
-        this.params = algorithm.wrapIv(iv);
+        this.params = algorithm.wrapParam(iv);
 
         inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
         outBuffer = java.nio.ByteBuffer
-                .allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getSignatureSize());
+                .allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
 
         initCipher();
     }

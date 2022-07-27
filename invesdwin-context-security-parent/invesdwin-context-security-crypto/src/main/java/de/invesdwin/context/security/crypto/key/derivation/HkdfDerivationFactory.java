@@ -3,9 +3,9 @@ package de.invesdwin.context.security.crypto.key.derivation;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.CryptoProperties;
-import de.invesdwin.context.security.crypto.authentication.mac.IMac;
-import de.invesdwin.context.security.crypto.authentication.mac.algorithm.HmacAlgorithm;
-import de.invesdwin.context.security.crypto.authentication.mac.algorithm.IMacAlgorithm;
+import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.HmacAlgorithm;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.util.math.Bytes;
 
 /**
@@ -17,7 +17,7 @@ public class HkdfDerivationFactory implements IDerivationFactory {
     public static final HkdfDerivationFactory INSTANCE = new HkdfDerivationFactory();
 
     private final byte[] pepper;
-    private final IMacAlgorithm algorithm;
+    private final IHashAlgorithm algorithm;
 
     private HkdfDerivationFactory() {
         this(CryptoProperties.DEFAULT_PEPPER, HmacAlgorithm.DEFAULT);
@@ -27,7 +27,7 @@ public class HkdfDerivationFactory implements IDerivationFactory {
         this(pepper, HmacAlgorithm.DEFAULT);
     }
 
-    public HkdfDerivationFactory(final byte[] pepper, final IMacAlgorithm algorithm) {
+    public HkdfDerivationFactory(final byte[] pepper, final IHashAlgorithm algorithm) {
         this.pepper = pepper;
         this.algorithm = algorithm;
     }
@@ -44,18 +44,18 @@ public class HkdfDerivationFactory implements IDerivationFactory {
 
     @Override
     public int getExtractLength() {
-        return algorithm.getMacLength();
+        return algorithm.getHashSize();
     }
 
     @Override
     public byte[] extract(final byte[] salt, final byte[] keyMaterial) {
         if (keyMaterial != null && keyMaterial.length > 0) {
-            final IMac mac = algorithm.getMacPool().borrowObject();
+            final IHash hash = algorithm.getHashPool().borrowObject();
             try {
-                mac.init(algorithm.wrapKey(Bytes.concat(salt, pepper)));
-                return mac.doFinal(keyMaterial);
+                hash.init(algorithm.wrapKey(Bytes.concat(salt, pepper)));
+                return hash.doFinal(keyMaterial);
             } finally {
-                algorithm.getMacPool().returnObject(mac);
+                algorithm.getHashPool().returnObject(hash);
             }
         } else {
             return null;
@@ -64,7 +64,7 @@ public class HkdfDerivationFactory implements IDerivationFactory {
 
     @Override
     public byte[] expand(final byte[] key, final byte[] pInfo, final int length) {
-        final IMac mac = algorithm.getMacPool().borrowObject();
+        final IHash mac = algorithm.getHashPool().borrowObject();
         try {
             mac.init(algorithm.wrapKey(key));
             final byte[] info;
@@ -77,7 +77,7 @@ public class HkdfDerivationFactory implements IDerivationFactory {
             byte[] hashRound = new byte[0];
             final java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocate(length);
 
-            for (int i = 0; i < (int) Math.ceil((double) length / (double) mac.getMacLength()); i++) {
+            for (int i = 0; i < (int) Math.ceil(length / (double) mac.getHashSize()); i++) {
                 mac.update(hashRound);
                 mac.update(info);
                 mac.update((byte) (i + 1));
@@ -88,7 +88,7 @@ public class HkdfDerivationFactory implements IDerivationFactory {
 
             return buffer.array();
         } finally {
-            algorithm.getMacPool().returnObject(mac);
+            algorithm.getHashPool().returnObject(mac);
         }
     }
 

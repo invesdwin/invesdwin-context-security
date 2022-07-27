@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Key;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.aes.AesAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.rsa.RsaAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.ICipherFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
@@ -16,19 +20,29 @@ import de.invesdwin.context.security.crypto.encryption.cipher.stream.StreamingCi
 
 public interface ICipherAlgorithm extends ICipherFactory {
 
-    ICipherAlgorithm DEFAULT = AesAlgorithm.DEFAULT;
+    ICipherAlgorithm DEFAULT_SYMMETRIC = AesAlgorithm.DEFAULT;
+    ICipherAlgorithm DEFAULT_ASYMMETRIC = RsaAlgorithm.DEFAULT;
 
-    @Override
-    String getAlgorithm();
+    String getKeyAlgorithm();
 
-    int getBlockSize();
+    /**
+     * A symmetric cipher requires a key, an asymmetric cipher requires a public/private key pair.
+     */
+    boolean isSymmetric();
+
+    /**
+     * Requires a public/private key pair.
+     */
+    default boolean isAsymmetric() {
+        return !isSymmetric();
+    }
 
     int getIvSize();
 
     /**
      * GCM has an encoded signature that is 16 bytes long per encrypted message.
      */
-    int getSignatureSize();
+    int getHashSize();
 
     default OutputStream newEncryptor(final OutputStream out, final ICipher cipher, final byte[] key, final byte[] iv) {
         try {
@@ -52,8 +66,14 @@ public interface ICipherAlgorithm extends ICipherFactory {
 
     Key wrapKey(byte[] key);
 
-    AlgorithmParameterSpec wrapIv(byte[] iv);
+    PublicKey wrapPublicKey(byte[] publicKey);
 
-    AlgorithmParameterSpec wrapIv(MutableIvParameterSpec iv);
+    PrivateKey wrapPrivateKey(byte[] privateKey);
+
+    AlgorithmParameterSpec getParam();
+
+    AlgorithmParameterSpec wrapParam(byte[] iv);
+
+    AlgorithmParameterSpec wrapParam(MutableIvParameterSpec iv);
 
 }

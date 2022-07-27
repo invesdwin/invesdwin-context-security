@@ -13,7 +13,7 @@ public interface IEncryptionFactory {
 
     ICipherAlgorithm getAlgorithm();
 
-    void init(ICipher cipher, int mode, AlgorithmParameterSpec iv);
+    void init(ICipher cipher, int mode, AlgorithmParameterSpec param);
 
     OutputStream newEncryptor(OutputStream out);
 

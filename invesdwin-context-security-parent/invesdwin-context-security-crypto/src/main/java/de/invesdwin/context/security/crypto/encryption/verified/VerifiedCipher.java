@@ -1,56 +1,79 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.wrapper;
+package de.invesdwin.context.security.crypto.encryption.verified;
 
 import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import javax.crypto.Cipher;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.algorithm.ICipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.ICipherFactory;
+import de.invesdwin.context.security.crypto.verification.IVerificationFactory;
+import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
- * Does not reuse cipher instances (e.g. GCM will refuse to encrypt twice in a row with the same IV)
- * 
- * This will cause a significant drop in performance because cipher instances can not be reused.
+ * WARNING: VerifiedCipher update calls always return a written length of 0 despite writing to the given output (same as
+ * com.sun.crypto.provider.GaloisCounterMode.GCMDecrypt.doUpdate(byte[], int, int, byte[], int)). This makes using the
+ * cipher directly unsuitable. It is only useful inside VerifiedEncryptionFactory (with its own drawbacks).
  */
 @NotThreadSafe
-public class RefreshingDelegateCipher implements ICipher {
+public class VerifiedCipher implements ICipher {
 
-    private final ICipherAlgorithm algorithm;
-    private final ICipherFactory factory;
+    private final ICipher unverifiedCipher;
+    private final IHash hash;
+    private final EncryptingVerifiedCipher encryptingDelegate;
+    private final DecryptingVerifiedCipher decryptingDelegate;
+    private final IVerificationFactory authenticationFactory;
     private ICipher delegate;
 
-    public RefreshingDelegateCipher(final ICipherAlgorithm algorithm, final ICipherFactory factory) {
-        this.algorithm = algorithm;
-        this.factory = factory;
+    public VerifiedCipher(final ICipher unverifiedCipher, final IVerificationFactory verificationFactory) {
+        this.unverifiedCipher = unverifiedCipher;
+        this.hash = verificationFactory.getAlgorithm().newHash();
+        this.encryptingDelegate = new EncryptingVerifiedCipher(unverifiedCipher, verificationFactory, hash);
+        this.decryptingDelegate = new DecryptingVerifiedCipher(unverifiedCipher, verificationFactory, hash);
+        this.authenticationFactory = verificationFactory;
+    }
+
+    public ICipher getUnverifiedCipher() {
+        return unverifiedCipher;
+    }
+
+    public IHash getHash() {
+        return hash;
+    }
+
+    public IVerificationFactory getAuthenticationFactory() {
+        return authenticationFactory;
     }
 
     @Override
     public int getBlockSize() {
-        if (delegate == null) {
-            throw new IllegalStateException("initialize first");
-        }
-        return delegate.getBlockSize();
+        return unverifiedCipher.getBlockSize();
     }
 
     @Override
     public int getHashSize() {
-        return algorithm.getHashSize();
+        return unverifiedCipher.getHashSize() + hash.getHashSize();
     }
 
     @Override
     public String getAlgorithm() {
-        return algorithm.getAlgorithm();
+        return unverifiedCipher.getAlgorithm() + "With" + hash.getAlgorithm();
     }
 
     @Override
     public void init(final int mode, final Key key, final AlgorithmParameterSpec params) {
-        if (delegate != null) {
-            delegate.close();
+        switch (mode) {
+        case Cipher.ENCRYPT_MODE:
+            delegate = encryptingDelegate;
+            break;
+        case Cipher.DECRYPT_MODE:
+            delegate = decryptingDelegate;
+            break;
+        default:
+            throw UnknownArgumentException.newInstance(int.class, mode);
         }
-        delegate = factory.newCipher();
         delegate.init(mode, key, params);
     }
 
@@ -87,7 +110,10 @@ public class RefreshingDelegateCipher implements ICipher {
 
     @Override
     public int doFinal(final byte[] input, final int inputOffset, final int inputLen, final byte[] output) {
-        return delegate.doFinal(input, inputOffset, inputLen, output);
+        int written = delegate.doFinal(input, inputOffset, inputLen, output);
+        hash.update(input, inputOffset, inputLen);
+        written += hash.doFinal(output, written);
+        return written;
     }
 
     @Override
@@ -133,10 +159,10 @@ public class RefreshingDelegateCipher implements ICipher {
 
     @Override
     public void close() {
-        if (delegate != null) {
-            delegate.close();
-            delegate = null;
-        }
+        unverifiedCipher.close();
+        hash.close();
+        encryptingDelegate.reset();
+        decryptingDelegate.reset();
     }
 
 }

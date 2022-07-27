@@ -183,7 +183,7 @@ public class StreamingCipherOutputStream extends CipherOutputStream {
         final long counter = streamOffset / cipher.getBlockSize();
 
         CipherDerivedIV.calculateIV(initIV, counter, iv.getIV());
-        cipher.init(Cipher.ENCRYPT_MODE, key, algorithm.wrapIv(iv));
+        cipher.init(Cipher.ENCRYPT_MODE, key, algorithm.wrapParam(iv));
         cipherReset = false;
     }
 

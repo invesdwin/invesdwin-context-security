@@ -11,7 +11,7 @@ public interface ICipher extends Closeable {
 
     int getBlockSize();
 
-    int getSignatureSize();
+    int getHashSize();
 
     String getAlgorithm();
 
