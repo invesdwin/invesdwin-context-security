@@ -2,6 +2,7 @@ package de.invesdwin.context.security.crypto;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.system.properties.IProperties;
 import de.invesdwin.context.system.properties.SystemProperties;
 
 @Immutable
@@ -11,7 +12,9 @@ public final class CryptoProperties {
 
     static {
         final SystemProperties systemProperties = new SystemProperties(CryptoProperties.class);
-        DEFAULT_PEPPER = systemProperties.getStringWithSecurityWarning("DEFAULT_PEPPER", "invesdwin").getBytes();
+        DEFAULT_PEPPER = systemProperties
+                .getStringWithSecurityWarning("DEFAULT_PEPPER", IProperties.INVESDWIN_DEFAULT_PASSWORD)
+                .getBytes();
     }
 
     private CryptoProperties() {
