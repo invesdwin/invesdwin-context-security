@@ -51,6 +51,27 @@ public final class DisabledEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
+    public OutputStream newStreamingEncryptor(final OutputStream out) {
+        //buffering is better for write throughput to file
+        return PooledFastBufferedOutputStream.newInstance(out);
+    }
+
+    @Override
+    public OutputStream newStreamingEncryptor(final OutputStream out, final ICipher cipher) {
+        return newStreamingEncryptor(out);
+    }
+
+    @Override
+    public InputStream newStreamingDecryptor(final InputStream in) {
+        return in;
+    }
+
+    @Override
+    public InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher) {
+        return newStreamingDecryptor(in);
+    }
+
+    @Override
     public int encrypt(final IByteBuffer src, final IByteBuffer dest) {
         dest.putBytes(0, src);
         return src.capacity();

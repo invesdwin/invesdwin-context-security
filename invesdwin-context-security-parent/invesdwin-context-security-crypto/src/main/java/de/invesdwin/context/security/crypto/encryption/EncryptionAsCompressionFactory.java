@@ -20,12 +20,12 @@ public class EncryptionAsCompressionFactory implements ICompressionFactory {
 
     @Override
     public OutputStream newCompressor(final OutputStream out, final boolean large) {
-        return encryptionFactory.newEncryptor(out);
+        return encryptionFactory.newStreamingEncryptor(out);
     }
 
     @Override
     public InputStream newDecompressor(final InputStream in) {
-        return encryptionFactory.newDecryptor(in);
+        return encryptionFactory.newStreamingDecryptor(in);
     }
 
     @Override

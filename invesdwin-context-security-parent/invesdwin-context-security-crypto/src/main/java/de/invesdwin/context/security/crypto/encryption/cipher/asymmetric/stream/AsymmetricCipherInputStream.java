@@ -10,35 +10,18 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.Cipher;
 
-import org.agrona.BufferUtil;
-import org.apache.commons.crypto.Crypto;
 import org.apache.commons.crypto.stream.CtrCryptoInputStream;
-import org.apache.commons.crypto.stream.input.ChannelInput;
 import org.apache.commons.crypto.stream.input.Input;
-import org.apache.commons.crypto.stream.input.StreamInput;
 import org.apache.commons.crypto.utils.Utils;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
-import de.invesdwin.context.system.properties.SystemProperties;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.CipherStreams;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @NotThreadSafe
 public class AsymmetricCipherInputStream extends InputStream implements ReadableByteChannel {
-
-    /**
-     * The configuration key of the buffer size for stream.
-     */
-    public static final String STREAM_BUFFER_SIZE_KEY = Crypto.CONF_PREFIX + "stream.buffer.size";
-
-    // stream related configuration keys
-    /**
-     * The default value of the buffer size for stream.
-     */
-    private static final int STREAM_BUFFER_SIZE_DEFAULT = 8192;
-
-    private static final int MIN_BUFFER_SIZE = 512;
 
     protected IAsymmetricCipherAlgorithm algorithm;
     /** The ICipher instance. */
@@ -76,22 +59,32 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
 
     public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final InputStream inputStream,
             final PrivateKey key) throws IOException {
-        this(algorithm, inputStream, algorithm.newCipher(), AsymmetricCipherInputStream.getDefaultBufferSize(), key);
+        this(algorithm, inputStream, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key);
+    }
+
+    public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final InputStream inputStream,
+            final ICipher cipher, final PrivateKey key) throws IOException {
+        this(algorithm, inputStream, cipher, CipherStreams.getDefaultBufferSize(), key);
+    }
+
+    public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
+            final ICipher cipher, final PrivateKey key) throws IOException {
+        this(algorithm, channel, cipher, CipherStreams.getDefaultBufferSize(), key);
     }
 
     public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
             final PrivateKey key) throws IOException {
-        this(algorithm, channel, algorithm.newCipher(), AsymmetricCipherInputStream.getDefaultBufferSize(), key);
+        this(algorithm, channel, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key);
     }
 
     protected AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final InputStream inputStream,
             final ICipher cipher, final int bufferSize, final PrivateKey key) throws IOException {
-        this(algorithm, new StreamInput(inputStream, bufferSize), cipher, bufferSize, key);
+        this(algorithm, CipherStreams.wrapInput(inputStream, bufferSize), cipher, bufferSize, key);
     }
 
     protected AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
             final ICipher cipher, final int bufferSize, final PrivateKey key) throws IOException {
-        this(algorithm, new ChannelInput(channel), cipher, bufferSize, key);
+        this(algorithm, CipherStreams.wrapInput(channel), cipher, bufferSize, key);
     }
 
     protected AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final Input input,
@@ -99,7 +92,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
         this.algorithm = algorithm;
         this.input = input;
         this.cipher = cipher;
-        this.bufferSize = AsymmetricCipherInputStream.checkBufferSize(cipher, bufferSize);
+        this.bufferSize = CipherStreams.checkBufferSize(cipher, bufferSize);
 
         this.key = key;
         this.params = algorithm.getParam();
@@ -475,48 +468,8 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
 
     /** Forcibly free the direct buffers. */
     protected void freeBuffers() {
-        AsymmetricCipherInputStream.freeDirectBuffer(inBuffer);
-        AsymmetricCipherInputStream.freeDirectBuffer(outBuffer);
+        CipherStreams.freeDirectBuffer(inBuffer);
+        CipherStreams.freeDirectBuffer(outBuffer);
     }
 
-    /**
-     * Forcibly free the direct buffer.
-     *
-     * @param buffer
-     *            the bytebuffer to be freed.
-     */
-    public static void freeDirectBuffer(final java.nio.ByteBuffer buffer) {
-        BufferUtil.free(buffer);
-    }
-
-    /**
-     * Reads crypto buffer size.
-     *
-     * @param props
-     *            The {@code Properties} class represents a set of properties.
-     * @return the buffer size.
-     */
-    public static int getDefaultBufferSize() {
-        final String bufferSizeStr = SystemProperties.SYSTEM_PROPERTIES
-                .getProperty(AsymmetricCipherInputStream.STREAM_BUFFER_SIZE_KEY);
-        if (bufferSizeStr == null || bufferSizeStr.isEmpty()) {
-            return AsymmetricCipherInputStream.STREAM_BUFFER_SIZE_DEFAULT;
-        }
-        return Integer.parseInt(bufferSizeStr);
-    }
-
-    /**
-     * Checks and floors buffer size.
-     *
-     * @param cipher
-     *            the {@link ICipher} instance.
-     * @param bufferSize
-     *            the buffer size.
-     * @return the remaining buffer size.
-     */
-    public static int checkBufferSize(final ICipher cipher, final int bufferSize) {
-        Utils.checkArgument(bufferSize >= AsymmetricCipherInputStream.MIN_BUFFER_SIZE,
-                "Minimum value of buffer size is " + AsymmetricCipherInputStream.MIN_BUFFER_SIZE + ".");
-        return bufferSize - bufferSize % cipher.getBlockSize();
-    }
 }

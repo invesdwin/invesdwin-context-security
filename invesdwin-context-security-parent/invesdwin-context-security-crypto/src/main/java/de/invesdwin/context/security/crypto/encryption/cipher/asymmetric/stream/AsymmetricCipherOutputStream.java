@@ -9,12 +9,11 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.Cipher;
 
-import org.apache.commons.crypto.stream.output.ChannelOutput;
 import org.apache.commons.crypto.stream.output.Output;
-import org.apache.commons.crypto.stream.output.StreamOutput;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.CipherStreams;
 import de.invesdwin.util.assertions.Assertions;
 
 @NotThreadSafe
@@ -51,30 +50,40 @@ public class AsymmetricCipherOutputStream extends OutputStream implements Writab
 
     public AsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final OutputStream outputStream,
             final PublicKey key) throws IOException {
-        this(algorithm, outputStream, algorithm.newCipher(), AsymmetricCipherInputStream.getDefaultBufferSize(), key);
+        this(algorithm, outputStream, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key);
+    }
+
+    public AsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final OutputStream outputStream,
+            final ICipher cipher, final PublicKey key) throws IOException {
+        this(algorithm, outputStream, cipher, CipherStreams.getDefaultBufferSize(), key);
+    }
+
+    public AsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final WritableByteChannel out,
+            final ICipher cipher, final PublicKey key) throws IOException {
+        this(algorithm, out, cipher, CipherStreams.getDefaultBufferSize(), key);
     }
 
     public AsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final WritableByteChannel out,
             final PublicKey key) throws IOException {
-        this(algorithm, out, algorithm.newCipher(), AsymmetricCipherInputStream.getDefaultBufferSize(), key);
+        this(algorithm, out, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key);
     }
 
     protected AsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final OutputStream outputStream,
             final ICipher cipher, final int bufferSize, final PublicKey key) throws IOException {
-        this(algorithm, new StreamOutput(outputStream, bufferSize), cipher, bufferSize, key);
+        this(algorithm, CipherStreams.wrapOutput(outputStream, bufferSize), cipher, bufferSize, key);
     }
 
     protected AsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
             final WritableByteChannel channel, final ICipher cipher, final int bufferSize, final PublicKey key)
             throws IOException {
-        this(algorithm, new ChannelOutput(channel), cipher, bufferSize, key);
+        this(algorithm, CipherStreams.wrapOutput(channel), cipher, bufferSize, key);
     }
 
     protected AsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final Output output,
             final ICipher cipher, final int bufferSize, final PublicKey key) throws IOException {
         this.algorithm = algorithm;
         this.output = output;
-        this.bufferSize = AsymmetricCipherInputStream.checkBufferSize(cipher, bufferSize);
+        this.bufferSize = CipherStreams.checkBufferSize(cipher, bufferSize);
         this.cipher = cipher;
 
         this.key = key;
@@ -305,8 +314,8 @@ public class AsymmetricCipherOutputStream extends OutputStream implements Writab
 
     /** Forcibly free the direct buffers. */
     protected void freeBuffers() {
-        AsymmetricCipherInputStream.freeDirectBuffer(inBuffer);
-        AsymmetricCipherInputStream.freeDirectBuffer(outBuffer);
+        CipherStreams.freeDirectBuffer(inBuffer);
+        CipherStreams.freeDirectBuffer(outBuffer);
     }
 
     /**

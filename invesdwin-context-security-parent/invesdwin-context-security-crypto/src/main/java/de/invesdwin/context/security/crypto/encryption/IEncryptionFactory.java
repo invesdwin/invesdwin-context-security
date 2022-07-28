@@ -15,6 +15,9 @@ public interface IEncryptionFactory {
 
     void init(ICipher cipher, int mode, AlgorithmParameterSpec param);
 
+    /**
+     * Can only be used to encrypt one payload.
+     */
     OutputStream newEncryptor(OutputStream out);
 
     OutputStream newEncryptor(OutputStream out, ICipher cipher);
@@ -22,6 +25,17 @@ public interface IEncryptionFactory {
     InputStream newDecryptor(InputStream in);
 
     InputStream newDecryptor(InputStream in, ICipher cipher);
+
+    /**
+     * Can be used to encrypt multiple messages.
+     */
+    OutputStream newStreamingEncryptor(OutputStream out);
+
+    OutputStream newStreamingEncryptor(OutputStream out, ICipher cipher);
+
+    InputStream newStreamingDecryptor(InputStream in);
+
+    InputStream newStreamingDecryptor(InputStream in, ICipher cipher);
 
     int encrypt(IByteBuffer src, IByteBuffer dest);
 

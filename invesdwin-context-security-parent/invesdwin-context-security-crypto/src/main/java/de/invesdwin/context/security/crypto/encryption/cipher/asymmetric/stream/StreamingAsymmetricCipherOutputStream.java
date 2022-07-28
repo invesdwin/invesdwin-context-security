@@ -9,12 +9,11 @@ import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.Cipher;
 
 import org.apache.commons.crypto.stream.CryptoOutputStream;
-import org.apache.commons.crypto.stream.output.ChannelOutput;
 import org.apache.commons.crypto.stream.output.Output;
-import org.apache.commons.crypto.stream.output.StreamOutput;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.CipherStreams;
 
 @NotThreadSafe
 public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutputStream {
@@ -40,7 +39,12 @@ public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutpu
 
     public StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final OutputStream out,
             final ICipher cipher, final PublicKey key) throws IOException {
-        this(algorithm, out, cipher, AsymmetricCipherInputStream.getDefaultBufferSize(), key, 0);
+        this(algorithm, out, cipher, CipherStreams.getDefaultBufferSize(), key, 0);
+    }
+
+    public StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
+            final WritableByteChannel channel, final ICipher cipher, final PublicKey key) throws IOException {
+        this(algorithm, channel, cipher, CipherStreams.getDefaultBufferSize(), key, 0);
     }
 
     protected StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final OutputStream out,
@@ -61,26 +65,24 @@ public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutpu
 
     public StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
             final OutputStream outputStream, final PublicKey key, final long streamOffset) throws IOException {
-        this(algorithm, outputStream, algorithm.newCipher(), AsymmetricCipherInputStream.getDefaultBufferSize(), key,
-                streamOffset);
+        this(algorithm, outputStream, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key, streamOffset);
     }
 
     public StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
             final WritableByteChannel channel, final PublicKey key, final long streamOffset) throws IOException {
-        this(algorithm, channel, algorithm.newCipher(), AsymmetricCipherInputStream.getDefaultBufferSize(), key,
-                streamOffset);
+        this(algorithm, channel, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key, streamOffset);
     }
 
     protected StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
             final OutputStream outputStream, final ICipher cipher, final int bufferSize, final PublicKey key,
             final long streamOffset) throws IOException {
-        this(algorithm, new StreamOutput(outputStream, bufferSize), cipher, bufferSize, key, streamOffset);
+        this(algorithm, CipherStreams.wrapOutput(outputStream, bufferSize), cipher, bufferSize, key, streamOffset);
     }
 
     protected StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
             final WritableByteChannel channel, final ICipher cipher, final int bufferSize, final PublicKey key,
             final long streamOffset) throws IOException {
-        this(algorithm, new ChannelOutput(channel), cipher, bufferSize, key, streamOffset);
+        this(algorithm, CipherStreams.wrapOutput(channel), cipher, bufferSize, key, streamOffset);
     }
 
     protected StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final Output output,

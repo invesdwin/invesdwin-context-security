@@ -16,6 +16,8 @@ import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeyLength;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.AsymmetricCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.AsymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.StreamingAsymmetricCipherInputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.StreamingAsymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
@@ -27,8 +29,8 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 public class AsymmetricEncryptionFactory implements IEncryptionFactory {
 
     private final IAsymmetricCipherAlgorithm algorithm;
-    private final PublicKey encryptionKey;
-    private final PrivateKey decryptionKey;
+    private final PublicKey publicKey;
+    private final PrivateKey privateKey;
 
     public AsymmetricEncryptionFactory(final byte[] publicKey, final byte[] privateKey) {
         this(IAsymmetricCipherAlgorithm.DEFAULT, publicKey, privateKey);
@@ -53,11 +55,11 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
         this(algorithm, keyPair.getPublic(), keyPair.getPrivate());
     }
 
-    public AsymmetricEncryptionFactory(final IAsymmetricCipherAlgorithm algorithm, final PublicKey encryptionKey,
-            final PrivateKey decryptionKey) {
+    public AsymmetricEncryptionFactory(final IAsymmetricCipherAlgorithm algorithm, final PublicKey publicKey,
+            final PrivateKey privateKey) {
         this.algorithm = algorithm;
-        this.encryptionKey = encryptionKey;
-        this.decryptionKey = decryptionKey;
+        this.publicKey = publicKey;
+        this.privateKey = privateKey;
     }
 
     @Override
@@ -69,10 +71,10 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
     public void init(final ICipher cipher, final int mode, final AlgorithmParameterSpec param) {
         switch (mode) {
         case Cipher.ENCRYPT_MODE:
-            cipher.init(mode, encryptionKey, param);
+            cipher.init(mode, publicKey, param);
             break;
         case Cipher.DECRYPT_MODE:
-            cipher.init(mode, decryptionKey, param);
+            cipher.init(mode, privateKey, param);
             break;
         default:
             throw UnknownArgumentException.newInstance(int.class, mode);
@@ -87,7 +89,7 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
     @Override
     public OutputStream newEncryptor(final OutputStream out, final ICipher cipher) {
         try {
-            return new StreamingAsymmetricCipherOutputStream(algorithm, out, cipher, encryptionKey);
+            return new AsymmetricCipherOutputStream(algorithm, out, cipher, publicKey);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
@@ -101,7 +103,35 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
     @Override
     public InputStream newDecryptor(final InputStream in, final ICipher cipher) {
         try {
-            return new StreamingAsymmetricCipherInputStream(algorithm, in, cipher, decryptionKey);
+            return new AsymmetricCipherInputStream(algorithm, in, cipher, privateKey);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public OutputStream newStreamingEncryptor(final OutputStream out) {
+        return newStreamingEncryptor(out, algorithm.newCipher());
+    }
+
+    @Override
+    public OutputStream newStreamingEncryptor(final OutputStream out, final ICipher cipher) {
+        try {
+            return new StreamingAsymmetricCipherOutputStream(algorithm, out, cipher, publicKey);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public InputStream newStreamingDecryptor(final InputStream in) {
+        return newStreamingDecryptor(in, algorithm.newCipher());
+    }
+
+    @Override
+    public InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher) {
+        try {
+            return new StreamingAsymmetricCipherInputStream(algorithm, in, cipher, privateKey);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

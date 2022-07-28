@@ -75,6 +75,26 @@ public class VerifiedEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
+    public OutputStream newStreamingEncryptor(final OutputStream out) {
+        return newStreamingEncryptor(out, algorithm.newCipher());
+    }
+
+    @Override
+    public OutputStream newStreamingEncryptor(final OutputStream out, final ICipher cipher) {
+        return encryptionFactory.newStreamingEncryptor(out, cipher);
+    }
+
+    @Override
+    public InputStream newStreamingDecryptor(final InputStream in) {
+        return newStreamingDecryptor(in, algorithm.newCipher());
+    }
+
+    @Override
+    public InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher) {
+        return encryptionFactory.newStreamingDecryptor(in, cipher);
+    }
+
+    @Override
     public int encrypt(final IByteBuffer src, final IByteBuffer dest) {
         final int encryptedLength = encryptionFactory.encrypt(src, dest);
         final int signatureLength = verificationFactory.putHash(dest, encryptedLength);

@@ -19,6 +19,8 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.Ciphe
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherInputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherOutputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.ALazyDelegateInputStream;
@@ -92,7 +94,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
             protected OutputStream newDelegate() {
                 final byte[] iv = cipherIV.putNewIV(out);
                 try {
-                    return new StreamingSymmetricCipherOutputStream(algorithm, out, cipher, key, iv);
+                    return new SymmetricCipherOutputStream(algorithm, out, cipher, key, iv);
                 } catch (final IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -107,6 +109,46 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
 
     @Override
     public InputStream newDecryptor(final InputStream in, final ICipher cipher) {
+        return new ALazyDelegateInputStream() {
+            @Override
+            protected InputStream newDelegate() {
+                final byte[] iv = cipherIV.getNewIV(in);
+                try {
+                    return new SymmetricCipherInputStream(algorithm, in, cipher, key, iv);
+                } catch (final IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
+
+    @Override
+    public OutputStream newStreamingEncryptor(final OutputStream out) {
+        return newStreamingEncryptor(out, algorithm.newCipher());
+    }
+
+    @Override
+    public OutputStream newStreamingEncryptor(final OutputStream out, final ICipher cipher) {
+        return new ALazyDelegateOutputStream() {
+            @Override
+            protected OutputStream newDelegate() {
+                final byte[] iv = cipherIV.putNewIV(out);
+                try {
+                    return new StreamingSymmetricCipherOutputStream(algorithm, out, cipher, key, iv);
+                } catch (final IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
+
+    @Override
+    public InputStream newStreamingDecryptor(final InputStream in) {
+        return newStreamingDecryptor(in, algorithm.newCipher());
+    }
+
+    @Override
+    public InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher) {
         return new ALazyDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
