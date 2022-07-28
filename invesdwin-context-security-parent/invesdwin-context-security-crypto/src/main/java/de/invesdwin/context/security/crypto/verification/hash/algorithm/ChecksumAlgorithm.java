@@ -80,8 +80,8 @@ public enum ChecksumAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public boolean isAuthentication() {
-        return false;
+    public HashAlgorithmType getType() {
+        return HashAlgorithmType.Checksum;
     }
 
     @Override

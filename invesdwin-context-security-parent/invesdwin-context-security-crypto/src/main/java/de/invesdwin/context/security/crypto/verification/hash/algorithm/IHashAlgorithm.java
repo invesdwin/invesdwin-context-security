@@ -12,14 +12,7 @@ public interface IHashAlgorithm extends IHashFactory {
 
     int getHashSize();
 
-    /**
-     * Returns true if this is not just a verification based on a message digest but an authentication based on a mac as
-     * well.
-     * 
-     * Normally only authenticated hashes require a key on initialization. For non-authenticated hashes the key will
-     * then be used as a pepper (a static salt).
-     */
-    boolean isAuthentication();
+    HashAlgorithmType getType();
 
     Key wrapKey(byte[] key);
 

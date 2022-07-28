@@ -52,8 +52,8 @@ public enum HmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public boolean isAuthentication() {
-        return true;
+    public HashAlgorithmType getType() {
+        return HashAlgorithmType.Mac;
     }
 
     @Override

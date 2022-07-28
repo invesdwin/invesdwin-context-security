@@ -60,8 +60,8 @@ public enum DigestAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public boolean isAuthentication() {
-        return false;
+    public HashAlgorithmType getType() {
+        return HashAlgorithmType.Digest;
     }
 
     @Override

@@ -36,8 +36,8 @@ public enum GmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public boolean isAuthentication() {
-        return true;
+    public HashAlgorithmType getType() {
+        return HashAlgorithmType.Mac;
     }
 
     @Override
