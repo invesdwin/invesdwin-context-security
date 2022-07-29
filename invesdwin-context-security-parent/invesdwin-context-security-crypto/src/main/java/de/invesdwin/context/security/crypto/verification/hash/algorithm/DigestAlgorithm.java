@@ -61,6 +61,11 @@ public enum DigestAlgorithm implements IHashAlgorithm {
     }
 
     @Override
+    public int getKeySize() {
+        return getHashSize();
+    }
+
+    @Override
     public IHash newHash() {
         return new JceDigestHash(algorithm);
     }

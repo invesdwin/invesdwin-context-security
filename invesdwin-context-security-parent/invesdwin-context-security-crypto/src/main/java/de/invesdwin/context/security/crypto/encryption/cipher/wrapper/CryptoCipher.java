@@ -119,7 +119,6 @@ public class CryptoCipher implements ICipher {
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
-            assert written == getBlockSize() : "written [" + written + "] != blockSize [" + getBlockSize() + "]";
             return buffer.asByteArrayCopy(0, written);
         } finally {
             ByteBuffers.EXPANDABLE_POOL.returnObject(buffer);

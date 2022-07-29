@@ -30,7 +30,7 @@ public class CipherRandomIV implements ICipherIV {
     }
 
     @Override
-    public int getBlockSizeIV() {
+    public int getIvSize() {
         return algorithm.getIvSize();
     }
 

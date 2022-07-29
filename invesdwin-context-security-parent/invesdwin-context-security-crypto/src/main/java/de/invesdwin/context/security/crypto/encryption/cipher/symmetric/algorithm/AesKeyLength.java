@@ -8,6 +8,8 @@ public enum AesKeyLength {
     _196(24),
     _256(32);
 
+    public static final AesKeyLength BLOCK_SIZE = AesKeyLength._128;
+
     public static final AesKeyLength DEFAULT = AesKeyLength._256;
 
     private int bytes;

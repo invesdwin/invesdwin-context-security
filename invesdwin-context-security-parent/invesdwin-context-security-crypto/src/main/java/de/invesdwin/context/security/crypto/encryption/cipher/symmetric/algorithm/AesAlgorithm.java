@@ -48,7 +48,7 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
      *             https://docs.microsoft.com/en-us/dotnet/standard/security/vulnerabilities-cbc-mode
      */
     @Deprecated
-    AES_CBC_PKCS5Padding("AES/CBC/PKCS5Padding", AesKeyLength._128.getBytes(), 0) {
+    AES_CBC_PKCS5Padding("AES/CBC/PKCS5Padding", AesKeyLength.BLOCK_SIZE.getBytes(), 0) {
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -62,7 +62,7 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
     /**
      * encryption only, streaming capable
      */
-    AES_CTR_NoPadding("AES/CTR/NoPadding", AesKeyLength._128.getBytes(), 0) {
+    AES_CTR_NoPadding("AES/CTR/NoPadding", AesKeyLength.BLOCK_SIZE.getBytes(), 0) {
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -80,22 +80,20 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
      * 
      * https://stackoverflow.com/questions/54659935/java-aes-gcm-very-slow-compared-to-aes-ctr
      */
-    AES_GCM_NoPadding("AES/GCM/NoPadding", 12, AesKeyLength._128.getBytes()) {
+    AES_GCM_NoPadding("AES/GCM/NoPadding", 12, AesKeyLength.BLOCK_SIZE.getBytes()) {
 
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
-            return new GCMParameterSpec(AesKeyLength._128.getBits(), iv);
+            return new GCMParameterSpec(AesKeyLength.BLOCK_SIZE.getBits(), iv);
         }
 
         @Override
         public AlgorithmParameterSpec wrapParam(final MutableIvParameterSpec iv) {
-            return new GCMParameterSpec(AesKeyLength._128.getBits(), iv.getIV());
+            return new GCMParameterSpec(AesKeyLength.BLOCK_SIZE.getBits(), iv.getIV());
         }
     };
 
     public static final AesAlgorithm DEFAULT = AES_CTR_NoPadding;
-
-    public static final int BLOCK_SIZE = AesKeyLength._128.getBytes();
 
     private final String algorithm;
     private final int ivSize;
@@ -157,11 +155,15 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
     }
 
     protected ICipher newCryptoCipher() {
-        //ommons-crypto does not yet support openssl 3.0.0: https://issues.apache.org/jira/projects/CRYPTO/issues/CRYPTO-164
+        return newCryptoCipher(getAlgorithm(), getHashSize());
+    }
+
+    public static ICipher newCryptoCipher(final String algorithm, final int hashSize) {
+        //commons-crypto does not yet support openssl 3.0.0: https://issues.apache.org/jira/projects/CRYPTO/issues/CRYPTO-164
         try {
-            final org.apache.commons.crypto.cipher.CryptoCipher cryptoCipher = Utils.getCipherInstance(getAlgorithm(),
+            final org.apache.commons.crypto.cipher.CryptoCipher cryptoCipher = Utils.getCipherInstance(algorithm,
                     SystemProperties.SYSTEM_PROPERTIES);
-            return new CryptoCipher(cryptoCipher, getHashSize());
+            return new CryptoCipher(cryptoCipher, hashSize);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

@@ -13,7 +13,7 @@ public interface ICipherIV {
 
     ISymmetricCipherAlgorithm getAlgorithm();
 
-    int getBlockSizeIV();
+    int getIvSize();
 
     int putIV(IByteBuffer output, MutableIvParameterSpec destIV);
 

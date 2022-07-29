@@ -35,7 +35,7 @@ public class CipherPresharedIV implements ICipherIV {
     }
 
     @Override
-    public int getBlockSizeIV() {
+    public int getIvSize() {
         return 0;
     }
 

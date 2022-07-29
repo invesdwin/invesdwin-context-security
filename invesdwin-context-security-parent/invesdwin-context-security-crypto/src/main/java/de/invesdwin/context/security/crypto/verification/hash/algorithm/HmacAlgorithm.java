@@ -33,12 +33,12 @@ public enum HmacAlgorithm implements IHashAlgorithm {
     public static final HmacAlgorithm DEFAULT = HMAC_SHA_256;
     private final String algorithm;
     private final HashObjectPool hashPool;
-    private int macSize;
+    private int hashSize;
 
-    HmacAlgorithm(final String algorithm, final int macSize) {
+    HmacAlgorithm(final String algorithm, final int hashSize) {
         this.algorithm = algorithm;
         this.hashPool = new HashObjectPool(this);
-        this.macSize = macSize;
+        this.hashSize = hashSize;
     }
 
     @Override
@@ -58,7 +58,12 @@ public enum HmacAlgorithm implements IHashAlgorithm {
 
     @Override
     public int getHashSize() {
-        return macSize;
+        return hashSize;
+    }
+
+    @Override
+    public int getKeySize() {
+        return getHashSize();
     }
 
     @Override

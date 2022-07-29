@@ -4,27 +4,26 @@ import java.security.Key;
 
 import javax.annotation.concurrent.Immutable;
 
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
-import de.invesdwin.context.security.crypto.verification.hash.wrapper.SymmetricCipherAadHash;
+import de.invesdwin.context.security.crypto.verification.hash.wrapper.SymmetricCipherHash;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
-public enum GmacAlgorithm implements IHashAlgorithm {
-    GMAC_AES_128(AesAlgorithm.AES_GCM_NoPadding, AesKeyLength._128.getBytes()),
-    GMAC_AES_196(AesAlgorithm.AES_GCM_NoPadding, AesKeyLength._196.getBytes()),
-    GMAC_AES_256(AesAlgorithm.AES_GCM_NoPadding, AesKeyLength._256.getBytes());
+public enum CmacAlgorithm implements IHashAlgorithm {
+    CMAC_AES_128("AES/CBC/NoPadding", AesKeyLength._128.getBytes()),
+    CMAC_AES_196("AES/CBC/NoPadding", AesKeyLength._196.getBytes()),
+    CMAC_AES_256("AES/CBC/NoPadding", AesKeyLength._256.getBytes());
 
-    public static final GmacAlgorithm DEFAULT = GMAC_AES_256;
-    private final ISymmetricCipherAlgorithm algorithm;
+    public static final CmacAlgorithm DEFAULT = CMAC_AES_256;
+    private final String algorithm;
     private final HashObjectPool hashPool;
     private int keySize;
 
-    GmacAlgorithm(final ISymmetricCipherAlgorithm algorithm, final int keySize) {
+    CmacAlgorithm(final String algorithm, final int keySize) {
         this.algorithm = algorithm;
         this.hashPool = new HashObjectPool(this);
         this.keySize = keySize;
@@ -41,23 +40,26 @@ public enum GmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public int getKeySize() {
-        return keySize;
-    }
-
-    @Override
     public int getHashSize() {
         return AesKeyLength.BLOCK_SIZE.getBytes();
     }
 
     @Override
+    public int getKeySize() {
+        return keySize;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
     public IHash newHash() {
-        return new SymmetricCipherAadHash(algorithm, new CipherCountedIV(algorithm));
+        final AesAlgorithm reference = AesAlgorithm.AES_CBC_PKCS5Padding;
+        return new SymmetricCipherHash(AesAlgorithm.newCryptoCipher(algorithm, reference.getHashSize()),
+                new CipherCountedIV(reference));
     }
 
     @Override
     public Key wrapKey(final byte[] key) {
-        return algorithm.wrapKey(key);
+        return AesAlgorithm.AES_CTR_NoPadding.wrapKey(key);
     }
 
     @Override

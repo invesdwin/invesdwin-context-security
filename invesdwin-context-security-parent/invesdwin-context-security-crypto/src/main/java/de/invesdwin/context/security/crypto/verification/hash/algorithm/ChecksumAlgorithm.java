@@ -78,6 +78,11 @@ public enum ChecksumAlgorithm implements IHashAlgorithm {
     }
 
     @Override
+    public int getKeySize() {
+        return getHashSize();
+    }
+
+    @Override
     public HashAlgorithmType getType() {
         return HashAlgorithmType.Checksum;
     }
