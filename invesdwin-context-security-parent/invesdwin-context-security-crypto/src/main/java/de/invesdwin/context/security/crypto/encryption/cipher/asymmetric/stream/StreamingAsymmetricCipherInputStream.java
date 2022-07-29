@@ -383,7 +383,9 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
         inBuffer.clear();
         outBuffer.clear();
         outBuffer.limit(0);
-        resetCipher();
+        if (offset != 0) {
+            resetCipher();
+        }
     }
 
     /**

@@ -436,7 +436,9 @@ public class StreamingSymmetricCipherInputStream extends SymmetricCipherInputStr
         inBuffer.clear();
         outBuffer.clear();
         outBuffer.limit(0);
-        resetCipher(offset);
+        if (offset != 0) {
+            resetCipher(offset);
+        }
     }
 
     /**

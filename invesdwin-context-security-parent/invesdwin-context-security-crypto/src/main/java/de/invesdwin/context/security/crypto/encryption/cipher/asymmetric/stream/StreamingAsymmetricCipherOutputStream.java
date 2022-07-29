@@ -91,7 +91,9 @@ public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutpu
 
         this.streamOffset = streamOffset;
 
-        resetCipher();
+        if (streamOffset != 0) {
+            resetCipher();
+        }
     }
 
     /**

@@ -126,7 +126,9 @@ public class StreamingSymmetricCipherOutputStream extends SymmetricCipherOutputS
         this.initIV = iv.clone();
         this.iv = new MutableIvParameterSpec(iv.clone());
 
-        resetCipher();
+        if (streamOffset != 0) {
+            resetCipher();
+        }
     }
 
     /**
