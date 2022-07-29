@@ -1,104 +1,74 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm;
 
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 
 import javax.annotation.concurrent.Immutable;
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.padding.RsaOaepAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.padding.RsaPkcs1Algorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
-import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipher;
 
 /**
+ * RSA requires padding to be secure. Otherwise the same plaintext will be encrypted the same way always.
+ * RSA/ECB/NoPadding does not work correctly because the decryption has a too long size because unpadding is missing.
+ * 
+ * https://crypto.stackexchange.com/questions/3608/why-is-padding-used-for-rsa-encryption-given-that-it-is-not-a-block-cipher
+ * 
  * https://github.com/corretto/amazon-corretto-crypto-provider
  */
 @Immutable
 public enum RsaAlgorithm implements IAsymmetricCipherAlgorithm {
-    /**
-     * RSA requires padding to be secure. Otherwise the same plaintext will be encrypted the same way always.
-     * 
-     * https://crypto.stackexchange.com/questions/3608/why-is-padding-used-for-rsa-encryption-given-that-it-is-not-a-block-cipher
-     */
-    @Deprecated
-    RSA_ECB_NoPadding("RSA/ECB/NoPadding"),
-    RSA_ECB_PKCS1Padding("RSA/ECB/PKCS1Padding");
+    RSA_ECB_PKCS1Padding(RsaPkcs1Algorithm.INSTANCE),
+    RSA_ECB_OAEPPadding(RsaOaepAlgorithm.DEFAULT);
 
-    //CHECKSTYLE:OFF
-    public static final RsaOaepAlgorithm RSA_ECB_OAEPPadding = RsaOaepAlgorithm.DEFAULT;
-    //CHECKSTYLE:ON
+    private final IAsymmetricCipherAlgorithm delegate;
 
-    public static final IAsymmetricCipherAlgorithm DEFAULT = RSA_ECB_OAEPPadding;
-
-    private final String algorithm;
-    private final CipherObjectPool cipherPool;
-
-    RsaAlgorithm(final String algorithm) {
-        this.algorithm = algorithm;
-        this.cipherPool = new CipherObjectPool(this);
+    RsaAlgorithm(final IAsymmetricCipherAlgorithm delegate) {
+        this.delegate = delegate;
     }
 
     @Override
     public String toString() {
-        return algorithm;
+        return delegate.toString();
     }
 
     @Override
     public String getKeyAlgorithm() {
-        return "RSA";
+        return delegate.getKeyAlgorithm();
     }
 
     @Override
     public ICipher newCipher() {
-        try {
-            return new JceCipher(Cipher.getInstance(getAlgorithm()), 0);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException(e);
-        }
+        return delegate.newCipher();
     }
 
     @Override
     public String getAlgorithm() {
-        return algorithm;
+        return delegate.getAlgorithm();
     }
 
     @Override
     public CipherObjectPool getCipherPool() {
-        return cipherPool;
+        return delegate.getCipherPool();
     }
 
-    /**
-     * https://stackoverflow.com/questions/19353748/how-to-convert-byte-array-to-privatekey-or-publickey-type
-     */
     @Override
     public PrivateKey wrapPrivateKey(final byte[] privateKey) {
-        try {
-            return KeyFactory.getInstance(getKeyAlgorithm()).generatePrivate(new PKCS8EncodedKeySpec(privateKey));
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        return delegate.wrapPrivateKey(privateKey);
     }
 
     @Override
     public PublicKey wrapPublicKey(final byte[] publicKey) {
-        try {
-            return KeyFactory.getInstance(getKeyAlgorithm()).generatePublic(new X509EncodedKeySpec(publicKey));
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        return delegate.wrapPublicKey(publicKey);
     }
 
     @Override
     public AlgorithmParameterSpec getParam() {
-        return null;
+        return delegate.getParam();
     }
 
 }

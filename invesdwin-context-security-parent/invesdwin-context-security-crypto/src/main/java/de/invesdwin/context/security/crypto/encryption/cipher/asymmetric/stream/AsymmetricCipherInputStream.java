@@ -92,16 +92,16 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
         this.algorithm = algorithm;
         this.input = input;
         this.cipher = cipher;
-        this.bufferSize = CipherStreams.checkBufferSize(cipher, bufferSize);
 
         this.key = key;
         this.params = algorithm.getParam();
 
-        inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
-        outBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
-        outBuffer.limit(0);
-
         initCipher();
+        this.bufferSize = CipherStreams.checkBufferSize(cipher, bufferSize);
+        this.inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
+        this.outBuffer = java.nio.ByteBuffer
+                .allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
+        this.outBuffer.limit(0);
     }
 
     /**

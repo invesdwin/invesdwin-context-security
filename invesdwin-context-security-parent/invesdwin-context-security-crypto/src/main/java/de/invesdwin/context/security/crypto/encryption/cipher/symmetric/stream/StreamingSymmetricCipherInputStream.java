@@ -404,15 +404,6 @@ public class StreamingSymmetricCipherInputStream extends SymmetricCipherInputStr
     }
 
     /**
-     * Overrides the {@link StreamingSymmetricCipherInputStream#initCipher()}. Initializes the cipher.
-     */
-    @Override
-    protected void initCipher() {
-        // Do nothing for initCipher
-        // Will reset the cipher when reset the stream offset
-    }
-
-    /**
      * Calculates the counter and iv, resets the cipher.
      *
      * @param position

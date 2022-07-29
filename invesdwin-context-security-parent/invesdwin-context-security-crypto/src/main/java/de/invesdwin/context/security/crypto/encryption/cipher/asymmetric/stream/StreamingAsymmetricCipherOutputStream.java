@@ -8,7 +8,6 @@ import java.security.PublicKey;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.Cipher;
 
-import org.apache.commons.crypto.stream.CryptoOutputStream;
 import org.apache.commons.crypto.stream.output.Output;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
@@ -138,21 +137,12 @@ public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutpu
         encrypt();
     }
 
-    /**
-     * Overrides the {@link CryptoOutputStream#initCipher()}. Initializes the cipher.
-     */
-    @Override
-    protected void initCipher() {
-        // Do nothing for initCipher
-        // Will reset the cipher considering the stream offset
-    }
-
-    /**
-     * Resets the {@link #cipher}: calculate counter.
-     *
-     */
-    private void resetCipher() {
-        cipher.init(Cipher.ENCRYPT_MODE, key, params);
+    private void resetCipher() throws IOException {
+        try {
+            cipher.init(Cipher.ENCRYPT_MODE, key, params);
+        } catch (final Exception e) {
+            throw new IOException(e);
+        }
         cipherReset = false;
     }
 
@@ -166,14 +156,18 @@ public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutpu
      */
     private void encryptBuffer(final java.nio.ByteBuffer out) throws IOException {
         final int inputSize = inBuffer.remaining();
-        final int n = cipher.update(inBuffer, out);
-        if (n < inputSize) {
-            /**
-             * Typically code will not get here. ICipher#update will consume all input data and put result in outBuffer.
-             * ICipher#doFinal will reset the cipher context.
-             */
-            cipher.doFinal(inBuffer, out);
-            cipherReset = true;
+        try {
+            final int n = cipher.update(inBuffer, out);
+            if (n < inputSize) {
+                /**
+                 * Typically code will not get here. ICipher#update will consume all input data and put result in
+                 * outBuffer. ICipher#doFinal will reset the cipher context.
+                 */
+                cipher.doFinal(inBuffer, out);
+                cipherReset = true;
+            }
+        } catch (final Exception e) {
+            throw new IOException(e);
         }
     }
 

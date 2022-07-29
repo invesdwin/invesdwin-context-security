@@ -47,7 +47,8 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
             //we need a deterministic pseudorandom seed
             final byte[] seed = newDerivedKey(info, length);
             random.setSeed(seed);
-            generator.initialize(length, random);
+            final int lengthBits = length * Byte.SIZE;
+            generator.initialize(lengthBits, random);
             return generator.generateKeyPair();
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);

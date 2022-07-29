@@ -41,6 +41,8 @@ public interface ICipher extends Closeable {
     int doFinal(java.nio.ByteBuffer inBuffer, java.nio.ByteBuffer outBuffer);
 
     default int doFinal(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
+        outBuffer.ensureCapacity(getBlockSize());
+
         final java.nio.ByteBuffer inBufferNio = inBuffer.asNioByteBuffer();
         final java.nio.ByteBuffer outBufferNio = outBuffer.asNioByteBuffer();
 

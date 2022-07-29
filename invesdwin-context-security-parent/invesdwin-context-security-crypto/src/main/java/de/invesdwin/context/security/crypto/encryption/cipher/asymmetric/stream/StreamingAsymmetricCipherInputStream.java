@@ -160,12 +160,12 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
             if (buf.isDirect() && buf.remaining() >= inBuffer.position()) {
                 // Use buf as the output buffer directly
                 decryptInPlace(buf);
-                postDecryption(streamOffset);
+                postDecryption();
                 return n;
             }
             // Use outBuffer as the output buffer
             decrypt();
-            postDecryption(streamOffset);
+            postDecryption();
         }
 
         // Copy decrypted data from outBuffer to buf
@@ -252,7 +252,7 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
 
         streamOffset += n; // Read n bytes
         decrypt();
-        postDecryption(streamOffset);
+        postDecryption();
         return outBuffer.remaining();
     }
 
@@ -329,7 +329,7 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
                 n += outBuffer.remaining();
                 buf.put(outBuffer);
             } finally {
-                postDecryption(streamOffset - (len - n));
+                postDecryption();
             }
         }
         ByteBuffers.position(buf, pos);
@@ -338,30 +338,18 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
     /**
      * This method is executed immediately after decryption. Checks whether cipher should be updated.
      *
-     * @param position
-     *            the given position in the data..
-     * @return the byte.
      * @throws IOException
      *             if an I/O error occurs.
      */
-    protected void postDecryption(final long position) throws IOException {
+    protected void postDecryption() throws IOException {
         if (cipherReset) {
             /*
              * This code is generally not executed since the cipher usually maintains cipher context (e.g. the counter)
              * internally. However, some implementations can't maintain context so a re-init is necessary after each
              * decryption call.
              */
-            resetCipher(position);
+            resetCipher();
         }
-    }
-
-    /**
-     * Overrides the {@link StreamingAsymmetricCipherInputStream#initCipher()}. Initializes the cipher.
-     */
-    @Override
-    protected void initCipher() {
-        // Do nothing for initCipher
-        // Will reset the cipher when reset the stream offset
     }
 
     /**
@@ -372,7 +360,7 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
      * @throws IOException
      *             if an I/O error occurs.
      */
-    protected void resetCipher(final long position) throws IOException {
+    protected void resetCipher() throws IOException {
         try {
             cipher.init(Cipher.DECRYPT_MODE, key, params);
         } catch (final Exception e) {
@@ -395,7 +383,7 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
         inBuffer.clear();
         outBuffer.clear();
         outBuffer.limit(0);
-        resetCipher(offset);
+        resetCipher();
     }
 
     /**

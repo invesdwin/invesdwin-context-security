@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm;
+package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.padding;
 
 import java.security.spec.MGF1ParameterSpec;
 

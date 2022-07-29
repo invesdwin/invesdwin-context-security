@@ -83,16 +83,16 @@ public class AsymmetricCipherOutputStream extends OutputStream implements Writab
             final ICipher cipher, final int bufferSize, final PublicKey key) throws IOException {
         this.algorithm = algorithm;
         this.output = output;
-        this.bufferSize = CipherStreams.checkBufferSize(cipher, bufferSize);
         this.cipher = cipher;
 
         this.key = key;
         this.params = algorithm.getParam();
 
-        inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
-        outBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
-
         initCipher();
+        this.bufferSize = CipherStreams.checkBufferSize(cipher, bufferSize);
+        this.inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
+        this.outBuffer = java.nio.ByteBuffer
+                .allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
     }
 
     /**

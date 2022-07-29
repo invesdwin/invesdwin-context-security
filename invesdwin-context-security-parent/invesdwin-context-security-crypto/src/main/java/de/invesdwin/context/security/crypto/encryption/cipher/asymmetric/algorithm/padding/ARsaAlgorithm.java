@@ -1,10 +1,9 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm;
+package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.padding;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -12,33 +11,27 @@ import java.security.spec.X509EncodedKeySpec;
 import javax.annotation.concurrent.Immutable;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.OAEPParameterSpec;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
-import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipherWithKeyBlockSize;
 
+/**
+ * RSA requires padding to be secure. Otherwise the same plaintext will be encrypted the same way always.
+ * RSA/ECB/NoPadding does not work correctly because the decryption has a too long size because unpadding is missing.
+ * 
+ * https://crypto.stackexchange.com/questions/3608/why-is-padding-used-for-rsa-encryption-given-that-it-is-not-a-block-cipher
+ * 
+ * https://github.com/corretto/amazon-corretto-crypto-provider
+ */
 @Immutable
-public class RsaOaepAlgorithm implements IAsymmetricCipherAlgorithm {
+public abstract class ARsaAlgorithm implements IAsymmetricCipherAlgorithm {
 
-    public static final RsaOaepAlgorithm DEFAULT = new RsaOaepAlgorithm(OaepPadding.DEFAULT.getCommonParam());
-
-    private final OAEPParameterSpec param;
     private final CipherObjectPool cipherPool;
 
-    public RsaOaepAlgorithm(final OAEPParameterSpec param) {
-        this.param = param;
+    public ARsaAlgorithm() {
         this.cipherPool = new CipherObjectPool(this);
-    }
-
-    @Override
-    public ICipher newCipher() {
-        try {
-            return new JceCipher(Cipher.getInstance(getAlgorithm()), 0);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -47,13 +40,17 @@ public class RsaOaepAlgorithm implements IAsymmetricCipherAlgorithm {
     }
 
     @Override
-    public String getAlgorithm() {
-        return "RSA/ECB/OAEPPadding";
+    public String getKeyAlgorithm() {
+        return "RSA";
     }
 
     @Override
-    public String getKeyAlgorithm() {
-        return "RSA";
+    public ICipher newCipher() {
+        try {
+            return new JceCipherWithKeyBlockSize(Cipher.getInstance(getAlgorithm()), 0);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -80,11 +77,6 @@ public class RsaOaepAlgorithm implements IAsymmetricCipherAlgorithm {
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public AlgorithmParameterSpec getParam() {
-        return param;
     }
 
 }

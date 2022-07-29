@@ -92,16 +92,16 @@ public class SymmetricCipherOutputStream extends OutputStream implements Writabl
             final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv) throws IOException {
         this.algorithm = algorithm;
         this.output = output;
-        this.bufferSize = CipherStreams.checkBufferSize(cipher, bufferSize);
         this.cipher = cipher;
 
         this.key = algorithm.wrapKey(key);
         this.params = algorithm.wrapParam(iv);
 
-        inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
-        outBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
-
         initCipher();
+        this.bufferSize = CipherStreams.checkBufferSize(cipher, bufferSize);
+        this.inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
+        this.outBuffer = java.nio.ByteBuffer
+                .allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
     }
 
     /**
