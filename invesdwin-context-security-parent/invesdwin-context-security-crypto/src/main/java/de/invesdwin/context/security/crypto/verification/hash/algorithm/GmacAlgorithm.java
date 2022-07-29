@@ -10,7 +10,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorith
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
-import de.invesdwin.context.security.crypto.verification.hash.wrapper.SymmetricCipherAadHash;
+import de.invesdwin.context.security.crypto.verification.hash.wrapper.SymmetricCipherHashAad;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
@@ -52,7 +52,7 @@ public enum GmacAlgorithm implements IHashAlgorithm {
 
     @Override
     public IHash newHash() {
-        return new SymmetricCipherAadHash(algorithm, new CipherCountedIV(algorithm));
+        return new SymmetricCipherHashAad(algorithm, new CipherCountedIV(algorithm));
     }
 
     @Override

@@ -16,7 +16,7 @@ import de.invesdwin.util.streams.buffer.bytes.EmptyByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
-public class SymmetricCipherAadHash implements IHash {
+public class SymmetricCipherHashAad implements IHash {
 
     private final ISymmetricCipherAlgorithm algorithm;
     private final ICipher cipher;
@@ -26,7 +26,7 @@ public class SymmetricCipherAadHash implements IHash {
     private final IByteBuffer ivBlock;
     private final int hashSize;
 
-    public SymmetricCipherAadHash(final ISymmetricCipherAlgorithm algorithm, final ICipherIV cipherIV) {
+    public SymmetricCipherHashAad(final ISymmetricCipherAlgorithm algorithm, final ICipherIV cipherIV) {
         this.algorithm = algorithm;
         this.cipher = algorithm.newCipher();
         this.cipherIV = cipherIV;
