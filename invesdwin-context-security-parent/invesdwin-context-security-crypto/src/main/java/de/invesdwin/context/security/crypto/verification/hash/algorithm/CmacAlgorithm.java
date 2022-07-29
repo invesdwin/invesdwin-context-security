@@ -14,11 +14,14 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
 public enum CmacAlgorithm implements IHashAlgorithm {
-    CMAC_AES_128("AES/CBC/NoPadding", AesKeyLength._128.getBytes()),
-    CMAC_AES_196("AES/CBC/NoPadding", AesKeyLength._196.getBytes()),
-    CMAC_AES_256("AES/CBC/NoPadding", AesKeyLength._256.getBytes());
+    CMAC_AES_128("CmacAES128", AesKeyLength._128.getBytes()),
+    CMAC_AES_196("CmacAES196", AesKeyLength._196.getBytes()),
+    CMAC_AES_256("CmacAES256", AesKeyLength._256.getBytes());
 
     public static final CmacAlgorithm DEFAULT = CMAC_AES_256;
+
+    @SuppressWarnings("deprecation")
+    private static final AesAlgorithm REFERENCE = AesAlgorithm.AES_CBC_PKCS5Padding;
     private final String algorithm;
     private final HashObjectPool hashPool;
     private int keySize;
@@ -31,7 +34,7 @@ public enum CmacAlgorithm implements IHashAlgorithm {
 
     @Override
     public String getAlgorithm() {
-        return name();
+        return algorithm;
     }
 
     @Override
@@ -49,17 +52,16 @@ public enum CmacAlgorithm implements IHashAlgorithm {
         return keySize;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public IHash newHash() {
-        final AesAlgorithm reference = AesAlgorithm.AES_CBC_PKCS5Padding;
-        return new SymmetricCipherHash(AesAlgorithm.newCryptoCipher(algorithm, reference.getHashSize()),
-                new CipherCountedIV(reference));
+        return new SymmetricCipherHash(
+                AesAlgorithm.newCryptoCipher("AES/CBC/NoPadding", REFERENCE.getHashSize()),
+                new CipherCountedIV(REFERENCE));
     }
 
     @Override
     public Key wrapKey(final byte[] key) {
-        return AesAlgorithm.AES_CTR_NoPadding.wrapKey(key);
+        return REFERENCE.wrapKey(key);
     }
 
     @Override

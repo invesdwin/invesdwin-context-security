@@ -4,7 +4,6 @@ import java.security.Key;
 
 import javax.annotation.concurrent.Immutable;
 
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
@@ -15,16 +14,18 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
 public enum GmacAlgorithm implements IHashAlgorithm {
-    GMAC_AES_128(AesAlgorithm.AES_GCM_NoPadding, AesKeyLength._128.getBytes()),
-    GMAC_AES_196(AesAlgorithm.AES_GCM_NoPadding, AesKeyLength._196.getBytes()),
-    GMAC_AES_256(AesAlgorithm.AES_GCM_NoPadding, AesKeyLength._256.getBytes());
+    GMAC_AES_128("GmacAES128", AesKeyLength._128.getBytes()),
+    GMAC_AES_196("GmacAES196", AesKeyLength._196.getBytes()),
+    GMAC_AES_256("GmacAES256", AesKeyLength._256.getBytes());
 
     public static final GmacAlgorithm DEFAULT = GMAC_AES_256;
-    private final ISymmetricCipherAlgorithm algorithm;
-    private final HashObjectPool hashPool;
-    private int keySize;
 
-    GmacAlgorithm(final ISymmetricCipherAlgorithm algorithm, final int keySize) {
+    private static final AesAlgorithm REFERENCE = AesAlgorithm.AES_GCM_NoPadding;
+    private final String algorithm;
+    private final HashObjectPool hashPool;
+    private final int keySize;
+
+    GmacAlgorithm(final String algorithm, final int keySize) {
         this.algorithm = algorithm;
         this.hashPool = new HashObjectPool(this);
         this.keySize = keySize;
@@ -32,7 +33,7 @@ public enum GmacAlgorithm implements IHashAlgorithm {
 
     @Override
     public String getAlgorithm() {
-        return name();
+        return algorithm;
     }
 
     @Override
@@ -52,12 +53,12 @@ public enum GmacAlgorithm implements IHashAlgorithm {
 
     @Override
     public IHash newHash() {
-        return new SymmetricCipherHashAad(algorithm, new CipherCountedIV(algorithm));
+        return new SymmetricCipherHashAad(REFERENCE, new CipherCountedIV(REFERENCE));
     }
 
     @Override
     public Key wrapKey(final byte[] key) {
-        return algorithm.wrapKey(key);
+        return REFERENCE.wrapKey(key);
     }
 
     @Override
