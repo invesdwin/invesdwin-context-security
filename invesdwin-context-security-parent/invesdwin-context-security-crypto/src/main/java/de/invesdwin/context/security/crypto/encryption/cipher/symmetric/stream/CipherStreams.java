@@ -101,7 +101,12 @@ public final class CipherStreams {
      */
     public static int checkBufferSize(final ICipher cipher, final int bufferSize) {
         Utils.checkArgument(bufferSize >= MIN_BUFFER_SIZE, "Minimum value of buffer size is " + MIN_BUFFER_SIZE + ".");
-        return bufferSize - bufferSize % cipher.getBlockSize();
+        final int blockSize = cipher.getBlockSize();
+        if (blockSize == 0) {
+            return bufferSize;
+        } else {
+            return bufferSize - bufferSize % blockSize;
+        }
     }
 
 }

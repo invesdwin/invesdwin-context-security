@@ -356,17 +356,6 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
     }
 
     /**
-     * Gets the counter for input stream position.
-     *
-     * @param position
-     *            the given position in the data.
-     * @return the counter for input stream position.
-     */
-    protected long getCounter(final long position) {
-        return position / cipher.getBlockSize();
-    }
-
-    /**
      * Overrides the {@link StreamingAsymmetricCipherInputStream#initCipher()}. Initializes the cipher.
      */
     @Override

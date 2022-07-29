@@ -1,24 +1,20 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.symmetric;
+package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.security.KeyPair;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeyLength;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.AsymmetricCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.AsymmetricCipherOutputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.StreamingAsymmetricCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.StreamingAsymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherPresharedIV;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherRandomIV;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherInputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherOutputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherInputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
@@ -31,7 +27,7 @@ import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 
 @NotThreadSafe
-public class SymmetricEncryptionFactoryTest extends ATest {
+public class AsymmetricEncryptionFactoryTest extends ATest {
 
     @Test
     public void testEncryptionAndDecryption() {
@@ -41,26 +37,20 @@ public class SymmetricEncryptionFactoryTest extends ATest {
             final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
             random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
+                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
-        for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
-            final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
-            final CipherCountedIV countedIV = new CipherCountedIV(algorithm);
-            final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
-                    derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize()));
-            final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
-            for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
-                final SymmetricEncryptionFactory factory = new SymmetricEncryptionFactory(algorithm, key, iv);
-                testEncryptionAndDecryption(factory, "1234567890");
-                testEncryptionAndDecryption(factory, "0987654321");
-            }
+        for (final RsaAlgorithm algorithm : RsaAlgorithm.values()) {
+            final KeyPair key = derivedKeyProvider.newDerivedKeyPair(algorithm.getKeyAlgorithm(),
+                    "cipher-key".getBytes(), RsaKeyLength.DEFAULT.getBytes());
+            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(algorithm, key);
+            testEncryptionAndDecryption(factory, "1234567890");
+            testEncryptionAndDecryption(factory, "0987654321");
         }
     }
 
-    private void testEncryptionAndDecryption(final SymmetricEncryptionFactory factory, final String payload) {
+    private void testEncryptionAndDecryption(final AsymmetricEncryptionFactory factory, final String payload) {
         final String srcStr = payload;
         final IByteBuffer src = ByteBuffers.wrap(srcStr.getBytes());
         final IByteBuffer encrypted = ByteBuffers.allocateExpandable();
@@ -79,31 +69,31 @@ public class SymmetricEncryptionFactoryTest extends ATest {
             final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
             random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
+                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
-        for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
-            final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
+        for (final RsaAlgorithm algorithm : RsaAlgorithm.values()) {
+            final KeyPair key = derivedKeyProvider.newDerivedKeyPair(algorithm.getKeyAlgorithm(),
+                    "cipher-key".getBytes(), RsaKeyLength.DEFAULT.getBytes());
             try {
-                testCipherStream(algorithm, key, iv, "1234567890", "0987654321");
-                testCipherStream(algorithm, key, iv, "0987654321", "1234567890");
+                testCipherStream(algorithm, key, "1234567890", "0987654321");
+                testCipherStream(algorithm, key, "0987654321", "1234567890");
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    private void testCipherStream(final ISymmetricCipherAlgorithm algorithm, final byte[] key, final byte[] iv,
+    private void testCipherStream(final IAsymmetricCipherAlgorithm algorithm, final KeyPair key,
             final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
-        final SymmetricCipherOutputStream encryptingStream = new SymmetricCipherOutputStream(algorithm,
-                encryptedOutputStream, key, iv);
+        final AsymmetricCipherOutputStream encryptingStream = new AsymmetricCipherOutputStream(algorithm,
+                encryptedOutputStream, key.getPublic());
 
         final FastByteArrayInputStream encryptedInputStream = new FastByteArrayInputStream(Bytes.EMPTY_ARRAY);
-        final SymmetricCipherInputStream decryptingStream = new SymmetricCipherInputStream(algorithm,
-                encryptedInputStream, key, iv);
+        final AsymmetricCipherInputStream decryptingStream = new AsymmetricCipherInputStream(algorithm,
+                encryptedInputStream, key.getPrivate());
 
         final FastByteArrayOutputStream payloadsOutputStream = new FastByteArrayOutputStream();
 
@@ -138,34 +128,34 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(RsaKeyLength.DEFAULT.getBytes());
             //            random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
+                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
-        for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
-            final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
+        for (final RsaAlgorithm algorithm : RsaAlgorithm.values()) {
+            final KeyPair key = derivedKeyProvider.newDerivedKeyPair(algorithm.getKeyAlgorithm(),
+                    "cipher-key".getBytes(), RsaKeyLength.DEFAULT.getBytes());
             try {
-                testStreamingCipherStream(algorithm, key, iv, "1234567890", "0987654321");
-                testStreamingCipherStream(algorithm, key, iv, "0987654321", "1234567890");
+                testStreamingCipherStream(algorithm, key, "1234567890", "0987654321");
+                testStreamingCipherStream(algorithm, key, "0987654321", "1234567890");
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    private void testStreamingCipherStream(final ISymmetricCipherAlgorithm algorithm, final byte[] key, final byte[] iv,
+    private void testStreamingCipherStream(final IAsymmetricCipherAlgorithm algorithm, final KeyPair key,
             final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
-        final StreamingSymmetricCipherOutputStream encryptingStream = new StreamingSymmetricCipherOutputStream(
-                algorithm, encryptedOutputStream, key, iv);
+        final StreamingAsymmetricCipherOutputStream encryptingStream = new StreamingAsymmetricCipherOutputStream(
+                algorithm, encryptedOutputStream, key.getPublic());
 
         final FastByteArrayInputStream encryptedInputStream = new FastByteArrayInputStream(Bytes.EMPTY_ARRAY);
-        final StreamingSymmetricCipherInputStream decryptingStream = new StreamingSymmetricCipherInputStream(algorithm,
-                encryptedInputStream, key, iv);
+        final StreamingAsymmetricCipherInputStream decryptingStream = new StreamingAsymmetricCipherInputStream(
+                algorithm, encryptedInputStream, key.getPrivate());
 
         for (final String payload : payloads) {
             encryptedInputStream.reset();
