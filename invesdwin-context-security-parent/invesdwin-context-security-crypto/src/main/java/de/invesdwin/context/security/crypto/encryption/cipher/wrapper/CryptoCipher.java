@@ -10,7 +10,9 @@ import javax.crypto.ShortBufferException;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.util.lang.Closeables;
+import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
+import de.invesdwin.util.streams.buffer.bytes.EmptyByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
@@ -100,7 +102,7 @@ public class CryptoCipher implements ICipher {
     @Override
     public int doFinal(final byte[] output, final int offset) {
         try {
-            return cipher.doFinal(null, 0, 0, output, offset);
+            return cipher.doFinal(Bytes.EMPTY_ARRAY, 0, 0, output, offset);
         } catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
             throw new RuntimeException(e);
         }
@@ -113,7 +115,7 @@ public class CryptoCipher implements ICipher {
             buffer.ensureCapacity(getBlockSize());
             final int written;
             try {
-                written = cipher.doFinal(null, buffer.asNioByteBuffer());
+                written = cipher.doFinal(EmptyByteBuffer.EMPTY_BYTE_BUFFER, buffer.asNioByteBuffer());
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }

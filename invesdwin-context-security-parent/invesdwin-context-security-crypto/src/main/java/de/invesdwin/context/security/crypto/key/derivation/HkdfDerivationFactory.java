@@ -7,6 +7,7 @@ import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.HmacAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.util.math.Bytes;
+import de.invesdwin.util.math.Integers;
 
 /**
  * Adapted from: https://github.com/NetRiceCake/HKDF/blob/master/src/main/java/com/github/netricecake/hkdf/HKDF.java
@@ -83,7 +84,8 @@ public class HkdfDerivationFactory implements IDerivationFactory {
                 mac.update((byte) (i + 1));
                 hashRound = mac.doFinal();
                 final int size = Math.min(length, hashRound.length);
-                buffer.put(hashRound, 0, size);
+                final int copySize = Integers.min(buffer.remaining(), size);
+                buffer.put(hashRound, 0, copySize);
             }
 
             return buffer.array();

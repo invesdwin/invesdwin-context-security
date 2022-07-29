@@ -23,12 +23,7 @@ public enum DigestAlgorithm implements IHashAlgorithm {
     SHA3_224("SHA3-224", 28),
     SHA3_256("SHA3-256", 32),
     SHA3_384("SHA3-384", 48),
-    SHA3_512("SHA3-512", 64),
-    RipeMD_128("RipeMD160", 16),
-    RipeMD_160("RipeMD160", 20),
-    RipeMD_256("RipeMD256", 32),
-    RipeMD_320("RipeMD320", 40),
-    Whirlpool("Whirlpool", 64);
+    SHA3_512("SHA3-512", 64);
 
     /**
      * Intel instructions support up SHA-256 and SHA-1:

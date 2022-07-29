@@ -32,7 +32,7 @@ public class SymmetricCipherHash implements IHash {
         this.cipherIV = cipherIV;
         this.iv = new MutableIvParameterSpec(ByteBuffers.allocateByteArray(algorithm.getIvSize()));
         this.ivBlock = ByteBuffers.allocate(cipherIV.getBlockSizeIV());
-        this.hashSize = cipher.getBlockSize() + cipher.getHashSize() + cipherIV.getBlockSizeIV();
+        this.hashSize = cipher.getHashSize() + cipherIV.getBlockSizeIV();
     }
 
     @Override
@@ -109,7 +109,7 @@ public class SymmetricCipherHash implements IHash {
     @Override
     public int doFinal(final byte[] output, final int offset) {
         if (output == null || output.length - offset < hashSize) {
-            throw new RuntimeException(new ShortBufferException("Cannot store MAC in output buffer"));
+            throw new RuntimeException(new ShortBufferException("Cannot store hash in output buffer"));
         }
         final byte[] hash = doFinal();
         System.arraycopy(hash, 0, output, offset, hashSize);

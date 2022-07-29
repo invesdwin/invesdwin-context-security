@@ -48,7 +48,7 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
      *             https://docs.microsoft.com/en-us/dotnet/standard/security/vulnerabilities-cbc-mode
      */
     @Deprecated
-    AES_CBC_PKCS5Padding("AES/CBC/PKCS5Padding", AesKeyLength._128.getBytes(), AesKeyLength._128.getBytes()) {
+    AES_CBC_PKCS5Padding("AES/CBC/PKCS5Padding", AesKeyLength._128.getBytes(), 0) {
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -62,7 +62,7 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
     /**
      * encryption only, streaming capable
      */
-    AES_CTR_NoPadding("AES/CTR/NoPadding", AesKeyLength._128.getBytes(), AesKeyLength._128.getBytes()) {
+    AES_CTR_NoPadding("AES/CTR/NoPadding", AesKeyLength._128.getBytes(), 0) {
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -80,7 +80,7 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
      * 
      * https://stackoverflow.com/questions/54659935/java-aes-gcm-very-slow-compared-to-aes-ctr
      */
-    AES_GCM_NoPadding("AES/GCM/NoPadding", 12, AesKeyLength._128.getBytes() + AesKeyLength._128.getBytes()) {
+    AES_GCM_NoPadding("AES/GCM/NoPadding", 12, AesKeyLength._128.getBytes()) {
 
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
