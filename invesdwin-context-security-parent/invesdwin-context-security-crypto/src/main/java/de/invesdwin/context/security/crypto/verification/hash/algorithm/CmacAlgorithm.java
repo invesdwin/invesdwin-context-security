@@ -54,8 +54,7 @@ public enum CmacAlgorithm implements IHashAlgorithm {
 
     @Override
     public IHash newHash() {
-        return new SymmetricCipherHash(
-                AesAlgorithm.newCryptoCipher("AES/CBC/NoPadding", REFERENCE.getHashSize()),
+        return new SymmetricCipherHash(AesAlgorithm.newCryptoCipher("AES/CBC/NoPadding", REFERENCE.getHashSize()),
                 new CipherCountedIV(REFERENCE));
     }
 

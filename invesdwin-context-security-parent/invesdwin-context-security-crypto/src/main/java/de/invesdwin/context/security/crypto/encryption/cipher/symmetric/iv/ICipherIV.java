@@ -2,6 +2,7 @@ package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.spec.AlgorithmParameterSpec;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
@@ -12,6 +13,14 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 public interface ICipherIV {
 
     ISymmetricCipherAlgorithm getAlgorithm();
+
+    default AlgorithmParameterSpec wrapParam(final byte[] iv) {
+        return getAlgorithm().wrapParam(iv);
+    }
+
+    default AlgorithmParameterSpec wrapParam(final MutableIvParameterSpec iv) {
+        return getAlgorithm().wrapParam(iv);
+    }
 
     int getIvSize();
 

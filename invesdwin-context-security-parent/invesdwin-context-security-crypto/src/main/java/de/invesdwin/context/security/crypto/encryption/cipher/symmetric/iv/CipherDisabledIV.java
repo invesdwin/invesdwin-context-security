@@ -2,6 +2,7 @@ package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -15,6 +16,16 @@ public final class CipherDisabledIV implements ICipherIV {
     public static final CipherDisabledIV INSTANCE = new CipherDisabledIV();
 
     private CipherDisabledIV() {
+    }
+
+    @Override
+    public AlgorithmParameterSpec wrapParam(final byte[] iv) {
+        return null;
+    }
+
+    @Override
+    public AlgorithmParameterSpec wrapParam(final MutableIvParameterSpec iv) {
+        return null;
     }
 
     @Override

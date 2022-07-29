@@ -177,7 +177,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
         final MutableIvParameterSpec iv = cipherIV.borrowDestIV();
         try {
             cipherIV.putIV(dest, iv);
-            init(cipher, Cipher.ENCRYPT_MODE, algorithm.wrapParam(iv));
+            init(cipher, Cipher.ENCRYPT_MODE, cipherIV.wrapParam(iv));
             final IByteBuffer payloadBuffer = dest.sliceFrom(cipherIV.getIvSize());
             final int length = cipher.doFinal(src, payloadBuffer);
             return cipherIV.getIvSize() + length;
@@ -201,7 +201,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
         final MutableIvParameterSpec iv = cipherIV.borrowDestIV();
         try {
             cipherIV.getIV(src, iv);
-            init(cipher, Cipher.DECRYPT_MODE, algorithm.wrapParam(iv));
+            init(cipher, Cipher.DECRYPT_MODE, cipherIV.wrapParam(iv));
             final IByteBuffer payloadBuffer = src.sliceFrom(cipherIV.getIvSize());
             final int length = cipher.doFinal(payloadBuffer, dest);
             return length;

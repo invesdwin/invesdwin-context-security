@@ -119,7 +119,7 @@ public class SymmetricCipherHashAad implements IHash {
     @Override
     public void reset() {
         cipherIV.putIV(ivBlock, iv);
-        cipher.init(Cipher.ENCRYPT_MODE, prevKey, algorithm.wrapParam(iv));
+        cipher.init(Cipher.ENCRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
     }
 
     @Override
@@ -136,7 +136,7 @@ public class SymmetricCipherHashAad implements IHash {
     @Override
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
         cipherIV.getIV(input, iv);
-        cipher.init(Cipher.ENCRYPT_MODE, prevKey, algorithm.wrapParam(iv));
+        cipher.init(Cipher.ENCRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
         update(input);
         final byte[] calculatedSignature;
         try {
