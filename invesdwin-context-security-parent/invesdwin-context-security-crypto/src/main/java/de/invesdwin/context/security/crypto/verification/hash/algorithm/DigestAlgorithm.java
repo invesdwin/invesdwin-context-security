@@ -13,10 +13,6 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 @Immutable
 public enum DigestAlgorithm implements IHashAlgorithm {
     @Deprecated
-    MD2("MD2", 16),
-    @Deprecated
-    MD4("MD4", 16),
-    @Deprecated
     MD5("MD5", 16),
     @Deprecated
     SHA_1("SHA1", 20),

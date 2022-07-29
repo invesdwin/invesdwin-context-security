@@ -17,15 +17,16 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.Ciphe
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherPresharedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherRandomIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherInputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherInputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherOutputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.encryption.verified.algorithm.VerifiedSymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
 import de.invesdwin.context.security.crypto.verification.hash.HashVerificationFactory;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.math.Bytes;
@@ -58,11 +59,15 @@ public class VerifiedEncryptionFactoryTest extends ATest {
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
                 final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
-                final HashVerificationFactory authenticationFactory = new HashVerificationFactory(derivedKeyProvider);
-                final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory,
-                        authenticationFactory);
-                testEncryptionAndDecryption(factory, "1234567890");
-                testEncryptionAndDecryption(factory, "0987654321");
+                for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
+                    log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
+                    final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,
+                            derivedKeyProvider);
+                    final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory,
+                            verificationFactory);
+                    testEncryptionAndDecryption(factory, "1234567890");
+                    testEncryptionAndDecryption(factory, "0987654321");
+                }
             }
         }
     }
@@ -95,15 +100,19 @@ public class VerifiedEncryptionFactoryTest extends ATest {
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
             final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key,
                     new CipherPresharedIV(algorithm, iv));
-            final HashVerificationFactory verificationFactory = new HashVerificationFactory(derivedKeyProvider);
-            final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory, verificationFactory);
-            try {
-                final VerifiedSymmetricCipherAlgorithm verifiedAlgorithm = (VerifiedSymmetricCipherAlgorithm) factory
-                        .getAlgorithm();
-                testCipherStream(verifiedAlgorithm, key, iv, "1234567890", "0987654321");
-                testCipherStream(verifiedAlgorithm, key, iv, "0987654321", "1234567890");
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
+            for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
+                final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,
+                        derivedKeyProvider);
+                final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory,
+                        verificationFactory);
+                try {
+                    final VerifiedSymmetricCipherAlgorithm verifiedAlgorithm = (VerifiedSymmetricCipherAlgorithm) factory
+                            .getAlgorithm();
+                    testCipherStream(verifiedAlgorithm, key, iv, "1234567890", "0987654321");
+                    testCipherStream(verifiedAlgorithm, key, iv, "0987654321", "1234567890");
+                } catch (final IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -111,10 +120,12 @@ public class VerifiedEncryptionFactoryTest extends ATest {
     private void testCipherStream(final VerifiedSymmetricCipherAlgorithm algorithm, final byte[] key, final byte[] iv,
             final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
-        final SymmetricCipherOutputStream encryptingStream = new SymmetricCipherOutputStream(algorithm, encryptedOutputStream, key, iv);
+        final SymmetricCipherOutputStream encryptingStream = new SymmetricCipherOutputStream(algorithm,
+                encryptedOutputStream, key, iv);
 
         final FastByteArrayInputStream encryptedInputStream = new FastByteArrayInputStream(Bytes.EMPTY_ARRAY);
-        final SymmetricCipherInputStream decryptingStream = new SymmetricCipherInputStream(algorithm, encryptedInputStream, key, iv);
+        final SymmetricCipherInputStream decryptingStream = new SymmetricCipherInputStream(algorithm,
+                encryptedInputStream, key, iv);
 
         final FastByteArrayOutputStream payloadsOutputStream = new FastByteArrayOutputStream();
 
@@ -161,15 +172,19 @@ public class VerifiedEncryptionFactoryTest extends ATest {
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
             final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key,
                     new CipherPresharedIV(algorithm, iv));
-            final HashVerificationFactory verificationFactory = new HashVerificationFactory(derivedKeyProvider);
-            final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory, verificationFactory);
-            try {
-                final VerifiedSymmetricCipherAlgorithm verifiedAlgorithm = (VerifiedSymmetricCipherAlgorithm) factory
-                        .getAlgorithm();
-                testStreamingCipherStream(verifiedAlgorithm, key, iv, "1234567890", "0987654321");
-                testStreamingCipherStream(verifiedAlgorithm, key, iv, "0987654321", "1234567890");
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
+            for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
+                final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,
+                        derivedKeyProvider);
+                final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory,
+                        verificationFactory);
+                try {
+                    final VerifiedSymmetricCipherAlgorithm verifiedAlgorithm = (VerifiedSymmetricCipherAlgorithm) factory
+                            .getAlgorithm();
+                    testStreamingCipherStream(verifiedAlgorithm, key, iv, "1234567890", "0987654321");
+                    testStreamingCipherStream(verifiedAlgorithm, key, iv, "0987654321", "1234567890");
+                } catch (final IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -177,8 +192,8 @@ public class VerifiedEncryptionFactoryTest extends ATest {
     private void testStreamingCipherStream(final VerifiedSymmetricCipherAlgorithm algorithm, final byte[] key,
             final byte[] iv, final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
-        final StreamingSymmetricCipherOutputStream encryptingStream = new StreamingSymmetricCipherOutputStream(algorithm,
-                encryptedOutputStream, key, iv);
+        final StreamingSymmetricCipherOutputStream encryptingStream = new StreamingSymmetricCipherOutputStream(
+                algorithm, encryptedOutputStream, key, iv);
 
         final FastByteArrayInputStream encryptedInputStream = new FastByteArrayInputStream(Bytes.EMPTY_ARRAY);
         final StreamingSymmetricCipherInputStream decryptingStream = new StreamingSymmetricCipherInputStream(algorithm,

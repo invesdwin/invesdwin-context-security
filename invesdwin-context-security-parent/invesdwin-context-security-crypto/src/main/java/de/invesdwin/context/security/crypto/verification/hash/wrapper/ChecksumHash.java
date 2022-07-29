@@ -7,8 +7,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.ShortBufferException;
 
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
-import de.invesdwin.util.error.UnknownArgumentException;
-import de.invesdwin.util.math.Integers;
 import de.invesdwin.util.math.Longs;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -16,15 +14,14 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @NotThreadSafe
 public class ChecksumHash implements IHash {
 
+    public static final int HASH_SIZE = Long.BYTES;
     private final String algorithm;
     private final Checksum checksum;
-    private final int hashSize;
     private byte[] prevKey;
 
-    public ChecksumHash(final String algorithm, final Checksum checksum, final int hashSize) {
+    public ChecksumHash(final String algorithm, final Checksum checksum) {
         this.algorithm = algorithm;
         this.checksum = checksum;
-        this.hashSize = hashSize;
     }
 
     @Override
@@ -34,7 +31,7 @@ public class ChecksumHash implements IHash {
 
     @Override
     public int getHashSize() {
-        return Long.BYTES;
+        return HASH_SIZE;
     }
 
     @Override
@@ -73,14 +70,7 @@ public class ChecksumHash implements IHash {
     @Override
     public byte[] doFinal() {
         final long value = checksum.getValue();
-        switch (hashSize) {
-        case Integer.BYTES:
-            return Integers.toByteArray(Integers.checkedCast(value));
-        case Long.BYTES:
-            return Longs.toByteArray(value);
-        default:
-            throw UnknownArgumentException.newInstance(int.class, hashSize);
-        }
+        return Longs.toByteArray(value);
     }
 
     @Override

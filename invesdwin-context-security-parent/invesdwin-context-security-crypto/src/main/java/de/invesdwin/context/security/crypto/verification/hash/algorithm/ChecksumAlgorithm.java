@@ -17,39 +17,37 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
 public enum ChecksumAlgorithm implements IHashAlgorithm {
-    CRC32("CRC32", Integer.BYTES) {
+    CRC32("CRC32", ChecksumHash.HASH_SIZE) {
         @Override
         public IHash newHash() {
-            return new ChecksumHash(getAlgorithm(), new PureJavaCrc32(), getHashSize());
+            return new ChecksumHash(getAlgorithm(), new PureJavaCrc32());
         }
     },
-    CRC32C("CRC32C", Integer.BYTES) {
+    CRC32C("CRC32C", ChecksumHash.HASH_SIZE) {
         @Override
         public IHash newHash() {
-            return new ChecksumHash(getAlgorithm(), new PureJavaCrc32C(), getHashSize());
+            return new ChecksumHash(getAlgorithm(), new PureJavaCrc32C());
         }
     },
     /**
      * Supposed to be almost as good but faster than CRC32.
      */
-    Adler32("Adler32", Integer.BYTES) {
+    Adler32("Adler32", ChecksumHash.HASH_SIZE) {
         @Override
         public IHash newHash() {
-            return new ChecksumHash(getAlgorithm(), new Adler32(), getHashSize());
+            return new ChecksumHash(getAlgorithm(), new Adler32());
         }
     },
-    XXHash32("XXHash32", Integer.BYTES) {
+    XXHash32("XXHash32", ChecksumHash.HASH_SIZE) {
         @Override
         public IHash newHash() {
-            return new ChecksumHash(getAlgorithm(), LZ4Streams.newXXHashFactory().newStreamingHash32(0).asChecksum(),
-                    getHashSize());
+            return new ChecksumHash(getAlgorithm(), LZ4Streams.newXXHashFactory().newStreamingHash32(0).asChecksum());
         }
     },
-    XXHash64("XXHash64", Long.BYTES) {
+    XXHash64("XXHash64", ChecksumHash.HASH_SIZE) {
         @Override
         public IHash newHash() {
-            return new ChecksumHash(getAlgorithm(), LZ4Streams.newXXHashFactory().newStreamingHash64(0).asChecksum(),
-                    getHashSize());
+            return new ChecksumHash(getAlgorithm(), LZ4Streams.newXXHashFactory().newStreamingHash64(0).asChecksum());
         }
     };
 
