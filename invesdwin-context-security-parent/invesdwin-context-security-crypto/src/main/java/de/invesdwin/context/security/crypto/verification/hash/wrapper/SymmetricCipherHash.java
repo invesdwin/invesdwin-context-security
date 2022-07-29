@@ -19,6 +19,8 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
  * Adapted from org.bouncycastle.crypto.macs.CMac
+ * 
+ * Similar: https://github.com/devlaam/lora_simulator/blob/master/src/main/java/AesCmac.java
  */
 @NotThreadSafe
 public class SymmetricCipherHash implements IHash {
