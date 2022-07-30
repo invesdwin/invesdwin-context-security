@@ -60,6 +60,7 @@ public enum CmacAlgorithm implements IHashAlgorithm {
     @Override
     public IHash newHash() {
         try {
+            //Cmac does not require an IV, so we use 0 bytes: https://crypto.stackexchange.com/questions/99508/is-cmac-secure-without-iv-and-the-same-key-authenticate-only
             return new SymmetricCipherHash(
                     new JceCipher(Cipher.getInstance(REFERENCE.getAlgorithm()), REFERENCE.getHashSize()),
                     new CipherPresharedIV(REFERENCE, ByteBuffers.allocateByteArray(REFERENCE.getIvSize())));
