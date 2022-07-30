@@ -110,19 +110,14 @@ public class CryptoCipher implements ICipher {
 
     @Override
     public byte[] doFinal() {
-        final IByteBuffer buffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+        final IByteBuffer buffer = ByteBuffers.allocate(getBlockSize());
+        final int written;
         try {
-            buffer.ensureCapacity(getBlockSize());
-            final int written;
-            try {
-                written = cipher.doFinal(EmptyByteBuffer.EMPTY_BYTE_BUFFER, buffer.asNioByteBuffer());
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
-            return buffer.asByteArrayCopy(0, written);
-        } finally {
-            ByteBuffers.EXPANDABLE_POOL.returnObject(buffer);
+            written = cipher.doFinal(EmptyByteBuffer.EMPTY_BYTE_BUFFER, buffer.asNioByteBuffer());
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         }
+        return buffer.asByteArray(0, written);
     }
 
     @Override

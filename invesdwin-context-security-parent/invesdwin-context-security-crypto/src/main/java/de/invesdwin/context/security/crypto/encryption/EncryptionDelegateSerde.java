@@ -46,7 +46,9 @@ public class EncryptionDelegateSerde<E> implements ISerde<E> {
             final IByteBuffer decryptedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
             try {
                 final int decryptedLength = encryptionFactory.encrypt(buffer, decryptedBuffer);
-                return delegate.fromBuffer(decryptedBuffer, decryptedLength);
+                final E copied = delegate.fromBuffer(decryptedBuffer, decryptedLength);
+                //                decryptedBuffer.clear(Bytes.ZERO, 0, decryptedLength);
+                return copied;
             } finally {
                 ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedBuffer);
             }
@@ -65,7 +67,9 @@ public class EncryptionDelegateSerde<E> implements ISerde<E> {
             final IByteBuffer decryptedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
             try {
                 final int decryptedLength = delegate.toBuffer(decryptedBuffer, obj);
-                return encryptionFactory.decrypt(decryptedBuffer.sliceTo(decryptedLength), buffer);
+                final int copied = encryptionFactory.decrypt(decryptedBuffer.sliceTo(decryptedLength), buffer);
+                //                decryptedBuffer.clear(Bytes.ZERO, 0, decryptedLength);
+                return copied;
             } finally {
                 ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedBuffer);
             }

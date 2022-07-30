@@ -82,22 +82,18 @@ public class SymmetricCipherHashAad implements IHash {
 
     @Override
     public byte[] doFinal() {
-        final IByteBuffer buffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+        final IByteBuffer buffer = ByteBuffers.allocate(hashSize);
+        buffer.ensureCapacity(hashSize);
+        final int macIndex = cipherIV.getIvSize();
+        buffer.putBytes(0, ivBlock);
+        int written = macIndex;
         try {
-            buffer.ensureCapacity(hashSize);
-            final int macIndex = cipherIV.getIvSize();
-            buffer.putBytes(0, ivBlock);
-            int written = macIndex;
-            try {
-                written += cipher.doFinal(EmptyByteBuffer.INSTANCE, buffer.sliceFrom(macIndex));
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
-            assert written == hashSize : "written [" + written + "] != hashSize [" + hashSize + "]";
-            return buffer.asByteArrayCopy(0, written);
-        } finally {
-            ByteBuffers.EXPANDABLE_POOL.returnObject(buffer);
+            written += cipher.doFinal(EmptyByteBuffer.INSTANCE, buffer.sliceFrom(macIndex));
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         }
+        assert written == hashSize : "written [" + written + "] != hashSize [" + hashSize + "]";
+        return buffer.asByteArray(0, written);
     }
 
     @Override
@@ -133,9 +129,12 @@ public class SymmetricCipherHashAad implements IHash {
         return verify(ByteBuffers.wrap(input), ByteBuffers.wrap(signature));
     }
 
+    /**
+     * https://stackoverflow.com/questions/48548394/how-to-verify-a-gmac
+     */
     @Override
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
-        cipherIV.getIV(input, iv);
+        cipherIV.getIV(signature, iv);
         cipher.init(Cipher.ENCRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
         update(input);
         final byte[] calculatedSignature;

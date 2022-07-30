@@ -322,7 +322,7 @@ public class SymmetricCipherHash implements IHash {
 
     @Override
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
-        cipherIV.getIV(input, iv);
+        cipherIV.getIV(signature, iv);
         cipher.init(Cipher.ENCRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
         update(input);
         final byte[] calculatedSignature;
