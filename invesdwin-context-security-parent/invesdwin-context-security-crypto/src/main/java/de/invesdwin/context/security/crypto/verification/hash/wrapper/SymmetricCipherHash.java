@@ -307,9 +307,6 @@ public class SymmetricCipherHash implements IHash {
     private void clean() {
         buf.clear(Bytes.ZERO);
         bufOff = 0;
-        Arrays.fill(l, Bytes.ZERO);
-        Arrays.fill(lu1, Bytes.ZERO);
-        Arrays.fill(lu2, Bytes.ZERO);
     }
 
     @Override
@@ -317,6 +314,13 @@ public class SymmetricCipherHash implements IHash {
         prevKey = null;
         cipher.close();
         clean();
+        cleanLu();
+    }
+
+    private void cleanLu() {
+        Arrays.fill(l, Bytes.ZERO);
+        Arrays.fill(lu1, Bytes.ZERO);
+        Arrays.fill(lu2, Bytes.ZERO);
     }
 
     @Override
@@ -338,7 +342,8 @@ public class SymmetricCipherHash implements IHash {
             throw new RuntimeException(e);
         }
         final int macIndex = cipherIV.getIvSize();
-        return ByteBuffers.constantTimeEquals(signature.sliceFrom(macIndex), calculatedSignature);
+        return ByteBuffers.constantTimeEquals(signature.sliceFrom(macIndex), calculatedSignature, macIndex,
+                signature.remaining(macIndex));
     }
 
 }
