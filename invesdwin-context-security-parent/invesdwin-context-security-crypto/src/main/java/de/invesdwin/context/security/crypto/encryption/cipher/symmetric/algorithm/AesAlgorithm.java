@@ -38,6 +38,18 @@ import de.invesdwin.context.system.properties.SystemProperties;
  */
 @Immutable
 public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
+    @Deprecated
+    AES_CBC_NoPadding("AES/CBC/NoPadding", AesKeyLength.BLOCK_SIZE.getBytes(), 0) {
+        @Override
+        public AlgorithmParameterSpec wrapParam(final byte[] iv) {
+            return new MutableIvParameterSpec(iv);
+        }
+
+        @Override
+        public AlgorithmParameterSpec wrapParam(final MutableIvParameterSpec iv) {
+            return iv;
+        }
+    },
     /**
      * encryption only, full blocks, not streaming capable
      * 

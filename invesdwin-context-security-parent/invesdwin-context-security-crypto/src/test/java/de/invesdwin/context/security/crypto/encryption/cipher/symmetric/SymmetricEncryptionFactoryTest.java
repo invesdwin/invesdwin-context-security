@@ -19,6 +19,8 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.S
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherInputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherOutputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.padding.PaddingStreamingSymmetricCipherInputStream;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.padding.PaddingStreamingSymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
@@ -47,6 +49,10 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         }
         final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
+            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
+                //requires padding
+                continue;
+            }
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(algorithm);
             final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
@@ -85,6 +91,10 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         }
         final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
+            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
+                //requires padding
+                continue;
+            }
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
             try {
                 testCipherStream(algorithm, key, iv, "1234567890", "0987654321");
@@ -147,6 +157,10 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         }
         final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
+            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
+                //requires padding
+                continue;
+            }
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
             try {
                 testStreamingCipherStream(algorithm, key, iv, "1234567890", "0987654321");
@@ -166,6 +180,69 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         final FastByteArrayInputStream encryptedInputStream = new FastByteArrayInputStream(Bytes.EMPTY_ARRAY);
         final StreamingSymmetricCipherInputStream decryptingStream = new StreamingSymmetricCipherInputStream(algorithm,
                 encryptedInputStream, key, iv);
+
+        for (final String payload : payloads) {
+            encryptedInputStream.reset();
+            encryptedOutputStream.reset();
+
+            final byte[] payloadBytes = payload.getBytes();
+            encryptingStream.write(payloadBytes);
+            encryptingStream.flush();
+
+            encryptedInputStream.array = encryptedOutputStream.array;
+            encryptedInputStream.length = encryptedOutputStream.length;
+
+            final byte[] decryptedBytes = IOUtils.toByteArray(decryptingStream);
+
+            Assertions.assertThat(payloadBytes.length).isEqualTo(decryptedBytes.length);
+            Assertions.assertThat(ByteBuffers.equals(payloadBytes, decryptedBytes)).isTrue();
+        }
+
+        encryptingStream.close();
+        decryptingStream.close();
+    }
+
+    @Test
+    public void testPaddingStreamingCipherStream() {
+        final DerivedKeyProvider derivedKeyProvider;
+        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+        try {
+            final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
+            //            random.nextBytes(key);
+            derivedKeyProvider = DerivedKeyProvider
+                    .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
+        } finally {
+            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
+        }
+        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
+        for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
+            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
+                //requires different padding
+                continue;
+            }
+            if (algorithm == AesAlgorithm.AES_GCM_NoPadding) {
+                //requires no padding
+                continue;
+            }
+            final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
+            try {
+                testPaddingStreamingCipherStream(algorithm, key, iv, "1234567890", "0987654321");
+                testPaddingStreamingCipherStream(algorithm, key, iv, "0987654321", "1234567890");
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void testPaddingStreamingCipherStream(final ISymmetricCipherAlgorithm algorithm, final byte[] key,
+            final byte[] iv, final String... payloads) throws IOException {
+        final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
+        final PaddingStreamingSymmetricCipherOutputStream encryptingStream = new PaddingStreamingSymmetricCipherOutputStream(
+                algorithm, encryptedOutputStream, key, iv);
+
+        final FastByteArrayInputStream encryptedInputStream = new FastByteArrayInputStream(Bytes.EMPTY_ARRAY);
+        final PaddingStreamingSymmetricCipherInputStream decryptingStream = new PaddingStreamingSymmetricCipherInputStream(
+                algorithm, encryptedInputStream, key, iv);
 
         for (final String payload : payloads) {
             encryptedInputStream.reset();

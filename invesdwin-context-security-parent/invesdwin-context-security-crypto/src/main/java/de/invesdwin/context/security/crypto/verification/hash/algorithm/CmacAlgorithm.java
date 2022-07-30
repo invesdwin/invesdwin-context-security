@@ -21,7 +21,7 @@ public enum CmacAlgorithm implements IHashAlgorithm {
     public static final CmacAlgorithm DEFAULT = CMAC_AES_256;
 
     @SuppressWarnings("deprecation")
-    private static final AesAlgorithm REFERENCE = AesAlgorithm.AES_CBC_PKCS5Padding;
+    private static final AesAlgorithm REFERENCE = AesAlgorithm.AES_CBC_NoPadding;
     private final String algorithm;
     private final HashObjectPool hashPool;
     private int keySize;
@@ -54,7 +54,7 @@ public enum CmacAlgorithm implements IHashAlgorithm {
 
     @Override
     public IHash newHash() {
-        return new SymmetricCipherHash(AesAlgorithm.newCryptoCipher("AES/CBC/NoPadding", REFERENCE.getHashSize()),
+        return new SymmetricCipherHash(AesAlgorithm.newCryptoCipher(REFERENCE.getAlgorithm(), REFERENCE.getHashSize()),
                 new CipherCountedIV(REFERENCE));
     }
 

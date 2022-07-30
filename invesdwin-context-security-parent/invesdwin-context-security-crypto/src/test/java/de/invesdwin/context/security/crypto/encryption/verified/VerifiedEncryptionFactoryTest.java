@@ -52,6 +52,10 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         }
         final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
+            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
+                //requires padding
+                continue;
+            }
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(algorithm);
             final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
@@ -97,6 +101,10 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         }
         final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
+            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
+                //requires padding
+                continue;
+            }
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
             final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key,
                     new CipherPresharedIV(algorithm, iv));
@@ -169,6 +177,10 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         }
         final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
+            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
+                //requires padding
+                continue;
+            }
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
             final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key,
                     new CipherPresharedIV(algorithm, iv));

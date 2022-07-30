@@ -196,7 +196,7 @@ public class SymmetricCipherHash implements IHash {
             inOff += gapLen;
 
             while (len > blockSize) {
-                cipher.update(in, inOff, len, mac.asByteArray(), 0);
+                cipher.update(in, inOff, blockSize, mac.asByteArray(), 0);
 
                 len -= blockSize;
                 inOff += blockSize;
@@ -229,7 +229,7 @@ public class SymmetricCipherHash implements IHash {
             inOff += gapLen;
 
             while (len > blockSize) {
-                cipher.update(input.slice(inOff, len), mac);
+                cipher.update(input.slice(inOff, blockSize), mac);
 
                 len -= blockSize;
                 inOff += blockSize;
