@@ -46,7 +46,7 @@ public class SymmetricCipherHash implements IHash {
 
     public SymmetricCipherHash(final ICipher cipher, final ICipherIV cipherIV) {
         this.cipher = cipher;
-        this.hashSize = cipher.getHashSize() + cipherIV.getIvSize();
+        this.hashSize = cipher.getBlockSize() + cipher.getHashSize() + cipherIV.getIvSize();
         this.blockSize = cipher.getBlockSize();
         this.poly = lookupPoly(blockSize);
 
@@ -150,6 +150,10 @@ public class SymmetricCipherHash implements IHash {
         this.prevKey = key;
         reset();
 
+        initLu();
+    }
+
+    private void initLu() {
         //initializes the L, Lu, Lu2 numbers
         cipher.update(zeroes, 0, zeroes.length, l, 0);
         doubleLu(l, lu1);
@@ -324,10 +328,12 @@ public class SymmetricCipherHash implements IHash {
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
         cipherIV.getIV(signature, iv);
         cipher.init(Cipher.ENCRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
+        clean();
+        initLu();
         update(input);
         final byte[] calculatedSignature;
         try {
-            calculatedSignature = cipher.doFinal();
+            calculatedSignature = doFinal();
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }

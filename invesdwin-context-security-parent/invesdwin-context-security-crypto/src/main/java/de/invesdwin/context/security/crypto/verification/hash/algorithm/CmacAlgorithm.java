@@ -21,7 +21,7 @@ public enum CmacAlgorithm implements IHashAlgorithm {
     public static final CmacAlgorithm DEFAULT = CMAC_AES_256;
 
     @SuppressWarnings("deprecation")
-    private static final AesAlgorithm REFERENCE = AesAlgorithm.AES_CBC_NoPadding;
+    private static final AesAlgorithm REFERENCE = AesAlgorithm.AES_CTR_NoPadding;
     private final String algorithm;
     private final HashObjectPool hashPool;
     private int keySize;

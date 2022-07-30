@@ -134,6 +134,21 @@ public class SymmetricCipherHashAad implements IHash {
      */
     @Override
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
+        /*
+         * this variant would be slower due to exception stack trace generation, though it might better support encoded
+         * random elements in the underlying hash (not needed for gmac)
+         */
+        //        cipherIV.getIV(signature, iv);
+        //        cipher.init(Cipher.DECRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
+        //        update(input);
+        //        try {
+        //            final int macIndex = cipherIV.getIvSize();
+        //            cipher.doFinal(signature.sliceFrom(macIndex).asNioByteBuffer(), EmptyByteBuffer.EMPTY_BYTE_BUFFER);
+        //            return true;
+        //        } catch (final Throwable e) {
+        //            return false;
+        //        }
+
         cipherIV.getIV(signature, iv);
         cipher.init(Cipher.ENCRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
         update(input);
