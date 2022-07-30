@@ -16,22 +16,22 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 @Immutable
 public enum HmacAlgorithm implements IHashAlgorithm {
     /**
-     * @deprecated deemed insecure
+     * @deprecated deemed insecure or not recommended for new systems
      */
     @Deprecated
     HMAC_MD2(DigestAlgorithm.MD2),
     /**
-     * @deprecated deemed insecure
+     * @deprecated deemed insecure or not recommended for new systems
      */
     @Deprecated
     HMAC_MD4(DigestAlgorithm.MD4),
     /**
-     * @deprecated deemed insecure
+     * @deprecated deemed insecure or not recommended for new systems
      */
     @Deprecated
     HMAC_MD5(DigestAlgorithm.MD5),
     /**
-     * @deprecated deemed insecure
+     * @deprecated deemed insecure or not recommended for new systems
      */
     @Deprecated
     HMAC_SHA_1(DigestAlgorithm.SHA_1),

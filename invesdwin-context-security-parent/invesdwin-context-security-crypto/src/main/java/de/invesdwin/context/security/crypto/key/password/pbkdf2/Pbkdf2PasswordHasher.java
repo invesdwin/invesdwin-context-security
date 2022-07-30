@@ -8,7 +8,6 @@ import javax.crypto.spec.PBEKeySpec;
 
 import de.invesdwin.context.security.crypto.CryptoProperties;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
-import de.invesdwin.context.security.crypto.verification.hash.algorithm.DigestAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.hmac.HmacAlgorithm;
 import de.invesdwin.util.lang.Objects;
@@ -28,7 +27,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
      * About 200ms on an I9-9900k
      */
     public static final int DEFAULT_ITERATIONS = 200_000;
-    public static final IHashAlgorithm DEFAULT_MAC_ALGORITHM = new HmacAlgorithm(DigestAlgorithm.SHA_512);
+    public static final IHashAlgorithm DEFAULT_MAC_ALGORITHM = HmacAlgorithm.HMAC_SHA_512;
     public static final Pbkdf2PasswordHasher INSTANCE = new Pbkdf2PasswordHasher();
 
     private final int iterations;
