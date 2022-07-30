@@ -1,12 +1,16 @@
 package de.invesdwin.context.security.crypto.verification.hash.algorithm;
 
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 
 import javax.annotation.concurrent.Immutable;
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDisabledIV;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipher;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
 import de.invesdwin.context.security.crypto.verification.hash.wrapper.SymmetricCipherHash;
@@ -54,8 +58,13 @@ public enum CmacAlgorithm implements IHashAlgorithm {
 
     @Override
     public IHash newHash() {
-        return new SymmetricCipherHash(AesAlgorithm.newCryptoCipher(REFERENCE.getAlgorithm(), REFERENCE.getHashSize()),
-                new CipherCountedIV(REFERENCE));
+        try {
+            return new SymmetricCipherHash(
+                    new JceCipher(Cipher.getInstance(REFERENCE.getAlgorithm()), REFERENCE.getHashSize()),
+                    CipherDisabledIV.INSTANCE);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

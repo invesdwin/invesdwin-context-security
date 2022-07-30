@@ -83,7 +83,6 @@ public class SymmetricCipherHashAad implements IHash {
     @Override
     public byte[] doFinal() {
         final IByteBuffer buffer = ByteBuffers.allocate(hashSize);
-        buffer.ensureCapacity(hashSize);
         final int macIndex = cipherIV.getIvSize();
         buffer.putBytes(0, ivBlock);
         int written = macIndex;
@@ -143,7 +142,7 @@ public class SymmetricCipherHashAad implements IHash {
         //        update(input);
         //        try {
         //            final int macIndex = cipherIV.getIvSize();
-        //            cipher.doFinal(signature.sliceFrom(macIndex).asNioByteBuffer(), EmptyByteBuffer.EMPTY_BYTE_BUFFER);
+        //            cipher.doFinal(signature.sliceFrom(macIndex), EmptyByteBuffer.INSTANCE);
         //            return true;
         //        } catch (final Throwable e) {
         //            return false;
