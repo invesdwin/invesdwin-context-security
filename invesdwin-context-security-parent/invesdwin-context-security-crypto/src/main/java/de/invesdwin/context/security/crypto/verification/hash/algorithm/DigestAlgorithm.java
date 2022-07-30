@@ -81,7 +81,9 @@ public enum DigestAlgorithm implements IHashAlgorithm {
     Blake3_256("Blake3-256", 32),
     DSTU7564_256("DSTU7564-256", 32),
     DSTU7564_384("DSTU7564-384", 48),
-    DSTU7564_512("DSTU7564-512", 64);
+    DSTU7564_512("DSTU7564-512", 64),
+    SHAKE_128("SHAKE128", 16),
+    SHAKE_256("SHAKE256", 32);
 
     /**
      * Intel instructions support up SHA-256 and SHA-1:

@@ -10,6 +10,9 @@ import de.invesdwin.context.security.crypto.verification.hash.algorithm.HashAlgo
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
+/**
+ * https://www.bouncycastle.org/specifications.html
+ */
 @Immutable
 public enum HmacAlgorithm implements IHashAlgorithm {
     /**
@@ -49,6 +52,11 @@ public enum HmacAlgorithm implements IHashAlgorithm {
     HMAC_GOST3411(DigestAlgorithm.GOST3411),
     HMAC_GOST3411_2012_256(DigestAlgorithm.GOST3411_2012_256),
     HMAC_GOST3411_2012_512(DigestAlgorithm.GOST3411_2012_512),
+    HMAC_Keccak_224(new HmacDigestAlgorithm("KECCAK224", 28)),
+    HMAC_Keccak_256(new HmacDigestAlgorithm("KECCAK256", 32)),
+    HMAC_Keccak_288(new HmacDigestAlgorithm("KECCAK288", 36)),
+    HMAC_Keccak_384(new HmacDigestAlgorithm("KECCAK384", 48)),
+    HMAC_Keccak_512(new HmacDigestAlgorithm("KECCAK512", 64)),
     HMAC_Skein_256_128(DigestAlgorithm.Skein_256_128),
     HMAC_Skein_256_160(DigestAlgorithm.Skein_256_160),
     HMAC_Skein_256_224(DigestAlgorithm.Skein_256_224),
@@ -72,7 +80,11 @@ public enum HmacAlgorithm implements IHashAlgorithm {
     private final IHashAlgorithm delegate;
 
     HmacAlgorithm(final IHashAlgorithm delegate) {
-        this.delegate = new HmacDigestAlgorithm(delegate);
+        this(new HmacDigestAlgorithm(delegate));
+    }
+
+    HmacAlgorithm(final HmacDigestAlgorithm delegate) {
+        this.delegate = delegate;
     }
 
     @Override
