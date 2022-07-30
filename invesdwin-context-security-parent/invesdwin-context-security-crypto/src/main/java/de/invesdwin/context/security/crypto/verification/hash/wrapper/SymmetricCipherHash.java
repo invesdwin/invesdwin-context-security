@@ -6,7 +6,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.Cipher;
 
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
-import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Pack;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
@@ -25,39 +24,16 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @NotThreadSafe
 public class SymmetricCipherHash implements IHash {
     private static final ISO7816d4Padding PADDING = new ISO7816d4Padding();
-    private final byte[] poly;
-    private final byte[] zeroes;
 
-    private final IByteBuffer mac;
-
-    private final IByteBuffer buf;
-    private int bufOff;
     private final ICipher cipher;
-
-    private final int blockSize;
-    private final int hashSize;
-
-    private final byte[] l, lu1, lu2;
-
     private final MutableIvParameterSpec iv;
     private final IByteBuffer ivBlock;
     private final ICipherIV cipherIV;
     private Key prevKey;
+    private Data data;
 
     public SymmetricCipherHash(final ICipher cipher, final ICipherIV cipherIV) {
         this.cipher = cipher;
-        this.hashSize = cipher.getBlockSize() + cipher.getHashSize() + cipherIV.getIvSize();
-        this.blockSize = cipher.getBlockSize();
-        this.poly = lookupPoly(blockSize);
-
-        this.mac = ByteBuffers.allocate(blockSize);
-        this.buf = ByteBuffers.allocate(blockSize);
-        this.zeroes = new byte[blockSize];
-        this.bufOff = 0;
-
-        this.l = new byte[blockSize];
-        this.lu1 = new byte[blockSize];
-        this.lu2 = new byte[blockSize];
 
         this.iv = new MutableIvParameterSpec(ByteBuffers.allocateByteArray(cipherIV.getIvSize()));
         this.ivBlock = ByteBuffers.allocate(cipherIV.getIvSize());
@@ -82,18 +58,6 @@ public class SymmetricCipherHash implements IHash {
             bit = (b >>> 7) & 1;
         }
         return bit;
-    }
-
-    private void doubleLu(final byte[] in, final byte[] ret) {
-        final int carry = shiftLeft(in, ret);
-
-        /*
-         * NOTE: This construction is an attempt at a constant-time implementation.
-         */
-        final int mask = (-carry) & 0xff;
-        ret[in.length - 3] ^= poly[1] & mask;
-        ret[in.length - 2] ^= poly[2] & mask;
-        ret[in.length - 1] ^= poly[3] & mask;
     }
 
     private static byte[] lookupPoly(final int blockSizeLength) {
@@ -149,30 +113,17 @@ public class SymmetricCipherHash implements IHash {
     public void init(final Key key) {
         this.prevKey = key;
         reset();
-
-        initLu();
-    }
-
-    private void initLu() {
-        //initializes the L, Lu, Lu2 numbers
-        cipher.update(zeroes, 0, zeroes.length, l, 0);
-        doubleLu(l, lu1);
-        doubleLu(lu1, lu2);
+        data.initLu();
     }
 
     @Override
     public int getHashSize() {
-        return hashSize;
+        return data.hashSize;
     }
 
     @Override
     public void update(final byte in) {
-        if (bufOff == buf.capacity()) {
-            cipher.update(buf, mac);
-            bufOff = 0;
-        }
-
-        buf.putByte(bufOff++, in);
+        data.update(in);
     }
 
     @Override
@@ -182,69 +133,12 @@ public class SymmetricCipherHash implements IHash {
 
     @Override
     public void update(final byte[] in, final int pInOff, final int pLen) {
-        int inOff = pInOff;
-        int len = pLen;
-        if (len < 0) {
-            throw new IllegalArgumentException("Can't have a negative input length!");
-        }
-
-        final int gapLen = blockSize - bufOff;
-
-        if (len > gapLen) {
-            buf.putBytes(bufOff, in, inOff, gapLen);
-
-            cipher.update(buf, mac);
-
-            bufOff = 0;
-            len -= gapLen;
-            inOff += gapLen;
-
-            while (len > blockSize) {
-                cipher.update(in, inOff, blockSize, mac.asByteArray(), 0);
-
-                len -= blockSize;
-                inOff += blockSize;
-            }
-        }
-
-        if (len > 0) {
-            buf.putBytes(bufOff, in, inOff, len);
-            bufOff += len;
-        }
+        data.update(in, pInOff, pLen);
     }
 
     @Override
     public void update(final IByteBuffer input) {
-        int inOff = 0;
-        int len = input.capacity();
-        if (len < 0) {
-            throw new IllegalArgumentException("Can't have a negative input length!");
-        }
-
-        final int gapLen = blockSize - bufOff;
-
-        if (len > gapLen) {
-            buf.putBytes(bufOff, input, inOff, gapLen);
-
-            cipher.update(buf, mac);
-
-            bufOff = 0;
-            len -= gapLen;
-            inOff += gapLen;
-
-            while (len > blockSize) {
-                cipher.update(input.slice(inOff, blockSize), mac);
-
-                len -= blockSize;
-                inOff += blockSize;
-            }
-        }
-
-        if (len > 0) {
-            buf.putBytes(bufOff, input, inOff, len);
-            bufOff += len;
-        }
-
+        data.update(input);
     }
 
     @Override
@@ -262,7 +156,7 @@ public class SymmetricCipherHash implements IHash {
 
     @Override
     public byte[] doFinal() {
-        final byte[] hash = new byte[hashSize];
+        final byte[] hash = new byte[data.hashSize];
         doFinal(hash, 0);
         return hash;
     }
@@ -271,56 +165,26 @@ public class SymmetricCipherHash implements IHash {
     public int doFinal(final byte[] out, final int outOff) {
         ivBlock.getBytes(0, out, outOff, cipherIV.getIvSize());
         final int macIndex = outOff + cipherIV.getIvSize();
-        doFinalInternal(out, macIndex);
-        return hashSize;
-    }
-
-    private int doFinalInternal(final byte[] out, final int outOff) {
-        final byte[] lu;
-        if (bufOff == blockSize) {
-            lu = lu1;
-        } else {
-            PADDING.addPadding(buf.asByteArray(), bufOff);
-            lu = lu2;
-        }
-
-        for (int i = 0; i < mac.capacity(); i++) {
-            final byte b = (byte) (buf.getByte(i) ^ lu[i]);
-            buf.putByte(i, b);
-        }
-
-        cipher.update(buf, mac);
-
-        mac.getBytes(0, out, outOff, blockSize);
-
-        return blockSize;
+        data.doFinal(out, macIndex);
+        return data.hashSize;
     }
 
     @Override
     public void reset() {
         cipherIV.putIV(ivBlock, iv);
         cipher.init(Cipher.ENCRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
-
-        clean();
-    }
-
-    private void clean() {
-        buf.clear(Bytes.ZERO);
-        bufOff = 0;
+        final int blockSize = cipher.getBlockSize();
+        if (data == null || data.blockSize != blockSize) {
+            data = new Data(cipher, blockSize, cipherIV.getIvSize());
+        }
+        data.clean();
     }
 
     @Override
     public void close() {
         prevKey = null;
         cipher.close();
-        clean();
-        cleanLu();
-    }
-
-    private void cleanLu() {
-        Arrays.fill(l, Bytes.ZERO);
-        Arrays.fill(lu1, Bytes.ZERO);
-        Arrays.fill(lu2, Bytes.ZERO);
+        data = null;
     }
 
     @Override
@@ -332,8 +196,8 @@ public class SymmetricCipherHash implements IHash {
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
         cipherIV.getIV(signature, iv);
         cipher.init(Cipher.ENCRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
-        clean();
-        initLu();
+        data.clean();
+        data.initLu();
         update(input);
         final byte[] calculatedSignature;
         try {
@@ -344,6 +208,158 @@ public class SymmetricCipherHash implements IHash {
         final int macIndex = cipherIV.getIvSize();
         return ByteBuffers.constantTimeEquals(signature.sliceFrom(macIndex), calculatedSignature, macIndex,
                 signature.remaining(macIndex));
+    }
+
+    private static final class Data {
+        private final ICipher cipher;
+
+        private final byte[] poly;
+        private final byte[] zeroes;
+
+        private final IByteBuffer mac;
+        private final IByteBuffer buf;
+        private int bufOff;
+
+        private final int blockSize;
+        private final int hashSize;
+
+        private final byte[] l, lu1, lu2;
+
+        private Data(final ICipher cipher, final int blockSize, final int ivSize) {
+            this.cipher = cipher;
+            this.hashSize = cipher.getBlockSize() + cipher.getHashSize() + ivSize;
+            this.blockSize = cipher.getBlockSize();
+            this.poly = lookupPoly(blockSize);
+
+            this.mac = ByteBuffers.allocate(blockSize);
+            this.buf = ByteBuffers.allocate(blockSize);
+            this.zeroes = new byte[blockSize];
+            this.bufOff = 0;
+
+            this.l = new byte[blockSize];
+            this.lu1 = new byte[blockSize];
+            this.lu2 = new byte[blockSize];
+        }
+
+        private void initLu() {
+            //initializes the L, Lu, Lu2 numbers
+            cipher.update(zeroes, 0, zeroes.length, l, 0);
+            doubleLu(l, lu1);
+            doubleLu(lu1, lu2);
+        }
+
+        private void doubleLu(final byte[] in, final byte[] ret) {
+            final int carry = shiftLeft(in, ret);
+
+            /*
+             * NOTE: This construction is an attempt at a constant-time implementation.
+             */
+            final int mask = (-carry) & 0xff;
+            ret[in.length - 3] ^= poly[1] & mask;
+            ret[in.length - 2] ^= poly[2] & mask;
+            ret[in.length - 1] ^= poly[3] & mask;
+        }
+
+        private void clean() {
+            buf.clear(Bytes.ZERO);
+            bufOff = 0;
+        }
+
+        private void update(final byte in) {
+            if (bufOff == buf.capacity()) {
+                cipher.update(buf, mac);
+                bufOff = 0;
+            }
+
+            buf.putByte(bufOff++, in);
+        }
+
+        private void update(final byte[] in, final int pInOff, final int pLen) {
+            int inOff = pInOff;
+            int len = pLen;
+            if (len < 0) {
+                throw new IllegalArgumentException("Can't have a negative input length!");
+            }
+
+            final int gapLen = blockSize - bufOff;
+
+            if (len > gapLen) {
+                buf.putBytes(bufOff, in, inOff, gapLen);
+
+                cipher.update(buf, mac);
+
+                bufOff = 0;
+                len -= gapLen;
+                inOff += gapLen;
+
+                while (len > blockSize) {
+                    cipher.update(in, inOff, blockSize, mac.asByteArray(), 0);
+
+                    len -= blockSize;
+                    inOff += blockSize;
+                }
+            }
+
+            if (len > 0) {
+                buf.putBytes(bufOff, in, inOff, len);
+                bufOff += len;
+            }
+        }
+
+        private void update(final IByteBuffer input) {
+            int inOff = 0;
+            int len = input.capacity();
+            if (len < 0) {
+                throw new IllegalArgumentException("Can't have a negative input length!");
+            }
+
+            final int gapLen = blockSize - bufOff;
+
+            if (len > gapLen) {
+                buf.putBytes(bufOff, input, inOff, gapLen);
+
+                cipher.update(buf, mac);
+
+                bufOff = 0;
+                len -= gapLen;
+                inOff += gapLen;
+
+                while (len > blockSize) {
+                    cipher.update(input.slice(inOff, blockSize), mac);
+
+                    len -= blockSize;
+                    inOff += blockSize;
+                }
+            }
+
+            if (len > 0) {
+                buf.putBytes(bufOff, input, inOff, len);
+                bufOff += len;
+            }
+
+        }
+
+        private int doFinal(final byte[] out, final int outOff) {
+            final byte[] lu;
+            if (bufOff == blockSize) {
+                lu = lu1;
+            } else {
+                PADDING.addPadding(buf.asByteArray(), bufOff);
+                lu = lu2;
+            }
+
+            for (int i = 0; i < mac.capacity(); i++) {
+                final byte b = (byte) (buf.getByte(i) ^ lu[i]);
+                buf.putByte(i, b);
+            }
+
+            cipher.update(buf, mac);
+
+            mac.getBytes(0, out, outOff, blockSize);
+
+            return blockSize;
+        }
+
     }
 
 }
