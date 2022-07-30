@@ -6,7 +6,7 @@ import com.password4j.ScryptFunction;
 
 import de.invesdwin.context.security.crypto.key.password.pbkdf2.Pbkdf2PasswordHasher;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.DigestAlgorithm;
-import de.invesdwin.context.security.crypto.verification.hash.algorithm.HmacAlgorithm;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.hmac.HmacAlgorithm;
 import de.invesdwin.util.math.Bytes;
 
 @Immutable

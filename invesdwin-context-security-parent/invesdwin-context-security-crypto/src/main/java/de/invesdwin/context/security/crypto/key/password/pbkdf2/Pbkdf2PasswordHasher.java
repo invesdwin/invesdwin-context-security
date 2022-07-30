@@ -9,8 +9,8 @@ import javax.crypto.spec.PBEKeySpec;
 import de.invesdwin.context.security.crypto.CryptoProperties;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.DigestAlgorithm;
-import de.invesdwin.context.security.crypto.verification.hash.algorithm.HmacAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.hmac.HmacAlgorithm;
 import de.invesdwin.util.lang.Objects;
 import de.invesdwin.util.math.Bytes;
 
