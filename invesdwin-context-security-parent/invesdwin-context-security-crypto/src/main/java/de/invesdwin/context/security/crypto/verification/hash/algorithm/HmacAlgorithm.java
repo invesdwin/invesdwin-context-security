@@ -5,8 +5,6 @@ import java.security.Key;
 import javax.annotation.concurrent.Immutable;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.codec.digest.HmacAlgorithms;
-
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
 import de.invesdwin.context.security.crypto.verification.hash.wrapper.JceMacHash;
@@ -14,29 +12,30 @@ import de.invesdwin.context.security.crypto.verification.hash.wrapper.LazyDelega
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
-public enum HmacAlgorithm implements IHashAlgorithm {
-    /**
-     * @deprecated deemed insecure
-     */
-    @Deprecated
-    HMAC_MD5(HmacAlgorithms.HMAC_MD5.getName(), DigestAlgorithm.MD5.getHashSize()),
-    /**
-     * @deprecated deemed insecure
-     */
-    @Deprecated
-    HMAC_SHA_1(HmacAlgorithms.HMAC_SHA_1.getName(), DigestAlgorithm.SHA_1.getHashSize()),
-    HMAC_SHA_224(HmacAlgorithms.HMAC_SHA_224.getName(), DigestAlgorithm.SHA_224.getHashSize()),
-    HMAC_SHA_256(HmacAlgorithms.HMAC_SHA_256.getName(), DigestAlgorithm.SHA_256.getHashSize()),
-    HMAC_SHA_384(HmacAlgorithms.HMAC_SHA_384.getName(), DigestAlgorithm.SHA_384.getHashSize()),
-    HMAC_SHA_512(HmacAlgorithms.HMAC_SHA_512.getName(), DigestAlgorithm.SHA_512.getHashSize());
+public class HmacAlgorithm implements IHashAlgorithm {
 
-    public static final HmacAlgorithm DEFAULT = HMAC_SHA_256;
+    public static final HmacAlgorithm DEFAULT = new HmacAlgorithm(DigestAlgorithm.SHA_256);
+
+    public static final HmacAlgorithm[] VALUES;
+
+    static {
+        final DigestAlgorithm[] digests = DigestAlgorithm.values();
+        VALUES = new HmacAlgorithm[digests.length];
+        for (int i = 0; i < digests.length; i++) {
+            VALUES[i] = new HmacAlgorithm(digests[i]);
+        }
+    }
+
     private final String algorithm;
     private final HashObjectPool hashPool;
-    private int hashSize;
+    private final int hashSize;
 
-    HmacAlgorithm(final String algorithm, final int hashSize) {
-        this.algorithm = algorithm;
+    public HmacAlgorithm(final IHashAlgorithm digestAlgorithm) {
+        this(digestAlgorithm.getAlgorithm(), digestAlgorithm.getHashSize());
+    }
+
+    public HmacAlgorithm(final String digestAlgorithm, final int hashSize) {
+        this.algorithm = "Hmac" + digestAlgorithm;
         this.hashPool = new HashObjectPool(this);
         this.hashSize = hashSize;
     }

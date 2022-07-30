@@ -5,6 +5,7 @@ import javax.annotation.concurrent.Immutable;
 import com.password4j.ScryptFunction;
 
 import de.invesdwin.context.security.crypto.key.password.pbkdf2.Pbkdf2PasswordHasher;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.DigestAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.HmacAlgorithm;
 import de.invesdwin.util.math.Bytes;
 
@@ -22,7 +23,7 @@ public class FastScryptFunction extends ScryptFunction {
             DEFAULT_PARALLELIZATION);
 
     private static final Pbkdf2PasswordHasher PBKDF2_HMAC_SHA256_SINGLE_ITERATION_NO_PEPPER = new Pbkdf2PasswordHasher(
-            Bytes.EMPTY_ARRAY, 1, HmacAlgorithm.HMAC_SHA_256);
+            Bytes.EMPTY_ARRAY, 1, new HmacAlgorithm(DigestAlgorithm.SHA_256));
 
     public FastScryptFunction() {
         this(DEFAULT_WORK_FACTOR, DEFAULT_RESOURCES, DEFAULT_PARALLELIZATION);

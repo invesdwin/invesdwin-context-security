@@ -32,7 +32,9 @@ public enum DigestAlgorithm implements IHashAlgorithm {
     RipeMD_160("RipeMD160", 20),
     RipeMD_256("RipeMD256", 32),
     RipeMD_320("RipeMD320", 40),
-    Whirlpool("Whirlpool", 64);
+    Whirlpool("Whirlpool", 64),
+    Tiger("Tiger", 24),
+    GOST3411("GOST3411", 32);
 
     /**
      * Intel instructions support up SHA-256 and SHA-1:
