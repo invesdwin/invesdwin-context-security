@@ -25,6 +25,8 @@ public enum RsaAlgorithm implements IAsymmetricCipherAlgorithm {
     RSA_ECB_PKCS1Padding(RsaPkcs1Algorithm.INSTANCE),
     RSA_ECB_OAEPPadding(RsaOaepAlgorithm.DEFAULT);
 
+    public static final RsaAlgorithm DEFAULT = RSA_ECB_OAEPPadding;
+
     private final IAsymmetricCipherAlgorithm delegate;
 
     RsaAlgorithm(final IAsymmetricCipherAlgorithm delegate) {
