@@ -36,7 +36,7 @@ public class CipherPresharedIV implements ICipherIV {
 
     @Override
     public int getIvSize() {
-        return 0;
+        return algorithm.getIvSize();
     }
 
     @Override

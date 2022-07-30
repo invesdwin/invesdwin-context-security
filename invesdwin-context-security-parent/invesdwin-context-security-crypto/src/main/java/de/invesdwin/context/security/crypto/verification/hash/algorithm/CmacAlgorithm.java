@@ -7,17 +7,15 @@ import javax.annotation.concurrent.Immutable;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
-import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.ICipherFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDisabledIV;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherPresharedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.RefreshingDelegateCipher;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
 import de.invesdwin.context.security.crypto.verification.hash.wrapper.SymmetricCipherHash;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @Immutable
 public enum CmacAlgorithm implements IHashAlgorithm {
@@ -61,22 +59,13 @@ public enum CmacAlgorithm implements IHashAlgorithm {
 
     @Override
     public IHash newHash() {
-        return new SymmetricCipherHash(new RefreshingDelegateCipher(REFERENCE, new ICipherFactory() {
-
-            @Override
-            public ICipher newCipher() {
-                try {
-                    return new JceCipher(Cipher.getInstance(REFERENCE.getAlgorithm()), REFERENCE.getHashSize());
-                } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public String getAlgorithm() {
-                return REFERENCE.getAlgorithm();
-            }
-        }), CipherDisabledIV.INSTANCE);
+        try {
+            return new SymmetricCipherHash(
+                    new JceCipher(Cipher.getInstance(REFERENCE.getAlgorithm()), REFERENCE.getHashSize()),
+                    new CipherPresharedIV(REFERENCE, ByteBuffers.allocateByteArray(REFERENCE.getIvSize())));
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
