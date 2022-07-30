@@ -60,7 +60,18 @@ public enum CmacAlgorithm implements IHashAlgorithm {
     @Override
     public IHash newHash() {
         try {
-            //Cmac does not require an IV, so we use 0 bytes: https://crypto.stackexchange.com/questions/99508/is-cmac-secure-without-iv-and-the-same-key-authenticate-only
+            /*
+             * Cmac does not require an IV, so we use 0 bytes:
+             * https://crypto.stackexchange.com/questions/99508/is-cmac-secure-without-iv-and-the-same-key-authenticate-
+             * only
+             * 
+             * When we use null, com.sun.crypto.provider.CipherCore.init(int, Key, AlgorithmParameterSpec, SecureRandom)
+             * will generate a random IV instead which causes hash mismatches
+             * 
+             * org.bouncycastle.crypto.macs.CMacWithIV says: A non-NIST variant which allows passing of an IV to the
+             * underlying CBC cipher. Note: there isn't really a good reason to use an IV here, use the regular CMac
+             * where possible.
+             */
             return new SymmetricCipherHash(
                     new JceCipher(Cipher.getInstance(REFERENCE.getAlgorithm()), REFERENCE.getHashSize()),
                     new CipherPresharedIV(REFERENCE, ByteBuffers.allocateByteArray(REFERENCE.getIvSize())));
