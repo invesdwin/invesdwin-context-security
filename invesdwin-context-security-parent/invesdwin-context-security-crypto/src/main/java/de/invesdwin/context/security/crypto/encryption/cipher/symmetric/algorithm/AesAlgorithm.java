@@ -38,6 +38,9 @@ import de.invesdwin.context.system.properties.SystemProperties;
  */
 @Immutable
 public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
+    /**
+     * CBC will throw exceptions if used without padding. Cmac for example does the padding from the outside.
+     */
     @Deprecated
     AES_CBC_NoPadding("AES/CBC/NoPadding", AesKeyLength.BLOCK_SIZE.getBytes(), 0) {
         @Override
