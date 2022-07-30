@@ -32,7 +32,7 @@ public class HashVerificationFactory implements IVerificationFactory {
     }
 
     public HashVerificationFactory(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider.newDerivedKey("hash-key".getBytes(), algorithm.getKeySize()));
+        this(algorithm, derivedKeyProvider.newDerivedKey("hash-key".getBytes(), algorithm.getHashSize()));
     }
 
     public HashVerificationFactory(final IHashAlgorithm algorithm, final byte[] key) {
