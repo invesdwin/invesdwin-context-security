@@ -14,7 +14,7 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 @Immutable
 public enum KmacAlgorithm implements IHashAlgorithm {
     KMAC_128("Kmac128", 16),
-    KMAC_256("Kmac256", 32);
+    KMAC_256("Kmac256", DigestAlgorithm.Keccak_256.getHashSize());
 
     public static final KmacAlgorithm DEFAULT = KMAC_256;
 

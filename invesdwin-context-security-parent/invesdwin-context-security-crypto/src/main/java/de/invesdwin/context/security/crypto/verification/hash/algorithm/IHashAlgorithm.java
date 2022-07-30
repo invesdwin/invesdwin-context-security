@@ -13,7 +13,8 @@ public interface IHashAlgorithm extends IHashFactory {
     IHashAlgorithm DEFAULT = HmacAlgorithm.DEFAULT;
 
     IHashAlgorithm[] VALUES = Arrays.concat(IHashAlgorithm.class, ChecksumAlgorithm.values(), DigestAlgorithm.values(),
-            HmacAlgorithm.values(), CmacAlgorithm.values(), GmacAlgorithm.values(), KmacAlgorithm.values());
+            HmacAlgorithm.values(), CmacAlgorithm.values(), GmacAlgorithm.values(), KmacAlgorithm.values(),
+            SkeinMacAlgorithm.values());
 
     int getKeySize();
 
