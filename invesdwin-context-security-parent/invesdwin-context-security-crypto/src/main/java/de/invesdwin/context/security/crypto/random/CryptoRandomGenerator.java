@@ -1,6 +1,7 @@
 package de.invesdwin.context.security.crypto.random;
 
 import java.io.Closeable;
+import java.security.SecureRandomParameters;
 import java.util.Random;
 
 import javax.annotation.concurrent.Immutable;
@@ -12,7 +13,7 @@ import de.invesdwin.util.lang.Closeables;
 import de.invesdwin.util.lang.finalizer.AFinalizer;
 
 @Immutable
-public class CryptoRandomGenerator implements RandomGenerator, Closeable {
+public class CryptoRandomGenerator extends java.security.SecureRandom implements RandomGenerator, Closeable {
 
     private final CryptoRandomGeneratorFinalizer finalizer;
 
@@ -32,19 +33,41 @@ public class CryptoRandomGenerator implements RandomGenerator, Closeable {
         final long prime = 4294967291L;
 
         long combined = 0L;
-        for (final int s : seed) {
-            combined = combined * prime + s;
+        for (int i = 0; i < seed.length; i++) {
+            combined = combined * prime + seed[i];
+        }
+        setSeed(combined);
+    }
+
+    @Override
+    public void setSeed(final byte[] seed) {
+        // the following number is the largest prime that fits in 32 bits (it is 2^32 - 5)
+        final long prime = 4294967291L;
+
+        long combined = 0L;
+        for (int i = 0; i < seed.length; i++) {
+            combined = combined * prime + seed[i];
         }
         setSeed(combined);
     }
 
     @Override
     public void setSeed(final long seed) {
+        if (finalizer == null) {
+            //super constructor
+            return;
+        }
         finalizer.random.setSeed(seed);
     }
 
     @Override
     public void nextBytes(final byte[] bytes) {
+        finalizer.random.nextBytes(bytes);
+    }
+
+    @Deprecated
+    @Override
+    public void nextBytes(final byte[] bytes, final SecureRandomParameters params) {
         finalizer.random.nextBytes(bytes);
     }
 
@@ -81,6 +104,18 @@ public class CryptoRandomGenerator implements RandomGenerator, Closeable {
     @Override
     public double nextGaussian() {
         return finalizer.random.nextGaussian();
+    }
+
+    @Deprecated
+    @Override
+    public void reseed() {
+        //noop
+    }
+
+    @Deprecated
+    @Override
+    public void reseed(final SecureRandomParameters params) {
+        //noop
     }
 
     @Override

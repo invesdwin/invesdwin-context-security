@@ -6,10 +6,11 @@ import java.io.OutputStream;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.RefreshingCipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.context.security.crypto.encryption.cipher.pool.RefreshingCipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
@@ -94,6 +95,25 @@ public class CipherPresharedIV implements ICipherIV {
     @Override
     public byte[] getNewIV(final InputStream in) {
         return presharedIV.getIV();
+    }
+
+    @Override
+    public int toBuffer(final IByteBuffer buffer) {
+        buffer.putBytes(0, presharedIV.getIV());
+        return presharedIV.getIV().length;
+    }
+
+    @Override
+    public ICipherIV fromBuffer(final IByteBuffer buffer) {
+        final byte[] presharedIVFromBuffer = buffer.asByteArrayCopy();
+        return new CipherPresharedIV(algorithm, presharedIVFromBuffer);
+    }
+
+    @Override
+    public ICipherIV newRandomInstance() {
+        final byte[] randomIV = ByteBuffers.allocateByteArray(presharedIV.getIV().length);
+        CipherDerivedIV.randomizeIV(randomIV);
+        return new CipherPresharedIV(algorithm, randomIV);
     }
 
 }

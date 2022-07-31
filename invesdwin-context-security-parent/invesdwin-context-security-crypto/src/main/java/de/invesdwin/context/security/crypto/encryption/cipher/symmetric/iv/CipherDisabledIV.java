@@ -56,4 +56,19 @@ public final class CipherDisabledIV implements ICipherIV {
     public void getIV(final InputStream input, final MutableIvParameterSpec destIV) {
     }
 
+    @Override
+    public int toBuffer(final IByteBuffer buffer) {
+        return 0;
+    }
+
+    @Override
+    public ICipherIV fromBuffer(final IByteBuffer buffer) {
+        return INSTANCE;
+    }
+
+    @Override
+    public ICipherIV newRandomInstance() {
+        return INSTANCE;
+    }
+
 }

@@ -73,4 +73,24 @@ public interface ICipherIV {
         return newIv.getIV();
     }
 
+    default byte[] toBytes() {
+        final IByteBuffer buffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+        try {
+            final int length = toBuffer(buffer);
+            return buffer.asByteArrayCopyTo(length);
+        } finally {
+            ByteBuffers.EXPANDABLE_POOL.returnObject(buffer);
+        }
+    }
+
+    default ICipherIV fromBytes(final byte[] bytes) {
+        return fromBuffer(ByteBuffers.wrap(bytes));
+    }
+
+    int toBuffer(IByteBuffer buffer);
+
+    ICipherIV fromBuffer(IByteBuffer buffer);
+
+    ICipherIV newRandomInstance();
+
 }

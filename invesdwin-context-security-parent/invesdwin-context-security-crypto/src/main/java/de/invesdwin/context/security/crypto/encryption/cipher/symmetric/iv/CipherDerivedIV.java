@@ -36,13 +36,24 @@ public class CipherDerivedIV implements ICipherIV {
     private final AtomicLong ivCounter;
 
     public CipherDerivedIV(final ISymmetricCipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider.newDerivedKey("crypto-iv".getBytes(), algorithm.getIvSize()));
+        this(algorithm, derivedKeyProvider, newRandomIvCounter());
+    }
+
+    public CipherDerivedIV(final ISymmetricCipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
+            final AtomicLong ivCounter) {
+        this(algorithm, derivedKeyProvider.newDerivedKey(("cipher-symmetric-iv-" + algorithm.getAlgorithm()).getBytes(),
+                algorithm.getIvSize()), ivCounter);
     }
 
     public CipherDerivedIV(final ISymmetricCipherAlgorithm algorithm, final byte[] derivedIV) {
+        this(algorithm, derivedIV, newRandomIvCounter());
+    }
+
+    public CipherDerivedIV(final ISymmetricCipherAlgorithm algorithm, final byte[] derivedIV,
+            final AtomicLong ivCounter) {
         this.algorithm = algorithm;
-        this.initIV = newInitIV(algorithm.getIvSize());
-        this.ivCounter = newIvCounter();
+        this.initIV = derivedIV;
+        this.ivCounter = ivCounter;
         assert initIV.length == algorithm.getIvSize() : "initIV.length[" + initIV.length + "] != algorithm.getIvBytes["
                 + algorithm.getIvSize() + "]";
     }
@@ -55,14 +66,6 @@ public class CipherDerivedIV implements ICipherIV {
     @Override
     public int getIvBlockSize() {
         return Long.BYTES;
-    }
-
-    protected byte[] newInitIV(final int ivBytes) {
-        return newRandomIV(ivBytes);
-    }
-
-    protected AtomicLong newIvCounter() {
-        return newRandomIvCounter();
     }
 
     protected void deriveIV(final byte[] initIV, final long pCounter, final byte[] iv) {
@@ -157,6 +160,27 @@ public class CipherDerivedIV implements ICipherIV {
             }
             iv[i] = (byte) sum;
         }
+    }
+
+    @Override
+    public int toBuffer(final IByteBuffer buffer) {
+        buffer.putBytes(0, initIV);
+        return initIV.length;
+    }
+
+    @Override
+    public ICipherIV fromBuffer(final IByteBuffer buffer) {
+        //counter is sent over the wire anyway with each encryption, so we only need initIV
+        final byte[] initIVFromBuffer = buffer.asByteArrayCopy();
+        return new CipherDerivedIV(algorithm, initIVFromBuffer);
+    }
+
+    @Override
+    public ICipherIV newRandomInstance() {
+        final byte[] randomIV = ByteBuffers.allocateByteArray(initIV.length);
+        CipherDerivedIV.randomizeIV(randomIV);
+        //initialized a random ivCounter anyway
+        return new CipherDerivedIV(algorithm, randomIV);
     }
 
 }

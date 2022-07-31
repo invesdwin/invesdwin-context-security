@@ -72,4 +72,21 @@ public class CipherRandomIV implements ICipherIV {
         }
     }
 
+    @Override
+    public int toBuffer(final IByteBuffer buffer) {
+        //random iv is sent over the wire anyway with each encryption
+        return 0;
+    }
+
+    @Override
+    public ICipherIV fromBuffer(final IByteBuffer buffer) {
+        return this;
+    }
+
+    @Override
+    public ICipherIV newRandomInstance() {
+        //this is random anyway
+        return this;
+    }
+
 }

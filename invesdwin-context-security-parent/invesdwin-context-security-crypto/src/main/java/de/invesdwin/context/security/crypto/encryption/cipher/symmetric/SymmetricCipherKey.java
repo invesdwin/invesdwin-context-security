@@ -10,6 +10,11 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipherKey;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
+import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
+import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
 public class SymmetricCipherKey implements ICipherKey {
@@ -26,7 +31,7 @@ public class SymmetricCipherKey implements ICipherKey {
     public SymmetricCipherKey(final ISymmetricCipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
             final int derivedKeySize) {
         this(derivedKeyProvider.newDerivedKey(algorithm,
-                ("cipher-symmetric-key-" + algorithm.getKeyAlgorithm()).getBytes(), derivedKeySize));
+                ("cipher-symmetric-key-" + algorithm.getAlgorithm()).getBytes(), derivedKeySize));
     }
 
     public SymmetricCipherKey(final ISymmetricCipherAlgorithm algorithm, final byte[] derivedKey,
@@ -89,6 +94,44 @@ public class SymmetricCipherKey implements ICipherKey {
     public SymmetricCipherKey withCipherIV(final ICipherIV cipherIV) {
         //CHECKSTYLE:ON
         return new SymmetricCipherKey(algorithm, key, cipherIV);
+    }
+
+    @Override
+    public int toBuffer(final IByteBuffer buffer) {
+        final byte[] keyBytes = key.getEncoded();
+        int position = 0;
+        buffer.putInt(position, keyBytes.length);
+        position += Integer.BYTES;
+        buffer.putBytes(position, keyBytes);
+        position += keyBytes.length;
+        final int cipherIvSize = cipherIV.toBuffer(buffer.sliceFrom(position));
+        position += cipherIvSize;
+        return position;
+    }
+
+    @Override
+    public IKey fromBuffer(final IByteBuffer buffer) {
+        int position = 0;
+        final int keySize = buffer.getInt(position);
+        position += Integer.BYTES;
+        final byte[] keyBytes = ByteBuffers.allocateByteArray(keySize);
+        buffer.getBytes(position, keyBytes);
+        position += keyBytes.length;
+        final ICipherIV cipherIVFromBuffer = cipherIV.fromBuffer(buffer.sliceFrom(position));
+        return new SymmetricCipherKey(algorithm, keyBytes, cipherIVFromBuffer);
+    }
+
+    @Override
+    public IKey newRandomInstance() {
+        final byte[] randomKey = ByteBuffers.allocateByteArray(keySize);
+        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+        try {
+            random.nextBytes(randomKey);
+        } finally {
+            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
+        }
+        final ICipherIV randomCipherIV = cipherIV.newRandomInstance();
+        return new SymmetricCipherKey(algorithm, randomKey, randomCipherIV);
     }
 
 }

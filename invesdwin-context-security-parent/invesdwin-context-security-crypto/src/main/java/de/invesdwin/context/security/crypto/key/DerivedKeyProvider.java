@@ -48,7 +48,7 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
     @Override
     public SymmetricCipherKey newDerivedKey(final ISymmetricCipherAlgorithm algorithm, final byte[] info,
             final int length) {
-        return new SymmetricCipherKey(algorithm, newDerivedKey(info, length), new CipherDerivedIV(algorithm, info));
+        return new SymmetricCipherKey(algorithm, newDerivedKey(info, length), new CipherDerivedIV(algorithm, this));
     }
 
     @Override
