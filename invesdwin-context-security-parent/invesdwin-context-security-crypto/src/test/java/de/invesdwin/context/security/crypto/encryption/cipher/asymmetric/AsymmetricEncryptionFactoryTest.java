@@ -13,7 +13,6 @@ import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.AsymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.StreamingAsymmetricCipherInputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.StreamingAsymmetricCipherOutputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
@@ -33,7 +32,7 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
             random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
@@ -64,7 +63,7 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
             random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
