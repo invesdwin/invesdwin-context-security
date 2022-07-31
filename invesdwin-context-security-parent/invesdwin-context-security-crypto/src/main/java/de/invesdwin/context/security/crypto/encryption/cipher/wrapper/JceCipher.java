@@ -2,7 +2,6 @@ package de.invesdwin.context.security.crypto.encryption.cipher.wrapper;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -11,7 +10,10 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.ShortBufferException;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipherKey;
+import de.invesdwin.context.security.crypto.key.IKey;
 
 @NotThreadSafe
 public class JceCipher implements ICipher {
@@ -41,9 +43,10 @@ public class JceCipher implements ICipher {
     }
 
     @Override
-    public void init(final int mode, final Key key, final AlgorithmParameterSpec params) {
+    public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
+        final ICipherKey cKey = (ICipherKey) key;
         try {
-            cipher.init(mode, key, params);
+            cipher.init(mode.getJceMode(), cKey.getKey(mode), params);
         } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
             throw new RuntimeException(e);
         }

@@ -1,9 +1,9 @@
 package de.invesdwin.context.security.crypto.encryption.cipher;
 
 import java.io.Closeable;
-import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -15,7 +15,7 @@ public interface ICipher extends Closeable {
 
     String getAlgorithm();
 
-    void init(int mode, Key key, AlgorithmParameterSpec params);
+    void init(CipherMode mode, IKey key, AlgorithmParameterSpec params);
 
     int update(java.nio.ByteBuffer inBuffer, java.nio.ByteBuffer outBuffer);
 

@@ -1,6 +1,5 @@
 package de.invesdwin.context.security.crypto.verification.hash.algorithm;
 
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
 import javax.annotation.concurrent.Immutable;
@@ -8,7 +7,7 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherPresharedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipher;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
@@ -19,9 +18,9 @@ import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @Immutable
 public enum CmacAlgorithm implements IHashAlgorithm {
-    CMAC_AES_128("CmacAES128", AesKeyLength._128.getBytes()),
-    CMAC_AES_196("CmacAES196", AesKeyLength._196.getBytes()),
-    CMAC_AES_256("CmacAES256", AesKeyLength._256.getBytes());
+    CMAC_AES_128("CmacAES128", AesKeySize._128.getBytes()),
+    CMAC_AES_196("CmacAES196", AesKeySize._196.getBytes()),
+    CMAC_AES_256("CmacAES256", AesKeySize._256.getBytes());
 
     public static final CmacAlgorithm DEFAULT = CMAC_AES_256;
 
@@ -43,13 +42,18 @@ public enum CmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
+    public String getKeyAlgorithm() {
+        return REFERENCE.getKeyAlgorithm();
+    }
+
+    @Override
     public HashAlgorithmType getType() {
         return HashAlgorithmType.Mac;
     }
 
     @Override
     public int getHashSize() {
-        return AesKeyLength.BLOCK_SIZE.getBytes();
+        return AesKeySize.BLOCK_SIZE.getBytes();
     }
 
     @Override
@@ -78,11 +82,6 @@ public enum CmacAlgorithm implements IHashAlgorithm {
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public Key wrapKey(final byte[] key) {
-        return REFERENCE.wrapKey(key);
     }
 
     @Override

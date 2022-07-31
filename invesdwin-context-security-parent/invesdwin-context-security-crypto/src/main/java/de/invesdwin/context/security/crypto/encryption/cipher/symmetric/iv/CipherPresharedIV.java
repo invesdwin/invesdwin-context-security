@@ -6,9 +6,10 @@ import java.io.OutputStream;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.pool.RefreshingCipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
-import de.invesdwin.util.lang.Closeables;
+import de.invesdwin.util.concurrent.pool.IObjectPool;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
@@ -21,12 +22,15 @@ public class CipherPresharedIV implements ICipherIV {
 
     private final ISymmetricCipherAlgorithm algorithm;
     private final MutableIvParameterSpec presharedIV;
+    private final RefreshingCipherObjectPool cipherPool;
 
     public CipherPresharedIV(final ISymmetricCipherAlgorithm algorithm, final byte[] presharedIV) {
         this.algorithm = algorithm;
         this.presharedIV = new MutableIvParameterSpec(presharedIV);
         assert presharedIV.length == algorithm.getIvSize() : "iv.length[" + presharedIV.length
                 + "] != algorithm.getIvBytes[" + algorithm.getIvSize() + "]";
+        //can not reuse IV with AES/GCM/NoPadding, thus create a new instance
+        this.cipherPool = new RefreshingCipherObjectPool(algorithm);
     }
 
     @Override
@@ -35,7 +39,7 @@ public class CipherPresharedIV implements ICipherIV {
     }
 
     @Override
-    public int getIvSize() {
+    public int getIvBlockSize() {
         return algorithm.getIvSize();
     }
 
@@ -68,14 +72,8 @@ public class CipherPresharedIV implements ICipherIV {
     }
 
     @Override
-    public ICipher borrowCipher() {
-        //can not reuse IV with AES/GCM/NoPadding, thus create a new instance
-        return getAlgorithm().newCipher();
-    }
-
-    @Override
-    public void returnCipher(final ICipher cipher) {
-        Closeables.close(cipher);
+    public IObjectPool<ICipher> getCipherPool() {
+        return cipherPool;
     }
 
     @Override

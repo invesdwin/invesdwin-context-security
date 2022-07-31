@@ -1,9 +1,6 @@
 package de.invesdwin.context.security.crypto.verification.hash.algorithm.hmac;
 
-import java.security.Key;
-
 import javax.annotation.concurrent.Immutable;
-import javax.crypto.spec.SecretKeySpec;
 
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.HashAlgorithmType;
@@ -40,6 +37,11 @@ public class HmacDigestAlgorithm implements IHashAlgorithm {
     }
 
     @Override
+    public String getKeyAlgorithm() {
+        return algorithm;
+    }
+
+    @Override
     public HashAlgorithmType getType() {
         return HashAlgorithmType.Mac;
     }
@@ -57,11 +59,6 @@ public class HmacDigestAlgorithm implements IHashAlgorithm {
     @Override
     public IHash newHash() {
         return new LazyDelegateHash(new JceMacHash(getAlgorithm()));
-    }
-
-    @Override
-    public Key wrapKey(final byte[] key) {
-        return new SecretKeySpec(key, algorithm);
     }
 
     @Override

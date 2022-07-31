@@ -2,11 +2,11 @@ package de.invesdwin.context.security.crypto.verification.hash;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.Key;
 
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.IVerificationFactory;
 import de.invesdwin.context.security.crypto.verification.VerificationDelegateSerde;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
@@ -14,6 +14,7 @@ import de.invesdwin.context.security.crypto.verification.hash.stream.ChannelLaye
 import de.invesdwin.context.security.crypto.verification.hash.stream.ChannelLayeredHashOutputStream;
 import de.invesdwin.context.security.crypto.verification.hash.stream.LayeredHashInputStream;
 import de.invesdwin.context.security.crypto.verification.hash.stream.LayeredHashOutputStream;
+import de.invesdwin.util.concurrent.pool.IObjectPool;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -21,10 +22,10 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 public class HashVerificationFactory implements IVerificationFactory {
 
     private final IHashAlgorithm algorithm;
-    private final Key key;
+    private final HashKey key;
 
     public HashVerificationFactory(final byte[] key) {
-        this(IHashAlgorithm.DEFAULT, key);
+        this(new HashKey(IHashAlgorithm.DEFAULT, key));
     }
 
     public HashVerificationFactory(final IDerivedKeyProvider derivedKeyProvider) {
@@ -32,12 +33,17 @@ public class HashVerificationFactory implements IVerificationFactory {
     }
 
     public HashVerificationFactory(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider.newDerivedKey("hash-key".getBytes(), algorithm.getHashSize()));
+        this(new HashKey(algorithm, derivedKeyProvider));
     }
 
-    public HashVerificationFactory(final IHashAlgorithm algorithm, final byte[] key) {
-        this.algorithm = algorithm;
-        this.key = algorithm.wrapKey(key);
+    public HashVerificationFactory(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
+            final int derivedKeySize) {
+        this(new HashKey(algorithm, derivedKeyProvider, derivedKeySize));
+    }
+
+    public HashVerificationFactory(final HashKey key) {
+        this.algorithm = key.getAlgorithm();
+        this.key = key;
     }
 
     @Override
@@ -46,67 +52,42 @@ public class HashVerificationFactory implements IVerificationFactory {
     }
 
     @Override
-    public void init(final IHash hash) {
+    public IObjectPool<IHash> getHashPool() {
+        return algorithm.getHashPool();
+    }
+
+    @Override
+    public HashKey getKey() {
+        return key;
+    }
+
+    @Override
+    public LayeredHashOutputStream newHashOutputStream(final OutputStream out, final IHash hash, final IKey key) {
+        return ChannelLayeredHashOutputStream.maybeWrap(out, hash, key);
+    }
+
+    @Override
+    public LayeredHashInputStream newHashInputStream(final InputStream in, final IHash hash, final IKey key) {
+        return ChannelLayeredHashInputStream.maybeWrap(in, hash, key);
+    }
+
+    @Override
+    public byte[] newHash(final IByteBuffer src, final IHash hash, final IKey key) {
         hash.init(key);
-    }
-
-    @Override
-    public LayeredHashOutputStream newHashOutputStream(final OutputStream out) {
-        return ChannelLayeredHashOutputStream.maybeWrap(out, algorithm.newHash(), key);
-    }
-
-    @Override
-    public LayeredHashInputStream newHashInputStream(final InputStream in) {
-        return ChannelLayeredHashInputStream.maybeWrap(in, algorithm.newHash(), key);
-    }
-
-    @Override
-    public byte[] newHash(final IByteBuffer src) {
-        final IHash hash = algorithm.getHashPool().borrowObject();
-        try {
-            return newHash(src, hash);
-        } finally {
-            algorithm.getHashPool().returnObject(hash);
-        }
-    }
-
-    @Override
-    public byte[] newHash(final IByteBuffer src, final IHash hash) {
-        init(hash);
         hash.update(src);
         return hash.doFinal();
     }
 
     @Override
-    public int putHash(final IByteBuffer dest, final int destSignatureIndex) {
-        final IHash hash = algorithm.getHashPool().borrowObject();
-        try {
-            return putHash(dest, destSignatureIndex, hash);
-        } finally {
-            algorithm.getHashPool().returnObject(hash);
-        }
-    }
-
-    @Override
-    public int putHash(final IByteBuffer dest, final int destSignatureIndex, final IHash hash) {
-        final byte[] signature = newHash(dest.sliceTo(destSignatureIndex), hash);
+    public int putHash(final IByteBuffer dest, final int destSignatureIndex, final IHash hash, final IKey key) {
+        final byte[] signature = newHash(dest.sliceTo(destSignatureIndex), hash, key);
         dest.putBytes(destSignatureIndex, signature);
         return signature.length;
     }
 
     @Override
-    public int copyAndHash(final IByteBuffer src, final IByteBuffer dest) {
-        final IHash hash = algorithm.getHashPool().borrowObject();
-        try {
-            return copyAndHash(src, dest, hash);
-        } finally {
-            algorithm.getHashPool().returnObject(hash);
-        }
-    }
-
-    @Override
-    public int copyAndHash(final IByteBuffer src, final IByteBuffer dest, final IHash hash) {
-        init(hash);
+    public int copyAndHash(final IByteBuffer src, final IByteBuffer dest, final IHash hash, final IKey key) {
+        hash.init(key);
         hash.update(src);
         final byte[] signature = hash.doFinal();
         dest.putBytes(0, src);
@@ -116,43 +97,23 @@ public class HashVerificationFactory implements IVerificationFactory {
     }
 
     @Override
-    public int verifyAndCopy(final IByteBuffer src, final IByteBuffer dest) {
-        final IHash hash = algorithm.getHashPool().borrowObject();
-        try {
-            return verifyAndCopy(src, dest, hash);
-        } finally {
-            algorithm.getHashPool().returnObject(hash);
-        }
-    }
-
-    @Override
-    public int verifyAndCopy(final IByteBuffer src, final IByteBuffer dest, final IHash hash) {
-        final IByteBuffer payloadBuffer = verifyAndSlice(src, hash);
+    public int verifyAndCopy(final IByteBuffer src, final IByteBuffer dest, final IHash hash, final IKey key) {
+        final IByteBuffer payloadBuffer = verifyAndSlice(src, hash, key);
         dest.putBytes(0, payloadBuffer);
         return payloadBuffer.capacity();
     }
 
     @Override
-    public IByteBuffer verifyAndSlice(final IByteBuffer src) {
-        final IHash hash = algorithm.getHashPool().borrowObject();
-        try {
-            return verifyAndSlice(src, hash);
-        } finally {
-            algorithm.getHashPool().returnObject(hash);
-        }
-    }
-
-    @Override
-    public IByteBuffer verifyAndSlice(final IByteBuffer src, final IHash hash) {
-        init(hash);
+    public IByteBuffer verifyAndSlice(final IByteBuffer src, final IHash hash, final IKey key) {
+        hash.init(key);
         final IByteBuffer payloadBuffer = hash.verifyAndSlice(src);
         return payloadBuffer;
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public <T> ISerde<T> maybeWrap(final ISerde<T> delegate) {
-        return new VerificationDelegateSerde<>(delegate, this);
+    public <T> ISerde<T> maybeWrap(final ISerde<T> delegate, final IKey key) {
+        return new VerificationDelegateSerde<>(delegate, this, key);
     }
 
 }

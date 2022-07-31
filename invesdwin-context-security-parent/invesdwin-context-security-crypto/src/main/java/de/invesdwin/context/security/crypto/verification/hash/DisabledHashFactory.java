@@ -13,11 +13,6 @@ public final class DisabledHashFactory implements IHashFactory {
     }
 
     @Override
-    public String getAlgorithm() {
-        return null;
-    }
-
-    @Override
     public IHash newHash() {
         return DisabledHash.INSTANCE;
     }

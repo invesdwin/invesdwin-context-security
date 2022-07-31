@@ -1,13 +1,12 @@
-package de.invesdwin.context.security.crypto.encryption.verified;
+package de.invesdwin.context.security.crypto.encryption.verified.wrapper;
 
-import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.crypto.Cipher;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.verification.IVerificationFactory;
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -20,31 +19,33 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @NotThreadSafe
 public class VerifiedCipher implements ICipher {
 
-    private final ICipher unverifiedCipher;
-    private final IHash hash;
+    private ICipher unverifiedCipher;
+    private IHash hash;
     private final EncryptingVerifiedCipher encryptingDelegate;
     private final DecryptingVerifiedCipher decryptingDelegate;
-    private final IVerificationFactory authenticationFactory;
     private ICipher delegate;
 
-    public VerifiedCipher(final ICipher unverifiedCipher, final IVerificationFactory verificationFactory) {
+    public VerifiedCipher(final ICipher unverifiedCipher, final IHash hash) {
         this.unverifiedCipher = unverifiedCipher;
-        this.hash = verificationFactory.getAlgorithm().newHash();
-        this.encryptingDelegate = new EncryptingVerifiedCipher(unverifiedCipher, verificationFactory, hash);
-        this.decryptingDelegate = new DecryptingVerifiedCipher(unverifiedCipher, verificationFactory, hash);
-        this.authenticationFactory = verificationFactory;
+        this.hash = hash;
+        this.encryptingDelegate = new EncryptingVerifiedCipher(this);
+        this.decryptingDelegate = new DecryptingVerifiedCipher(this);
     }
 
     public ICipher getUnverifiedCipher() {
         return unverifiedCipher;
     }
 
+    public void setUnverifiedCipher(final ICipher unverifiedCipher) {
+        this.unverifiedCipher = unverifiedCipher;
+    }
+
     public IHash getHash() {
         return hash;
     }
 
-    public IVerificationFactory getAuthenticationFactory() {
-        return authenticationFactory;
+    public void setHash(final IHash hash) {
+        this.hash = hash;
     }
 
     @Override
@@ -63,16 +64,16 @@ public class VerifiedCipher implements ICipher {
     }
 
     @Override
-    public void init(final int mode, final Key key, final AlgorithmParameterSpec params) {
+    public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         switch (mode) {
-        case Cipher.ENCRYPT_MODE:
+        case Encrypt:
             delegate = encryptingDelegate;
             break;
-        case Cipher.DECRYPT_MODE:
+        case Decrypt:
             delegate = decryptingDelegate;
             break;
         default:
-            throw UnknownArgumentException.newInstance(int.class, mode);
+            throw UnknownArgumentException.newInstance(CipherMode.class, mode);
         }
         delegate.init(mode, key, params);
     }
@@ -110,10 +111,7 @@ public class VerifiedCipher implements ICipher {
 
     @Override
     public int doFinal(final byte[] input, final int inputOffset, final int inputLen, final byte[] output) {
-        int written = delegate.doFinal(input, inputOffset, inputLen, output);
-        hash.update(input, inputOffset, inputLen);
-        written += hash.doFinal(output, written);
-        return written;
+        return delegate.doFinal(input, inputOffset, inputLen, output);
     }
 
     @Override
@@ -159,8 +157,14 @@ public class VerifiedCipher implements ICipher {
 
     @Override
     public void close() {
-        unverifiedCipher.close();
-        hash.close();
+        if (unverifiedCipher != null) {
+            unverifiedCipher.close();
+            unverifiedCipher = null;
+        }
+        if (hash != null) {
+            hash.close();
+            hash = null;
+        }
         encryptingDelegate.reset();
         decryptingDelegate.reset();
     }

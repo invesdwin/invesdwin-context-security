@@ -1,9 +1,6 @@
 package de.invesdwin.context.security.crypto.verification.hash.algorithm;
 
-import java.security.Key;
-
 import javax.annotation.concurrent.Immutable;
-import javax.crypto.spec.SecretKeySpec;
 
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
@@ -111,6 +108,11 @@ public enum DigestAlgorithm implements IHashAlgorithm {
     }
 
     @Override
+    public String getKeyAlgorithm() {
+        return algorithm;
+    }
+
+    @Override
     public HashAlgorithmType getType() {
         return HashAlgorithmType.Digest;
     }
@@ -128,11 +130,6 @@ public enum DigestAlgorithm implements IHashAlgorithm {
     @Override
     public IHash newHash() {
         return new JceDigestHash(algorithm);
-    }
-
-    @Override
-    public Key wrapKey(final byte[] key) {
-        return new SecretKeySpec(key, algorithm);
     }
 
     @Override

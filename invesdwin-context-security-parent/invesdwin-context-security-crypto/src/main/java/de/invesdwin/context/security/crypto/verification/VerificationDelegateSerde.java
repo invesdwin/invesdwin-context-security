@@ -2,6 +2,8 @@ package de.invesdwin.context.security.crypto.verification;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.marshallers.serde.SerdeBaseMethods;
@@ -12,15 +14,18 @@ public class VerificationDelegateSerde<E> implements ISerde<E> {
 
     private final ISerde<E> delegate;
     private final IVerificationFactory verificationFactory;
+    private final IKey key;
 
     /**
      * WARNING: for internal use only. Use maybeWrap() instead.
      */
     @Deprecated
-    public VerificationDelegateSerde(final ISerde<E> delegate, final IVerificationFactory verificationFactory) {
+    public VerificationDelegateSerde(final ISerde<E> delegate, final IVerificationFactory verificationFactory,
+            final IKey key) {
         Assertions.assertThat(delegate).isNotInstanceOf(VerificationDelegateSerde.class);
         this.delegate = delegate;
         this.verificationFactory = verificationFactory;
+        this.key = key;
     }
 
     @Override
@@ -42,8 +47,14 @@ public class VerificationDelegateSerde<E> implements ISerde<E> {
             //we can save a copy here
             return delegate.fromBuffer(buffer, length);
         } else {
-            final IByteBuffer verifiedBuffer = verificationFactory.verifyAndSlice(buffer.sliceTo(length));
-            return delegate.fromBuffer(verifiedBuffer, verifiedBuffer.capacity());
+            final IHash hash = verificationFactory.getHashPool().borrowObject();
+            try {
+                final IByteBuffer verifiedBuffer = verificationFactory.verifyAndSlice(buffer.sliceTo(length), hash,
+                        key);
+                return delegate.fromBuffer(verifiedBuffer, verifiedBuffer.capacity());
+            } finally {
+                verificationFactory.getHashPool().returnObject(hash);
+            }
         }
     }
 
@@ -56,15 +67,15 @@ public class VerificationDelegateSerde<E> implements ISerde<E> {
             //we can save a copy here
             return delegate.toBuffer(buffer, obj);
         } else {
-            final int signatureIndex = delegate.toBuffer(buffer, obj);
-            final int signatureLength = verificationFactory.putHash(buffer, signatureIndex);
-            return signatureIndex + signatureLength;
+            final IHash hash = verificationFactory.getHashPool().borrowObject();
+            try {
+                final int signatureIndex = delegate.toBuffer(buffer, obj);
+                final int signatureLength = verificationFactory.putHash(buffer, signatureIndex, hash, key);
+                return signatureIndex + signatureLength;
+            } finally {
+                verificationFactory.getHashPool().returnObject(hash);
+            }
         }
-    }
-
-    public static <T> ISerde<T> maybeWrap(final ISerde<T> delegate,
-            final IVerificationFactory authenticationFactory) {
-        return authenticationFactory.maybeWrap(delegate);
     }
 
 }

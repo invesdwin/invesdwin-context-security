@@ -1,7 +1,5 @@
 package de.invesdwin.context.security.crypto.verification.hash.algorithm.hmac;
 
-import java.security.Key;
-
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
@@ -98,6 +96,11 @@ public enum HmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
+    public String getKeyAlgorithm() {
+        return delegate.getKeyAlgorithm();
+    }
+
+    @Override
     public HashAlgorithmType getType() {
         return delegate.getType();
     }
@@ -115,11 +118,6 @@ public enum HmacAlgorithm implements IHashAlgorithm {
     @Override
     public IHash newHash() {
         return delegate.newHash();
-    }
-
-    @Override
-    public Key wrapKey(final byte[] key) {
-        return delegate.wrapKey(key);
     }
 
     @Override

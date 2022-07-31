@@ -5,22 +5,28 @@ import java.io.OutputStream;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.DisabledHash;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
+import de.invesdwin.context.security.crypto.verification.hash.stream.ChannelLayeredHashInputStream;
+import de.invesdwin.context.security.crypto.verification.hash.stream.ChannelLayeredHashOutputStream;
 import de.invesdwin.context.security.crypto.verification.hash.stream.LayeredHashInputStream;
 import de.invesdwin.context.security.crypto.verification.hash.stream.LayeredHashOutputStream;
+import de.invesdwin.util.concurrent.pool.IObjectPool;
+import de.invesdwin.util.concurrent.pool.SingletonObjectPool;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
-import de.invesdwin.util.streams.pool.buffered.PooledFastBufferedOutputStream;
 
 @Immutable
 public final class DisabledVerificationFactory implements IVerificationFactory {
 
     public static final DisabledVerificationFactory INSTANCE = new DisabledVerificationFactory();
+    private final SingletonObjectPool<IHash> hashPool;
 
     private DisabledVerificationFactory() {
+        this.hashPool = new SingletonObjectPool<>(DisabledHash.INSTANCE);
     }
 
     @Override
@@ -29,75 +35,54 @@ public final class DisabledVerificationFactory implements IVerificationFactory {
     }
 
     @Override
-    public void init(final IHash hash) {
+    public IKey getKey() {
+        return null;
     }
 
     @Override
-    public LayeredHashOutputStream newHashOutputStream(final OutputStream out) {
-        //buffering is better for write throughput to file
-        return new LayeredHashOutputStream(PooledFastBufferedOutputStream.newInstance(out), DisabledHash.INSTANCE,
-                null);
+    public IObjectPool<IHash> getHashPool() {
+        return hashPool;
     }
 
     @Override
-    public LayeredHashInputStream newHashInputStream(final InputStream in) {
-        return new LayeredHashInputStream(in, DisabledHash.INSTANCE, null);
+    public LayeredHashOutputStream newHashOutputStream(final OutputStream out, final IHash hash, final IKey key) {
+        return ChannelLayeredHashOutputStream.maybeWrap(out, hash, key);
     }
 
     @Override
-    public byte[] newHash(final IByteBuffer src) {
+    public LayeredHashInputStream newHashInputStream(final InputStream in, final IHash hash, final IKey key) {
+        return ChannelLayeredHashInputStream.maybeWrap(in, hash, key);
+    }
+
+    @Override
+    public byte[] newHash(final IByteBuffer src, final IHash hash, final IKey key) {
         return Bytes.EMPTY_ARRAY;
     }
 
     @Override
-    public byte[] newHash(final IByteBuffer src, final IHash hash) {
-        return Bytes.EMPTY_ARRAY;
-    }
-
-    @Override
-    public int putHash(final IByteBuffer dest, final int destIndex) {
+    public int putHash(final IByteBuffer dest, final int destIndex, final IHash hash, final IKey key) {
         return 0;
     }
 
     @Override
-    public int putHash(final IByteBuffer dest, final int destIndex, final IHash hash) {
-        return 0;
-    }
-
-    @Override
-    public int copyAndHash(final IByteBuffer src, final IByteBuffer dest) {
+    public int copyAndHash(final IByteBuffer src, final IByteBuffer dest, final IHash hash, final IKey key) {
         dest.putBytes(0, src);
         return src.capacity();
     }
 
     @Override
-    public int copyAndHash(final IByteBuffer src, final IByteBuffer dest, final IHash hash) {
-        return copyAndHash(src, dest);
-    }
-
-    @Override
-    public int verifyAndCopy(final IByteBuffer src, final IByteBuffer dest) {
+    public int verifyAndCopy(final IByteBuffer src, final IByteBuffer dest, final IHash hash, final IKey key) {
         dest.putBytes(0, src);
         return src.capacity();
     }
 
     @Override
-    public int verifyAndCopy(final IByteBuffer src, final IByteBuffer dest, final IHash hash) {
-        return verifyAndCopy(src, dest);
-    }
-
-    @Override
-    public IByteBuffer verifyAndSlice(final IByteBuffer src) {
+    public IByteBuffer verifyAndSlice(final IByteBuffer src, final IHash hash, final IKey key) {
         return src;
     }
 
     @Override
-    public IByteBuffer verifyAndSlice(final IByteBuffer src, final IHash hash) {
-        return src;
-    }
-
-    @Override
-    public <T> ISerde<T> maybeWrap(final ISerde<T> serde) {
+    public <T> ISerde<T> maybeWrap(final ISerde<T> serde, final IKey key) {
         return serde;
     }
 

@@ -23,9 +23,9 @@ public final class HashObjectPool extends ATimeoutObjectPool<IHash> {
     }
 
     @Override
-    public void invalidateObject(final IHash obj) {
+    public void invalidateObject(final IHash element) {
         //will do a lazy reset only if required
-        obj.reset();
+        element.reset();
     }
 
     @Override

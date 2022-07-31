@@ -34,7 +34,7 @@ public final class CipherDisabledIV implements ICipherIV {
     }
 
     @Override
-    public int getIvSize() {
+    public int getIvBlockSize() {
         return 0;
     }
 

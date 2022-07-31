@@ -1,17 +1,19 @@
 package de.invesdwin.context.security.crypto.verification.hash.wrapper;
 
-import java.security.Key;
-
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.crypto.Cipher;
 
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.util.Pack;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricCipherKey;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
+import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.context.security.crypto.verification.hash.IHashKey;
 import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -29,14 +31,15 @@ public class SymmetricCipherHash implements IHash {
     private final MutableIvParameterSpec iv;
     private final IByteBuffer ivBlock;
     private final ICipherIV cipherIV;
-    private Key prevKey;
+    private IKey prevKey;
+    private IKey prevSymmetricKey;
     private Data data;
 
     public SymmetricCipherHash(final ICipher cipher, final ICipherIV cipherIV) {
         this.cipher = cipher;
 
-        this.iv = new MutableIvParameterSpec(ByteBuffers.allocateByteArray(cipherIV.getIvSize()));
-        this.ivBlock = ByteBuffers.allocate(cipherIV.getIvSize());
+        this.iv = new MutableIvParameterSpec(ByteBuffers.allocateByteArray(cipherIV.getAlgorithm().getIvSize()));
+        this.ivBlock = ByteBuffers.allocate(cipherIV.getIvBlockSize());
         this.cipherIV = cipherIV;
     }
 
@@ -110,8 +113,13 @@ public class SymmetricCipherHash implements IHash {
     }
 
     @Override
-    public void init(final Key key) {
-        this.prevKey = key;
+    public void init(final IKey key) {
+        if (key != prevKey) {
+            this.prevKey = key;
+            final IHashKey cKey = (IHashKey) key;
+            this.prevSymmetricKey = new SymmetricCipherKey(cipherIV.getAlgorithm(), cKey.getKey(HashMode.Sign),
+                    cipherIV);
+        }
         reset();
         data.initLu();
     }
@@ -163,8 +171,8 @@ public class SymmetricCipherHash implements IHash {
 
     @Override
     public int doFinal(final byte[] out, final int outOff) {
-        ivBlock.getBytes(0, out, outOff, cipherIV.getIvSize());
-        final int macIndex = outOff + cipherIV.getIvSize();
+        ivBlock.getBytes(0, out, outOff, cipherIV.getIvBlockSize());
+        final int macIndex = outOff + cipherIV.getIvBlockSize();
         data.doFinal(out, macIndex);
         return data.hashSize;
     }
@@ -172,10 +180,10 @@ public class SymmetricCipherHash implements IHash {
     @Override
     public void reset() {
         cipherIV.putIV(ivBlock, iv);
-        cipher.init(Cipher.ENCRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
+        cipher.init(CipherMode.Encrypt, prevSymmetricKey, cipherIV.wrapParam(iv));
         final int blockSize = cipher.getBlockSize();
         if (data == null || data.blockSize != blockSize) {
-            data = new Data(cipher, blockSize, cipherIV.getIvSize());
+            data = new Data(cipher, blockSize, cipherIV.getIvBlockSize());
         }
         data.clean();
     }
@@ -183,6 +191,7 @@ public class SymmetricCipherHash implements IHash {
     @Override
     public void close() {
         prevKey = null;
+        prevSymmetricKey = null;
         cipher.close();
         data = null;
     }
@@ -195,7 +204,7 @@ public class SymmetricCipherHash implements IHash {
     @Override
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
         cipherIV.getIV(signature, iv);
-        cipher.init(Cipher.ENCRYPT_MODE, prevKey, cipherIV.wrapParam(iv));
+        cipher.init(CipherMode.Encrypt, prevSymmetricKey, cipherIV.wrapParam(iv));
         data.clean();
         data.initLu();
         update(input);
@@ -205,7 +214,7 @@ public class SymmetricCipherHash implements IHash {
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
-        final int macIndex = cipherIV.getIvSize();
+        final int macIndex = cipherIV.getIvBlockSize();
         return ByteBuffers.constantTimeEquals(signature.sliceFrom(macIndex), calculatedSignature, macIndex,
                 signature.remaining(macIndex));
     }

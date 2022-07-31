@@ -5,17 +5,18 @@ import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.crypto.Cipher;
 
 import org.apache.commons.crypto.stream.output.Output;
 import org.apache.commons.crypto.utils.Utils;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.CipherStreams;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherOutputStream;
+import de.invesdwin.context.security.crypto.key.IKey;
 
 /**
  * <p>
@@ -65,71 +66,71 @@ public class PaddingStreamingSymmetricCipherOutputStream extends SymmetricCipher
     private boolean cipherReset = false;
 
     public PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final OutputStream out, final byte[] key, final byte[] iv) throws IOException {
+            final OutputStream out, final IKey key, final byte[] iv) throws IOException {
         this(algorithm, out, key, iv, 0);
     }
 
     public PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final WritableByteChannel out, final byte[] key, final byte[] iv) throws IOException {
+            final WritableByteChannel out, final IKey key, final byte[] iv) throws IOException {
         this(algorithm, out, key, iv, 0);
     }
 
     public PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final OutputStream out, final ICipher cipher, final byte[] key, final byte[] iv) throws IOException {
+            final OutputStream out, final ICipher cipher, final IKey key, final byte[] iv) throws IOException {
         this(algorithm, out, cipher, CipherStreams.getDefaultBufferSize(), key, iv, 0);
     }
 
     public PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final WritableByteChannel channel, final ICipher cipher, final byte[] key, final byte[] iv)
+            final WritableByteChannel channel, final ICipher cipher, final IKey key, final byte[] iv)
             throws IOException {
         this(algorithm, channel, cipher, CipherStreams.getDefaultBufferSize(), key, iv, 0);
     }
 
     protected PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final OutputStream out, final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv)
+            final OutputStream out, final ICipher cipher, final int bufferSize, final IKey key, final byte[] iv)
             throws IOException {
         this(algorithm, out, cipher, bufferSize, key, iv, 0);
     }
 
     protected PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final WritableByteChannel channel, final ICipher cipher, final int bufferSize, final byte[] key,
+            final WritableByteChannel channel, final ICipher cipher, final int bufferSize, final IKey key,
             final byte[] iv) throws IOException {
         this(algorithm, channel, cipher, bufferSize, key, iv, 0);
     }
 
     protected PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final Output output, final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv)
+            final Output output, final ICipher cipher, final int bufferSize, final IKey key, final byte[] iv)
             throws IOException {
         this(algorithm, output, cipher, bufferSize, key, iv, 0);
     }
 
     public PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final OutputStream outputStream, final byte[] key, final byte[] iv, final long streamOffset)
+            final OutputStream outputStream, final IKey key, final byte[] iv, final long streamOffset)
             throws IOException {
         this(algorithm, outputStream, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key, iv,
                 streamOffset);
     }
 
     public PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final WritableByteChannel channel, final byte[] key, final byte[] iv, final long streamOffset)
+            final WritableByteChannel channel, final IKey key, final byte[] iv, final long streamOffset)
             throws IOException {
         this(algorithm, channel, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key, iv, streamOffset);
     }
 
     protected PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final OutputStream outputStream, final ICipher cipher, final int bufferSize, final byte[] key,
+            final OutputStream outputStream, final ICipher cipher, final int bufferSize, final IKey key,
             final byte[] iv, final long streamOffset) throws IOException {
         this(algorithm, CipherStreams.wrapOutput(outputStream, bufferSize), cipher, bufferSize, key, iv, streamOffset);
     }
 
     protected PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final WritableByteChannel channel, final ICipher cipher, final int bufferSize, final byte[] key,
+            final WritableByteChannel channel, final ICipher cipher, final int bufferSize, final IKey key,
             final byte[] iv, final long streamOffset) throws IOException {
         this(algorithm, CipherStreams.wrapOutput(channel), cipher, bufferSize, key, iv, streamOffset);
     }
 
     protected PaddingStreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
-            final Output output, final ICipher cipher, final int bufferSize, final byte[] key, final byte[] iv,
+            final Output output, final ICipher cipher, final int bufferSize, final IKey key, final byte[] iv,
             final long streamOffset) throws IOException {
         super(algorithm, output, cipher, bufferSize, key, iv);
 
@@ -205,7 +206,7 @@ public class PaddingStreamingSymmetricCipherOutputStream extends SymmetricCipher
 
         CipherDerivedIV.calculateIV(initIV, counter, iv.getIV());
         try {
-            cipher.init(Cipher.ENCRYPT_MODE, key, algorithm.wrapParam(iv));
+            cipher.init(CipherMode.Encrypt, key, algorithm.wrapParam(iv));
         } catch (final Exception e) {
             throw new IOException(e);
         }

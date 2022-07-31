@@ -2,10 +2,10 @@ package de.invesdwin.context.security.crypto.verification.hash.stream;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.Key;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.streams.ASimpleDelegateOutputStream;
 
@@ -13,7 +13,7 @@ import de.invesdwin.util.streams.ASimpleDelegateOutputStream;
 public class LayeredHashOutputStream extends ASimpleDelegateOutputStream {
     protected final IHash hash;
 
-    public LayeredHashOutputStream(final OutputStream delegate, final IHash hash, final Key key) {
+    public LayeredHashOutputStream(final OutputStream delegate, final IHash hash, final IKey key) {
         super(delegate);
         this.hash = hash;
         hash.init(key);

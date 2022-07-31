@@ -1,10 +1,8 @@
 package de.invesdwin.context.security.crypto.verification.hash.algorithm;
 
-import java.security.Key;
 import java.util.zip.Adler32;
 
 import javax.annotation.concurrent.Immutable;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.digest.PureJavaCrc32;
 import org.apache.commons.codec.digest.PureJavaCrc32C;
@@ -73,6 +71,11 @@ public enum ChecksumAlgorithm implements IHashAlgorithm {
     }
 
     @Override
+    public String getKeyAlgorithm() {
+        return algorithm;
+    }
+
+    @Override
     public int getHashSize() {
         return hashSize;
     }
@@ -85,11 +88,6 @@ public enum ChecksumAlgorithm implements IHashAlgorithm {
     @Override
     public HashAlgorithmType getType() {
         return HashAlgorithmType.Checksum;
-    }
-
-    @Override
-    public Key wrapKey(final byte[] key) {
-        return new SecretKeySpec(key, algorithm);
     }
 
     @Override

@@ -3,20 +3,19 @@ package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
-import java.security.Key;
-import java.security.PrivateKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.crypto.Cipher;
 
 import org.apache.commons.crypto.stream.CtrCryptoInputStream;
 import org.apache.commons.crypto.stream.input.Input;
 import org.apache.commons.crypto.utils.Utils;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.CipherStreams;
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
@@ -28,7 +27,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
     protected final ICipher cipher;
 
     /** Crypto key for the cipher. */
-    protected final PrivateKey key;
+    protected final IKey key;
     /** the algorithm parameters */
     protected final AlgorithmParameterSpec params;
 
@@ -58,37 +57,37 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
     private boolean finalDone = false;
 
     public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final InputStream inputStream,
-            final PrivateKey key) throws IOException {
+            final IKey key) throws IOException {
         this(algorithm, inputStream, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key);
     }
 
     public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final InputStream inputStream,
-            final ICipher cipher, final PrivateKey key) throws IOException {
+            final ICipher cipher, final IKey key) throws IOException {
         this(algorithm, inputStream, cipher, CipherStreams.getDefaultBufferSize(), key);
     }
 
     public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
-            final ICipher cipher, final PrivateKey key) throws IOException {
+            final ICipher cipher, final IKey key) throws IOException {
         this(algorithm, channel, cipher, CipherStreams.getDefaultBufferSize(), key);
     }
 
     public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
-            final PrivateKey key) throws IOException {
+            final IKey key) throws IOException {
         this(algorithm, channel, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key);
     }
 
     protected AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final InputStream inputStream,
-            final ICipher cipher, final int bufferSize, final PrivateKey key) throws IOException {
+            final ICipher cipher, final int bufferSize, final IKey key) throws IOException {
         this(algorithm, CipherStreams.wrapInput(inputStream, bufferSize), cipher, bufferSize, key);
     }
 
     protected AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
-            final ICipher cipher, final int bufferSize, final PrivateKey key) throws IOException {
+            final ICipher cipher, final int bufferSize, final IKey key) throws IOException {
         this(algorithm, CipherStreams.wrapInput(channel), cipher, bufferSize, key);
     }
 
     protected AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final Input input,
-            final ICipher cipher, final int bufferSize, final PrivateKey key) throws IOException {
+            final ICipher cipher, final int bufferSize, final IKey key) throws IOException {
         this.algorithm = algorithm;
         this.input = input;
         this.cipher = cipher;
@@ -327,7 +326,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
      *
      * @return the key.
      */
-    protected Key getKey() {
+    protected IKey getKey() {
         return key;
     }
 
@@ -366,7 +365,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
      */
     protected void initCipher() throws IOException {
         try {
-            cipher.init(Cipher.DECRYPT_MODE, key, params);
+            cipher.init(CipherMode.Decrypt, key, params);
         } catch (final Exception e) {
             throw new IOException(e);
         }

@@ -1,14 +1,16 @@
 package de.invesdwin.context.security.crypto.verification.hash.wrapper;
 
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.Mac;
 import javax.crypto.ShortBufferException;
 
+import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.context.security.crypto.verification.hash.IHashKey;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -44,9 +46,10 @@ public class JceMacHash implements IHash {
     }
 
     @Override
-    public void init(final Key key) {
+    public void init(final IKey key) {
         try {
-            mac.init(key);
+            final IHashKey cKey = (IHashKey) key;
+            mac.init(cKey.getKey(HashMode.Sign));
         } catch (final InvalidKeyException e) {
             throw new RuntimeException(e);
         }

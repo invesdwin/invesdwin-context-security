@@ -2,6 +2,8 @@ package de.invesdwin.context.security.crypto.encryption;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.marshallers.serde.SerdeBaseMethods;
@@ -13,15 +15,18 @@ public class EncryptionDelegateSerde<E> implements ISerde<E> {
 
     private final ISerde<E> delegate;
     private final IEncryptionFactory encryptionFactory;
+    private final IKey key;
 
     /**
      * WARNING: for internal use only. Use maybeWrap() instead.
      */
     @Deprecated
-    public EncryptionDelegateSerde(final ISerde<E> delegate, final IEncryptionFactory encryptionFactory) {
+    public EncryptionDelegateSerde(final ISerde<E> delegate, final IEncryptionFactory encryptionFactory,
+            final IKey key) {
         Assertions.assertThat(delegate).isNotInstanceOf(EncryptionDelegateSerde.class);
         this.delegate = delegate;
         this.encryptionFactory = encryptionFactory;
+        this.key = key;
     }
 
     @Override
@@ -44,12 +49,14 @@ public class EncryptionDelegateSerde<E> implements ISerde<E> {
             return delegate.fromBuffer(buffer, length);
         } else {
             final IByteBuffer decryptedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+            final ICipher cipher = encryptionFactory.getCipherPool().borrowObject();
             try {
-                final int decryptedLength = encryptionFactory.encrypt(buffer, decryptedBuffer);
+                final int decryptedLength = encryptionFactory.encrypt(buffer, decryptedBuffer, cipher, key);
                 final E copied = delegate.fromBuffer(decryptedBuffer, decryptedLength);
                 //                decryptedBuffer.clear(Bytes.ZERO, 0, decryptedLength);
                 return copied;
             } finally {
+                encryptionFactory.getCipherPool().returnObject(cipher);
                 ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedBuffer);
             }
         }
@@ -65,19 +72,18 @@ public class EncryptionDelegateSerde<E> implements ISerde<E> {
             return delegate.toBuffer(buffer, obj);
         } else {
             final IByteBuffer decryptedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+            final ICipher cipher = encryptionFactory.getCipherPool().borrowObject();
             try {
                 final int decryptedLength = delegate.toBuffer(decryptedBuffer, obj);
-                final int copied = encryptionFactory.decrypt(decryptedBuffer.sliceTo(decryptedLength), buffer);
+                final int copied = encryptionFactory.decrypt(decryptedBuffer.sliceTo(decryptedLength), buffer, cipher,
+                        key);
                 //                decryptedBuffer.clear(Bytes.ZERO, 0, decryptedLength);
                 return copied;
             } finally {
+                encryptionFactory.getCipherPool().returnObject(cipher);
                 ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedBuffer);
             }
         }
-    }
-
-    public static <T> ISerde<T> maybeWrap(final ISerde<T> delegate, final IEncryptionFactory encryptionFactory) {
-        return encryptionFactory.maybeWrap(delegate);
     }
 
 }

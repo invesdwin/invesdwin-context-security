@@ -1,10 +1,10 @@
 package de.invesdwin.context.security.crypto.encryption.verified.algorithm;
 
-import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
@@ -13,9 +13,9 @@ import de.invesdwin.context.security.crypto.verification.IVerificationFactory;
 @Immutable
 public class VerifiedSymmetricCipherAlgorithm extends AVerifiedCipherAlgorithm implements ISymmetricCipherAlgorithm {
 
-    public VerifiedSymmetricCipherAlgorithm(final ISymmetricCipherAlgorithm cipherAlgorithm,
+    public VerifiedSymmetricCipherAlgorithm(final IEncryptionFactory encryptionFactory,
             final IVerificationFactory verificationFactory) {
-        super(cipherAlgorithm, verificationFactory);
+        super(encryptionFactory, verificationFactory);
     }
 
     @Override
@@ -36,11 +36,6 @@ public class VerifiedSymmetricCipherAlgorithm extends AVerifiedCipherAlgorithm i
     @Override
     public MutableIvParameterSpecObjectPool getIvParameterSpecPool() {
         return getCipherAlgorithm().getIvParameterSpecPool();
-    }
-
-    @Override
-    public Key wrapKey(final byte[] key) {
-        return getCipherAlgorithm().wrapKey(key);
     }
 
     @Override

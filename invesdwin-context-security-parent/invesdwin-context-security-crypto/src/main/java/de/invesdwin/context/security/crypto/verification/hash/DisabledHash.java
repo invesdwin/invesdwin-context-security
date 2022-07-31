@@ -1,9 +1,8 @@
 package de.invesdwin.context.security.crypto.verification.hash;
 
-import java.security.Key;
-
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -23,7 +22,7 @@ public final class DisabledHash implements IHash {
     }
 
     @Override
-    public void init(final Key key) {
+    public void init(final IKey key) {
     }
 
     @Override

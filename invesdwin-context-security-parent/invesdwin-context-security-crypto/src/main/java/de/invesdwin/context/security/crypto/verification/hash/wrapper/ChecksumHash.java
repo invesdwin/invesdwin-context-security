@@ -1,12 +1,14 @@
 package de.invesdwin.context.security.crypto.verification.hash.wrapper;
 
-import java.security.Key;
 import java.util.zip.Checksum;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.ShortBufferException;
 
+import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.context.security.crypto.verification.hash.IHashKey;
 import de.invesdwin.util.math.Longs;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -35,11 +37,12 @@ public class ChecksumHash implements IHash {
     }
 
     @Override
-    public void init(final Key key) {
+    public void init(final IKey key) {
         checksum.reset();
         if (key != null) {
             //we use the key as a pepper (static salt)
-            final byte[] encoded = key.getEncoded();
+            final IHashKey cKey = (IHashKey) key;
+            final byte[] encoded = cKey.getKey(HashMode.Sign).getEncoded();
             checksum.update(encoded);
             prevKey = encoded;
         } else {

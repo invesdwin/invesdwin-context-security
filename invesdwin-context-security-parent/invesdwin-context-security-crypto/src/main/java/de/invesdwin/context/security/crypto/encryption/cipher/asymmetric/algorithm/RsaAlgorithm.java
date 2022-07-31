@@ -1,7 +1,5 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.Immutable;
@@ -10,7 +8,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.padding.RsaOaepAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.padding.RsaPkcs1Algorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
+import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 /**
  * RSA requires padding to be secure. Otherwise the same plaintext will be encrypted the same way always.
@@ -44,6 +42,11 @@ public enum RsaAlgorithm implements IAsymmetricCipherAlgorithm {
     }
 
     @Override
+    public int getDefaultKeySize() {
+        return delegate.getDefaultKeySize();
+    }
+
+    @Override
     public ICipher newCipher() {
         return delegate.newCipher();
     }
@@ -54,18 +57,8 @@ public enum RsaAlgorithm implements IAsymmetricCipherAlgorithm {
     }
 
     @Override
-    public CipherObjectPool getCipherPool() {
+    public IObjectPool<ICipher> getCipherPool() {
         return delegate.getCipherPool();
-    }
-
-    @Override
-    public PrivateKey wrapPrivateKey(final byte[] privateKey) {
-        return delegate.wrapPrivateKey(privateKey);
-    }
-
-    @Override
-    public PublicKey wrapPublicKey(final byte[] publicKey) {
-        return delegate.wrapPublicKey(publicKey);
     }
 
     @Override

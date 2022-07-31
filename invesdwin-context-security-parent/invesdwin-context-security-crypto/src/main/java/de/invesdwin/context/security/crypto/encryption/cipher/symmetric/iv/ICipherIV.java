@@ -7,6 +7,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
+import de.invesdwin.util.concurrent.pool.IObjectPool;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -22,7 +23,7 @@ public interface ICipherIV {
         return getAlgorithm().wrapParam(iv);
     }
 
-    int getIvSize();
+    int getIvBlockSize();
 
     int putIV(IByteBuffer output, MutableIvParameterSpec destIV);
 
@@ -40,12 +41,8 @@ public interface ICipherIV {
         getAlgorithm().getIvParameterSpecPool().returnObject(iv);
     }
 
-    default ICipher borrowCipher() {
-        return getAlgorithm().getCipherPool().borrowObject();
-    }
-
-    default void returnCipher(final ICipher cipher) {
-        getAlgorithm().getCipherPool().returnObject(cipher);
+    default IObjectPool<ICipher> getCipherPool() {
+        return getAlgorithm().getCipherPool();
     }
 
     default byte[] putNewIV(final IByteBuffer out) {

@@ -1,7 +1,5 @@
 package de.invesdwin.context.security.crypto.verification.hash.algorithm;
 
-import java.security.Key;
-
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.hmac.HmacAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.pool.IHashFactory;
@@ -16,13 +14,15 @@ public interface IHashAlgorithm extends IHashFactory {
             HmacAlgorithm.values(), CmacAlgorithm.values(), GmacAlgorithm.values(), KmacAlgorithm.values(),
             SkeinMacAlgorithm.values());
 
+    String getKeyAlgorithm();
+
+    String getAlgorithm();
+
     int getKeySize();
 
     int getHashSize();
 
     HashAlgorithmType getType();
-
-    Key wrapKey(byte[] key);
 
     IObjectPool<IHash> getHashPool();
 

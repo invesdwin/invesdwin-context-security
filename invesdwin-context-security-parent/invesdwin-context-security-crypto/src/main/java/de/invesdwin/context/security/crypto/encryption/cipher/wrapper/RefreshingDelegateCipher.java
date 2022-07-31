@@ -1,13 +1,14 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.wrapper;
 
-import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.ICipherFactory;
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
@@ -46,7 +47,7 @@ public class RefreshingDelegateCipher implements ICipher {
     }
 
     @Override
-    public void init(final int mode, final Key key, final AlgorithmParameterSpec params) {
+    public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         if (delegate != null) {
             delegate.close();
         }

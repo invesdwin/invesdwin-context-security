@@ -1,14 +1,14 @@
-package de.invesdwin.context.security.crypto.encryption.verified;
+package de.invesdwin.context.security.crypto.encryption.verified.wrapper;
 
-import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.NoSuchElementException;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.crypto.Cipher;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.verification.IVerificationFactory;
+import de.invesdwin.context.security.crypto.encryption.verified.VerifiedCipherKey;
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.collections.iterable.buffer.BufferingIterator;
 import de.invesdwin.util.collections.iterable.buffer.IBufferingIterator;
@@ -20,9 +20,7 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @NotThreadSafe
 public class DecryptingVerifiedCipher implements ICipher {
 
-    private final ICipher delegate;
-    private final IVerificationFactory verificationFactory;
-    private final IHash hash;
+    private final VerifiedCipher parent;
 
     /**
      * We have to verify everything before starting with the decryption:
@@ -35,47 +33,41 @@ public class DecryptingVerifiedCipher implements ICipher {
     private final IByteBuffer outputBuffer = ByteBuffers.allocateExpandable();
     private int outputBufferPosition = 0;
 
-    public DecryptingVerifiedCipher(final ICipher unverifiedCipher, final IVerificationFactory verificationFactory,
-            final IHash hash) {
-        this.delegate = unverifiedCipher;
-        this.verificationFactory = verificationFactory;
-        this.hash = hash;
+    public DecryptingVerifiedCipher(final VerifiedCipher parent) {
+        this.parent = parent;
     }
 
-    public ICipher getUnverifiedCipher() {
-        return delegate;
+    private ICipher getDelegate() {
+        return parent.getUnverifiedCipher();
     }
 
-    public IHash getHash() {
-        return hash;
-    }
-
-    public IVerificationFactory getVerificationFactory() {
-        return verificationFactory;
+    private IHash getHash() {
+        return parent.getHash();
     }
 
     @Override
     public int getBlockSize() {
-        return delegate.getBlockSize();
+        return getDelegate().getBlockSize();
     }
 
     @Override
     public int getHashSize() {
-        return delegate.getHashSize() + hash.getHashSize();
+        return getDelegate().getHashSize() + getHash().getHashSize();
     }
 
     @Override
     public String getAlgorithm() {
-        return delegate.getAlgorithm() + "With" + hash.getAlgorithm();
+        return getDelegate().getAlgorithm() + "With" + getHash().getAlgorithm();
     }
 
     @Override
-    public void init(final int mode, final Key key, final AlgorithmParameterSpec params) {
-        if (mode != Cipher.DECRYPT_MODE) {
+    public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
+        if (mode != CipherMode.Decrypt) {
             throw new IllegalArgumentException("Only decryption supported");
         }
-        delegate.init(mode, key, params);
-        verificationFactory.init(hash);
+        final VerifiedCipherKey cKey = (VerifiedCipherKey) key;
+        getDelegate().init(mode, cKey.getEncryptionKey(), params);
+        getHash().init(cKey.getVerificationKey());
         reset();
     }
 
@@ -147,7 +139,7 @@ public class DecryptingVerifiedCipher implements ICipher {
     }
 
     private IByteBuffer verifyAndDrainOutput() {
-        hash.verifyThrow(inputBuffer.sliceTo(inputBufferPosition));
+        getHash().verifyThrow(inputBuffer.sliceTo(inputBufferPosition));
         try {
             while (true) {
                 final Runnable next = inputBufferTasks.next();
@@ -156,7 +148,8 @@ public class DecryptingVerifiedCipher implements ICipher {
         } catch (final NoSuchElementException e) {
             //end reached
         }
-        final int written = delegate.doFinal(EmptyByteBuffer.INSTANCE, outputBuffer.sliceFrom(outputBufferPosition));
+        final int written = getDelegate().doFinal(EmptyByteBuffer.INSTANCE,
+                outputBuffer.sliceFrom(outputBufferPosition));
         outputBufferPosition += written;
         return outputBuffer.sliceTo(outputBufferPosition);
     }
@@ -244,7 +237,7 @@ public class DecryptingVerifiedCipher implements ICipher {
         if (limitedLength < 0) {
             return;
         }
-        final int written = delegate.update(inputBuffer.slice(position, limitedLength),
+        final int written = getDelegate().update(inputBuffer.slice(position, limitedLength),
                 outputBuffer.sliceFrom(outputBufferPosition));
         outputBufferPosition += written;
     }
@@ -256,17 +249,15 @@ public class DecryptingVerifiedCipher implements ICipher {
         if (limitedLength < 0) {
             return;
         }
-        delegate.updateAAD(inputBuffer.slice(position, limitedLength));
+        getDelegate().updateAAD(inputBuffer.slice(position, limitedLength));
     }
 
     private int getInputBufferLimit() {
-        return inputBufferPosition - hash.getHashSize();
+        return inputBufferPosition - getHash().getHashSize();
     }
 
     @Override
     public void close() {
-        delegate.close();
-        hash.close();
     }
 
     void reset() {

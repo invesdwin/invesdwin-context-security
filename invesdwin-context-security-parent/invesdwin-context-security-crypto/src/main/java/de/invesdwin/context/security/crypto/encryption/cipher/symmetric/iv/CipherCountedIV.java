@@ -42,7 +42,7 @@ public class CipherCountedIV implements ICipherIV {
     }
 
     @Override
-    public int getIvSize() {
+    public int getIvBlockSize() {
         return algorithm.getIvSize();
     }
 

@@ -6,8 +6,15 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.AsymmetricCipherKey;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricCipherKey;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.key.derivation.IDerivationFactory;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
+import de.invesdwin.context.security.crypto.verification.hash.HashKey;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 
 /**
  * Key derivation techniques are: Password+PBKDF2+HKDFexpands or Random+HKDFextract+HKDFexpands
@@ -39,9 +46,21 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
     }
 
     @Override
-    public KeyPair newDerivedKeyPair(final String keyAlgorithm, final byte[] info, final int length) {
+    public SymmetricCipherKey newDerivedKey(final ISymmetricCipherAlgorithm algorithm, final byte[] info,
+            final int length) {
+        return new SymmetricCipherKey(algorithm, newDerivedKey(info, length), new CipherDerivedIV(algorithm, info));
+    }
+
+    @Override
+    public HashKey newDerivedKey(final IHashAlgorithm algorithm, final byte[] info, final int length) {
+        return new HashKey(algorithm, newDerivedKey(info, length));
+    }
+
+    @Override
+    public AsymmetricCipherKey newDerivedKey(final IAsymmetricCipherAlgorithm algorithm, final byte[] info,
+            final int length) {
         try {
-            final KeyPairGenerator generator = KeyPairGenerator.getInstance(keyAlgorithm);
+            final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm.getKeyAlgorithm());
             //we need to use a pseudorandom generator in order to be able to seed it
             final java.security.SecureRandom random = java.security.SecureRandom.getInstance("SHA1PRNG");
             //we need a deterministic pseudorandom seed
@@ -49,7 +68,8 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
             random.setSeed(seed);
             final int lengthBits = length * Byte.SIZE;
             generator.initialize(lengthBits, random);
-            return generator.generateKeyPair();
+            final KeyPair keyPair = generator.generateKeyPair();
+            return new AsymmetricCipherKey(algorithm, keyPair);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

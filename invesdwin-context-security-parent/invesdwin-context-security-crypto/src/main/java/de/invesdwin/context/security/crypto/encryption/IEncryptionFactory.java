@@ -2,10 +2,11 @@ package de.invesdwin.context.security.crypto.encryption;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.spec.AlgorithmParameterSpec;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
+import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.util.concurrent.pool.IObjectPool;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -13,38 +14,92 @@ public interface IEncryptionFactory {
 
     ICipherAlgorithm getAlgorithm();
 
-    void init(ICipher cipher, int mode, AlgorithmParameterSpec param);
+    IKey getKey();
+
+    default IObjectPool<ICipher> getCipherPool() {
+        return getAlgorithm().getCipherPool();
+    }
 
     /**
      * Can only be used to encrypt one payload.
      */
-    OutputStream newEncryptor(OutputStream out);
+    default OutputStream newEncryptor(final OutputStream out) {
+        return newEncryptor(out, getAlgorithm().newCipher());
+    }
 
-    OutputStream newEncryptor(OutputStream out, ICipher cipher);
+    default OutputStream newEncryptor(final OutputStream out, final ICipher cipher) {
+        return newEncryptor(out, cipher, getKey());
+    }
 
-    InputStream newDecryptor(InputStream in);
+    OutputStream newEncryptor(OutputStream out, ICipher cipher, IKey key);
 
-    InputStream newDecryptor(InputStream in, ICipher cipher);
+    default InputStream newDecryptor(final InputStream in) {
+        return newDecryptor(in, getAlgorithm().newCipher());
+    }
+
+    default InputStream newDecryptor(final InputStream in, final ICipher cipher) {
+        return newDecryptor(in, cipher, getKey());
+    }
+
+    InputStream newDecryptor(InputStream in, ICipher cipher, IKey key);
 
     /**
      * Can be used to encrypt multiple messages.
      */
-    OutputStream newStreamingEncryptor(OutputStream out);
+    default OutputStream newStreamingEncryptor(final OutputStream out) {
+        return newStreamingEncryptor(out, getAlgorithm().newCipher());
+    }
 
-    OutputStream newStreamingEncryptor(OutputStream out, ICipher cipher);
+    default OutputStream newStreamingEncryptor(final OutputStream out, final ICipher cipher) {
+        return newStreamingEncryptor(out, cipher, getKey());
+    }
 
-    InputStream newStreamingDecryptor(InputStream in);
+    OutputStream newStreamingEncryptor(OutputStream out, ICipher cipher, IKey key);
 
-    InputStream newStreamingDecryptor(InputStream in, ICipher cipher);
+    default InputStream newStreamingDecryptor(final InputStream in) {
+        return newStreamingDecryptor(in, getAlgorithm().newCipher());
+    }
 
-    int encrypt(IByteBuffer src, IByteBuffer dest);
+    default InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher) {
+        return newStreamingDecryptor(in, cipher, getKey());
+    }
 
-    int encrypt(IByteBuffer src, IByteBuffer dest, ICipher cipher);
+    InputStream newStreamingDecryptor(InputStream in, ICipher cipher, IKey key);
 
-    int decrypt(IByteBuffer src, IByteBuffer dest);
+    default int encrypt(final IByteBuffer src, final IByteBuffer dest) {
+        final ICipher cipher = getCipherPool().borrowObject();
+        try {
+            return encrypt(src, dest, cipher);
+        } finally {
+            getCipherPool().returnObject(cipher);
+        }
+    }
 
-    int decrypt(IByteBuffer src, IByteBuffer dest, ICipher cipher);
+    default int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
+        return encrypt(src, dest, cipher, getKey());
+    }
 
-    <T> ISerde<T> maybeWrap(ISerde<T> delegate);
+    int encrypt(IByteBuffer src, IByteBuffer dest, ICipher cipher, IKey key);
+
+    default int decrypt(final IByteBuffer src, final IByteBuffer dest) {
+        final ICipher cipher = getCipherPool().borrowObject();
+        try {
+            return decrypt(src, dest, cipher);
+        } finally {
+            getCipherPool().returnObject(cipher);
+        }
+    }
+
+    default int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
+        return decrypt(src, dest, cipher, getKey());
+    }
+
+    int decrypt(IByteBuffer src, IByteBuffer dest, ICipher cipher, IKey key);
+
+    default <T> ISerde<T> maybeWrap(final ISerde<T> delegate) {
+        return maybeWrap(delegate, getKey());
+    }
+
+    <T> ISerde<T> maybeWrap(ISerde<T> delegate, IKey key);
 
 }

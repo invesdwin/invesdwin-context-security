@@ -8,10 +8,11 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricCipherKey;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactoryTest;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherPresharedIV;
@@ -43,14 +44,14 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
             random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
+        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeySize.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires padding
@@ -92,22 +93,22 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
             random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires padding
                 continue;
             }
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
-            final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key,
-                    new CipherPresharedIV(algorithm, iv));
+            final SymmetricCipherKey key = new SymmetricCipherKey(algorithm, derivedKeyProvider)
+                    .withCipherIV(new CipherPresharedIV(algorithm, iv));
+            final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key);
             for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
                 final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,
                         derivedKeyProvider);
@@ -116,8 +117,8 @@ public class VerifiedEncryptionFactoryTest extends ATest {
                 try {
                     final VerifiedSymmetricCipherAlgorithm verifiedAlgorithm = (VerifiedSymmetricCipherAlgorithm) factory
                             .getAlgorithm();
-                    testCipherStream(verifiedAlgorithm, key, iv, "1234567890", "0987654321");
-                    testCipherStream(verifiedAlgorithm, key, iv, "0987654321", "1234567890");
+                    testCipherStream(verifiedAlgorithm, factory.getKey(), iv, "1234567890", "0987654321");
+                    testCipherStream(verifiedAlgorithm, factory.getKey(), iv, "0987654321", "1234567890");
                 } catch (final IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -125,8 +126,8 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         }
     }
 
-    private void testCipherStream(final VerifiedSymmetricCipherAlgorithm algorithm, final byte[] key, final byte[] iv,
-            final String... payloads) throws IOException {
+    private void testCipherStream(final VerifiedSymmetricCipherAlgorithm algorithm, final VerifiedCipherKey key,
+            final byte[] iv, final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
         final SymmetricCipherOutputStream encryptingStream = new SymmetricCipherOutputStream(algorithm,
                 encryptedOutputStream, key, iv);
@@ -168,22 +169,22 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
             //            random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires padding
                 continue;
             }
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
-            final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key,
-                    new CipherPresharedIV(algorithm, iv));
+            final SymmetricCipherKey key = new SymmetricCipherKey(algorithm, derivedKeyProvider)
+                    .withCipherIV(new CipherPresharedIV(algorithm, iv));
+            final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key);
             for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
                 final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,
                         derivedKeyProvider);
@@ -192,8 +193,8 @@ public class VerifiedEncryptionFactoryTest extends ATest {
                 try {
                     final VerifiedSymmetricCipherAlgorithm verifiedAlgorithm = (VerifiedSymmetricCipherAlgorithm) factory
                             .getAlgorithm();
-                    testStreamingCipherStream(verifiedAlgorithm, key, iv, "1234567890", "0987654321");
-                    testStreamingCipherStream(verifiedAlgorithm, key, iv, "0987654321", "1234567890");
+                    testStreamingCipherStream(verifiedAlgorithm, factory.getKey(), iv, "1234567890", "0987654321");
+                    testStreamingCipherStream(verifiedAlgorithm, factory.getKey(), iv, "0987654321", "1234567890");
                 } catch (final IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -201,8 +202,8 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         }
     }
 
-    private void testStreamingCipherStream(final VerifiedSymmetricCipherAlgorithm algorithm, final byte[] key,
-            final byte[] iv, final String... payloads) throws IOException {
+    private void testStreamingCipherStream(final VerifiedSymmetricCipherAlgorithm algorithm,
+            final VerifiedCipherKey key, final byte[] iv, final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
         final StreamingSymmetricCipherOutputStream encryptingStream = new StreamingSymmetricCipherOutputStream(
                 algorithm, encryptedOutputStream, key, iv);

@@ -3,10 +3,10 @@ package de.invesdwin.context.security.crypto.verification.hash.stream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
-import java.security.Key;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
@@ -15,7 +15,7 @@ public class ChannelLayeredHashOutputStream extends LayeredHashOutputStream impl
 
     private final WritableByteChannel delegateChannel;
 
-    public ChannelLayeredHashOutputStream(final OutputStream delegate, final IHash hash, final Key key) {
+    public ChannelLayeredHashOutputStream(final OutputStream delegate, final IHash hash, final IKey key) {
         super(delegate, hash, key);
         this.delegateChannel = (WritableByteChannel) delegate;
     }
@@ -33,7 +33,7 @@ public class ChannelLayeredHashOutputStream extends LayeredHashOutputStream impl
         return length;
     }
 
-    public static LayeredHashOutputStream maybeWrap(final OutputStream delegate, final IHash hash, final Key key) {
+    public static LayeredHashOutputStream maybeWrap(final OutputStream delegate, final IHash hash, final IKey key) {
         if (delegate instanceof WritableByteChannel) {
             return new ChannelLayeredHashOutputStream(delegate, hash, key);
         } else {

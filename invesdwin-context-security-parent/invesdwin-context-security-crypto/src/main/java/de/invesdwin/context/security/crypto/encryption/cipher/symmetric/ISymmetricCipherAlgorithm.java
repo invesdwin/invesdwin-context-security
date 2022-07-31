@@ -1,6 +1,5 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.symmetric;
 
-import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
@@ -12,16 +11,6 @@ public interface ISymmetricCipherAlgorithm extends ICipherAlgorithm {
 
     ISymmetricCipherAlgorithm DEFAULT = AesAlgorithm.DEFAULT;
 
-    @Override
-    default boolean isSymmetric() {
-        return true;
-    }
-
-    @Override
-    default boolean isAsymmetric() {
-        return false;
-    }
-
     int getIvSize();
 
     /**
@@ -30,8 +19,6 @@ public interface ISymmetricCipherAlgorithm extends ICipherAlgorithm {
     int getHashSize();
 
     MutableIvParameterSpecObjectPool getIvParameterSpecPool();
-
-    Key wrapKey(byte[] key);
 
     AlgorithmParameterSpec wrapParam(byte[] iv);
 

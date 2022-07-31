@@ -53,7 +53,7 @@ public class CipherDerivedIV implements ICipherIV {
     }
 
     @Override
-    public int getIvSize() {
+    public int getIvBlockSize() {
         return Long.BYTES;
     }
 
@@ -74,7 +74,7 @@ public class CipherDerivedIV implements ICipherIV {
         final long counter = ivCounter.incrementAndGet();
         deriveIV(initIV, counter, destIV.getIV());
         output.putLong(0, counter);
-        return getIvSize();
+        return getIvBlockSize();
     }
 
     @Override
@@ -86,7 +86,7 @@ public class CipherDerivedIV implements ICipherIV {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-        return getIvSize();
+        return getIvBlockSize();
     }
 
     @Override

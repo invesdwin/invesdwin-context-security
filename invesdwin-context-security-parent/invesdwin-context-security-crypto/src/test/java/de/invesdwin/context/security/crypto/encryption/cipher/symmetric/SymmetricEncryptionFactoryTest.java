@@ -9,7 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherPresharedIV;
@@ -22,6 +22,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.S
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.padding.PaddingStreamingSymmetricCipherInputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.padding.PaddingStreamingSymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
 import de.invesdwin.context.test.ATest;
@@ -40,14 +41,14 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
             random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
+        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeySize.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires padding
@@ -82,19 +83,19 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
             random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires padding
                 continue;
             }
+            final SymmetricCipherKey key = new SymmetricCipherKey(algorithm, derivedKeyProvider);
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
             try {
                 testCipherStream(algorithm, key, iv, "1234567890", "0987654321");
@@ -105,7 +106,7 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         }
     }
 
-    private void testCipherStream(final ISymmetricCipherAlgorithm algorithm, final byte[] key, final byte[] iv,
+    private void testCipherStream(final ISymmetricCipherAlgorithm algorithm, final IKey key, final byte[] iv,
             final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
         final SymmetricCipherOutputStream encryptingStream = new SymmetricCipherOutputStream(algorithm,
@@ -148,19 +149,19 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
             //            random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires padding
                 continue;
             }
+            final SymmetricCipherKey key = new SymmetricCipherKey(algorithm, derivedKeyProvider);
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
             try {
                 testStreamingCipherStream(algorithm, key, iv, "1234567890", "0987654321");
@@ -171,8 +172,8 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         }
     }
 
-    private void testStreamingCipherStream(final ISymmetricCipherAlgorithm algorithm, final byte[] key, final byte[] iv,
-            final String... payloads) throws IOException {
+    private void testStreamingCipherStream(final ISymmetricCipherAlgorithm algorithm, final SymmetricCipherKey key,
+            final byte[] iv, final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
         final StreamingSymmetricCipherOutputStream encryptingStream = new StreamingSymmetricCipherOutputStream(
                 algorithm, encryptedOutputStream, key, iv);
@@ -207,14 +208,13 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeyLength.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
             //            random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes());
         for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires different padding
@@ -224,6 +224,7 @@ public class SymmetricEncryptionFactoryTest extends ATest {
                 //requires no padding
                 continue;
             }
+            final SymmetricCipherKey key = new SymmetricCipherKey(algorithm, derivedKeyProvider);
             final byte[] iv = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize());
             try {
                 testPaddingStreamingCipherStream(algorithm, key, iv, "1234567890", "0987654321");
@@ -234,7 +235,7 @@ public class SymmetricEncryptionFactoryTest extends ATest {
         }
     }
 
-    private void testPaddingStreamingCipherStream(final ISymmetricCipherAlgorithm algorithm, final byte[] key,
+    private void testPaddingStreamingCipherStream(final ISymmetricCipherAlgorithm algorithm, final SymmetricCipherKey key,
             final byte[] iv, final String... payloads) throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
         final PaddingStreamingSymmetricCipherOutputStream encryptingStream = new PaddingStreamingSymmetricCipherOutputStream(

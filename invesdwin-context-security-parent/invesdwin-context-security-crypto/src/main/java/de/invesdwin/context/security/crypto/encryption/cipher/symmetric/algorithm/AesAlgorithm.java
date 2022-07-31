@@ -1,12 +1,10 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm;
 
 import java.io.IOException;
-import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.Immutable;
 import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.crypto.utils.Utils;
 
@@ -42,7 +40,7 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
      * CBC will throw exceptions if used without padding. Cmac for example does the padding from the outside.
      */
     @Deprecated
-    AES_CBC_NoPadding("AES/CBC/NoPadding", AesKeyLength.BLOCK_SIZE.getBytes(), 0) {
+    AES_CBC_NoPadding("AES/CBC/NoPadding", AesKeySize.BLOCK_SIZE.getBytes(), 0) {
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -63,7 +61,7 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
      *             https://docs.microsoft.com/en-us/dotnet/standard/security/vulnerabilities-cbc-mode
      */
     @Deprecated
-    AES_CBC_PKCS5Padding("AES/CBC/PKCS5Padding", AesKeyLength.BLOCK_SIZE.getBytes(), 0) {
+    AES_CBC_PKCS5Padding("AES/CBC/PKCS5Padding", AesKeySize.BLOCK_SIZE.getBytes(), 0) {
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -77,7 +75,7 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
     /**
      * encryption only, streaming capable
      */
-    AES_CTR_NoPadding("AES/CTR/NoPadding", AesKeyLength.BLOCK_SIZE.getBytes(), 0) {
+    AES_CTR_NoPadding("AES/CTR/NoPadding", AesKeySize.BLOCK_SIZE.getBytes(), 0) {
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
             return new MutableIvParameterSpec(iv);
@@ -95,16 +93,16 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
      * 
      * https://stackoverflow.com/questions/54659935/java-aes-gcm-very-slow-compared-to-aes-ctr
      */
-    AES_GCM_NoPadding("AES/GCM/NoPadding", 12, AesKeyLength.BLOCK_SIZE.getBytes()) {
+    AES_GCM_NoPadding("AES/GCM/NoPadding", 12, AesKeySize.BLOCK_SIZE.getBytes()) {
 
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
-            return new GCMParameterSpec(AesKeyLength.BLOCK_SIZE.getBits(), iv);
+            return new GCMParameterSpec(AesKeySize.BLOCK_SIZE.getBits(), iv);
         }
 
         @Override
         public AlgorithmParameterSpec wrapParam(final MutableIvParameterSpec iv) {
-            return new GCMParameterSpec(AesKeyLength.BLOCK_SIZE.getBits(), iv.getIV());
+            return new GCMParameterSpec(AesKeySize.BLOCK_SIZE.getBits(), iv.getIV());
         }
     };
 
@@ -127,6 +125,11 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
     @Override
     public String getKeyAlgorithm() {
         return "AES";
+    }
+
+    @Override
+    public int getDefaultKeySize() {
+        return AesKeySize.DEFAULT.getBytes();
     }
 
     @Override
@@ -162,11 +165,6 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
     @Override
     public ICipher newCipher() {
         return newCryptoCipher();
-    }
-
-    @Override
-    public Key wrapKey(final byte[] key) {
-        return new SecretKeySpec(key, getKeyAlgorithm());
     }
 
     protected ICipher newCryptoCipher() {

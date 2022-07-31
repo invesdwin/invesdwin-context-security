@@ -3,18 +3,14 @@ package de.invesdwin.context.security.crypto.encryption.cipher.symmetric;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.Key;
-import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.Immutable;
-import javax.crypto.Cipher;
 
 import de.invesdwin.context.security.crypto.encryption.EncryptionDelegateSerde;
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeyLength;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherInputStream;
@@ -22,6 +18,8 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.S
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherInputStream;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
+import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.util.concurrent.pool.IObjectPool;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.ALazyDelegateInputStream;
 import de.invesdwin.util.streams.ALazyDelegateOutputStream;
@@ -41,9 +39,7 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 public class SymmetricEncryptionFactory implements IEncryptionFactory {
 
     private final ISymmetricCipherAlgorithm algorithm;
-    private final byte[] key;
-    private final Key keyWrapped;
-    private final ICipherIV cipherIV;
+    private final SymmetricCipherKey key;
 
     public SymmetricEncryptionFactory(final byte[] derivedKey, final byte[] derivedIV) {
         this(ISymmetricCipherAlgorithm.DEFAULT, derivedKey,
@@ -56,43 +52,46 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
 
     public SymmetricEncryptionFactory(final ISymmetricCipherAlgorithm algorithm,
             final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeyLength.DEFAULT.getBytes()),
-                new CipherDerivedIV(algorithm, derivedKeyProvider));
+        this(algorithm, new SymmetricCipherKey(algorithm, derivedKeyProvider));
+    }
+
+    public SymmetricEncryptionFactory(final ISymmetricCipherAlgorithm algorithm,
+            final IDerivedKeyProvider derivedKeyProvider, final int derivedKeyLength) {
+        this(algorithm, new SymmetricCipherKey(algorithm, derivedKeyProvider, derivedKeyLength));
     }
 
     public SymmetricEncryptionFactory(final ISymmetricCipherAlgorithm algorithm, final byte[] key,
             final ICipherIV cipherIV) {
+        this(algorithm, new SymmetricCipherKey(algorithm, key, cipherIV));
+    }
+
+    public SymmetricEncryptionFactory(final ISymmetricCipherAlgorithm algorithm, final SymmetricCipherKey key) {
         this.algorithm = algorithm;
         this.key = key;
-        this.keyWrapped = algorithm.wrapKey(key);
-        this.cipherIV = cipherIV;
     }
 
     @Override
-    public ICipherAlgorithm getAlgorithm() {
+    public ISymmetricCipherAlgorithm getAlgorithm() {
         return algorithm;
     }
 
-    public ICipherIV getCipherIV() {
-        return cipherIV;
+    @Override
+    public IObjectPool<ICipher> getCipherPool() {
+        return key.getCipherIV().getCipherPool();
     }
 
     @Override
-    public void init(final ICipher cipher, final int mode, final AlgorithmParameterSpec param) {
-        cipher.init(mode, keyWrapped, param);
+    public SymmetricCipherKey getKey() {
+        return key;
     }
 
     @Override
-    public OutputStream newEncryptor(final OutputStream out) {
-        return newEncryptor(out, algorithm.newCipher());
-    }
-
-    @Override
-    public OutputStream newEncryptor(final OutputStream out, final ICipher cipher) {
+    public OutputStream newEncryptor(final OutputStream out, final ICipher cipher, final IKey key) {
+        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
         return new ALazyDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
-                final byte[] iv = cipherIV.putNewIV(out);
+                final byte[] iv = cKey.getCipherIV().putNewIV(out);
                 try {
                     return new SymmetricCipherOutputStream(algorithm, out, cipher, key, iv);
                 } catch (final IOException e) {
@@ -103,16 +102,12 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
-    public InputStream newDecryptor(final InputStream in) {
-        return newDecryptor(in, algorithm.newCipher());
-    }
-
-    @Override
-    public InputStream newDecryptor(final InputStream in, final ICipher cipher) {
+    public InputStream newDecryptor(final InputStream in, final ICipher cipher, final IKey key) {
+        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
         return new ALazyDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
-                final byte[] iv = cipherIV.getNewIV(in);
+                final byte[] iv = cKey.getCipherIV().getNewIV(in);
                 try {
                     return new SymmetricCipherInputStream(algorithm, in, cipher, key, iv);
                 } catch (final IOException e) {
@@ -123,16 +118,12 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
-    public OutputStream newStreamingEncryptor(final OutputStream out) {
-        return newStreamingEncryptor(out, algorithm.newCipher());
-    }
-
-    @Override
-    public OutputStream newStreamingEncryptor(final OutputStream out, final ICipher cipher) {
+    public OutputStream newStreamingEncryptor(final OutputStream out, final ICipher cipher, final IKey key) {
+        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
         return new ALazyDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
-                final byte[] iv = cipherIV.putNewIV(out);
+                final byte[] iv = cKey.getCipherIV().putNewIV(out);
                 try {
                     return new StreamingSymmetricCipherOutputStream(algorithm, out, cipher, key, iv);
                 } catch (final IOException e) {
@@ -143,16 +134,12 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
-    public InputStream newStreamingDecryptor(final InputStream in) {
-        return newStreamingDecryptor(in, algorithm.newCipher());
-    }
-
-    @Override
-    public InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher) {
+    public InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher, final IKey key) {
+        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
         return new ALazyDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
-                final byte[] iv = cipherIV.getNewIV(in);
+                final byte[] iv = cKey.getCipherIV().getNewIV(in);
                 try {
                     return new StreamingSymmetricCipherInputStream(algorithm, in, cipher, key, iv);
                 } catch (final IOException e) {
@@ -163,46 +150,30 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
-    public int encrypt(final IByteBuffer src, final IByteBuffer dest) {
-        final ICipher cipher = cipherIV.borrowCipher();
-        try {
-            return encrypt(src, dest, cipher);
-        } finally {
-            cipherIV.returnCipher(cipher);
-        }
-    }
-
-    @Override
-    public int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
+    public int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher, final IKey key) {
+        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
+        final ICipherIV cipherIV = cKey.getCipherIV();
         final MutableIvParameterSpec iv = cipherIV.borrowDestIV();
         try {
             cipherIV.putIV(dest, iv);
-            init(cipher, Cipher.ENCRYPT_MODE, cipherIV.wrapParam(iv));
-            final IByteBuffer payloadBuffer = dest.sliceFrom(cipherIV.getIvSize());
+            cipher.init(CipherMode.Encrypt, key, cipherIV.wrapParam(iv));
+            final IByteBuffer payloadBuffer = dest.sliceFrom(cipherIV.getIvBlockSize());
             final int length = cipher.doFinal(src, payloadBuffer);
-            return cipherIV.getIvSize() + length;
+            return cipherIV.getIvBlockSize() + length;
         } finally {
             cipherIV.returnDestIV(iv);
         }
     }
 
     @Override
-    public int decrypt(final IByteBuffer src, final IByteBuffer dest) {
-        final ICipher cipher = cipherIV.borrowCipher();
-        try {
-            return decrypt(src, dest, cipher);
-        } finally {
-            cipherIV.returnCipher(cipher);
-        }
-    }
-
-    @Override
-    public int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher) {
+    public int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher, final IKey key) {
+        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
+        final ICipherIV cipherIV = cKey.getCipherIV();
         final MutableIvParameterSpec iv = cipherIV.borrowDestIV();
         try {
             cipherIV.getIV(src, iv);
-            init(cipher, Cipher.DECRYPT_MODE, cipherIV.wrapParam(iv));
-            final IByteBuffer payloadBuffer = src.sliceFrom(cipherIV.getIvSize());
+            cipher.init(CipherMode.Decrypt, key, cipherIV.wrapParam(iv));
+            final IByteBuffer payloadBuffer = src.sliceFrom(cipherIV.getIvBlockSize());
             final int length = cipher.doFinal(payloadBuffer, dest);
             return length;
         } finally {
@@ -212,8 +183,8 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
 
     @SuppressWarnings("deprecation")
     @Override
-    public <T> ISerde<T> maybeWrap(final ISerde<T> serde) {
-        return new EncryptionDelegateSerde<>(serde, this);
+    public <T> ISerde<T> maybeWrap(final ISerde<T> serde, final IKey key) {
+        return new EncryptionDelegateSerde<>(serde, this, key);
     }
 
 }

@@ -22,8 +22,8 @@ public final class CryptoRandomGeneratorObjectPool extends ATimeoutObjectPool<Cr
     }
 
     @Override
-    public void invalidateObject(final CryptoRandomGenerator obj) {
-        Closeables.closeQuietly(obj);
+    public void invalidateObject(final CryptoRandomGenerator element) {
+        Closeables.closeQuietly(element);
     }
 
     @Override

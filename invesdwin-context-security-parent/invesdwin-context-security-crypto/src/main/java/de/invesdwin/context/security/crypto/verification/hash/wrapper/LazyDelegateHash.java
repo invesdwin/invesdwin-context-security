@@ -1,9 +1,8 @@
 package de.invesdwin.context.security.crypto.verification.hash.wrapper;
 
-import java.security.Key;
-
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -16,7 +15,7 @@ public class LazyDelegateHash implements IHash {
      * Not storing identity here because this might cause collisions if the object is already released. Instead using
      * close() to clear up the reference.
      */
-    private Key prevKey;
+    private IKey prevKey;
 
     public LazyDelegateHash(final IHash delegate) {
         this.delegate = delegate;
@@ -33,7 +32,7 @@ public class LazyDelegateHash implements IHash {
     }
 
     @Override
-    public void init(final Key key) {
+    public void init(final IKey key) {
         if (prevKey == key) {
             //init not needed if it is the same key
             reset(); //checks itself if reset is needed
