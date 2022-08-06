@@ -63,6 +63,7 @@ public class VerifiedCipher implements ICipher {
         return unverifiedCipher.getAlgorithm() + "With" + hash.getAlgorithm();
     }
 
+    @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         switch (mode) {

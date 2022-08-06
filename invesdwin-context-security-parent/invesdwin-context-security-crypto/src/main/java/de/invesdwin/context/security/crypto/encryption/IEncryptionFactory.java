@@ -21,6 +21,9 @@ public interface IEncryptionFactory {
         return getAlgorithm().getCipherPool();
     }
 
+    /**
+     * The key might contain a CipherIV which needs data put/read to/from the paramBuffer.
+     */
     int init(CipherMode mode, ICipher cipher, IKey key, IByteBuffer paramBuffer);
 
     /**

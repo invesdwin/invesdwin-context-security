@@ -15,6 +15,11 @@ public interface ICipher extends Closeable {
 
     String getAlgorithm();
 
+    /**
+     * WARNING: For internal use only. Call IEncryptionFactory.init(...) or one of the higher level methods instead from
+     * external code. Otherwise params are not handled properly.
+     */
+    @Deprecated
     void init(CipherMode mode, IKey key, AlgorithmParameterSpec params);
 
     int update(java.nio.ByteBuffer inBuffer, java.nio.ByteBuffer outBuffer);

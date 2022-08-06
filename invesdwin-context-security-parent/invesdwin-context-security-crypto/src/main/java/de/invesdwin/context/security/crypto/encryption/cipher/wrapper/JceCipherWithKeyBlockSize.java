@@ -26,6 +26,7 @@ public class JceCipherWithKeyBlockSize extends JceCipher {
         return blockSize;
     }
 
+    @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         if (key != prevKey) {

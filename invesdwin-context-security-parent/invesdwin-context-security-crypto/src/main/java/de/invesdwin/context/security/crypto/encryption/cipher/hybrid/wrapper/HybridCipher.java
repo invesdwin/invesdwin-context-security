@@ -78,6 +78,7 @@ public class HybridCipher implements ICipher {
         return keyCipher.getAlgorithm() + "With" + dataCipher.getAlgorithm();
     }
 
+    @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         switch (mode) {

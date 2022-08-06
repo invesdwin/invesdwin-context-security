@@ -199,6 +199,7 @@ public class PaddingStreamingSymmetricCipherOutputStream extends SymmetricCipher
      * Resets the {@link #cipher}: calculate counter and {@link #padding}.
      *
      */
+    @SuppressWarnings("deprecation")
     private void resetCipher() throws IOException {
         final long counter = streamOffset / cipher.getBlockSize();
         padding = (byte) (streamOffset % cipher.getBlockSize());

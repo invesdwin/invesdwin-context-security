@@ -175,6 +175,7 @@ public class StreamingSymmetricCipherOutputStream extends SymmetricCipherOutputS
         encrypt();
     }
 
+    @SuppressWarnings("deprecation")
     private void resetCipher() throws IOException {
         final long counter = streamOffset / cipher.getBlockSize();
 

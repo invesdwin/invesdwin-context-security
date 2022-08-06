@@ -1,34 +1,29 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.hybrid.wrapper;
 
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.NoSuchElementException;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.key.IKey;
-import de.invesdwin.util.collections.iterable.buffer.BufferingIterator;
-import de.invesdwin.util.collections.iterable.buffer.IBufferingIterator;
 import de.invesdwin.util.math.Integers;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
-import de.invesdwin.util.streams.buffer.bytes.EmptyByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
 public class DecryptingHybridCipher implements ICipher {
 
     private final HybridCipher parent;
-    /**
-     * We have to verify everything before starting with the decryption:
-     * https://moxie.org/2011/12/13/the-cryptographic-doom-principle.html
-     */
-    private final IByteBuffer inputBuffer = ByteBuffers.allocateExpandable();
-    private final IBufferingIterator<Runnable> inputBufferTasks = new BufferingIterator<>();
-    private int inputBufferPosition = 0;
 
-    private final IByteBuffer outputBuffer = ByteBuffers.allocateExpandable();
-    private int outputBufferPosition = 0;
+    private final byte[] oneByteBuf = new byte[1];
+    private final IByteBuffer decryptedRandomDataKeyBuffer = ByteBuffers.allocateExpandable();
+    private final IByteBuffer inputBuffer = ByteBuffers.allocateExpandable();
+    private int inputBufferPosition = 0;
+    private int inputBufferSize = 0;
+    private int expectedInputBufferSize = -1;
+    private IKey prevKey;
+    private boolean initialized = false;
 
     public DecryptingHybridCipher(final HybridCipher parent) {
         this.parent = parent;
@@ -49,6 +44,7 @@ public class DecryptingHybridCipher implements ICipher {
         return parent.getAlgorithm();
     }
 
+    @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         if (mode != CipherMode.Decrypt) {
@@ -57,21 +53,21 @@ public class DecryptingHybridCipher implements ICipher {
         if (params != null) {
             throw new IllegalArgumentException("params not supported here: " + params);
         }
-        delegate.init(mode, key, params);
-        verificationFactory.init(hash);
         reset();
+        this.prevKey = key;
     }
 
     @Override
     public int update(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
-        update(inBuffer);
-        return 0;
+        final int read = maybeInit(inBuffer);
+        ByteBuffers.position(inBuffer, inBuffer.position() + read);
+        return parent.getDataCipher().update(inBuffer, outBuffer);
     }
 
     @Override
     public int update(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
-        update(inBuffer);
-        return 0;
+        final int read = maybeInit(inBuffer);
+        return parent.getDataCipher().update(inBuffer.sliceFrom(read), outBuffer);
     }
 
     @Override
@@ -82,27 +78,29 @@ public class DecryptingHybridCipher implements ICipher {
     @Override
     public int update(final byte[] input, final int inputOffset, final int inputLen, final byte[] output,
             final int outputOffset) {
-        update(input, inputOffset, inputLen);
-        return 0;
+        final int read = maybeInit(input, inputOffset, inputLen);
+        return parent.getDataCipher().update(input, inputOffset + read, inputLen - read, output, outputOffset);
     }
 
     @Override
     public int doFinal(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
-        update(inBuffer);
-        final IByteBuffer decrypted = verifyAndDrainOutput();
-        final int length = decrypted.capacity();
-        decrypted.getBytesTo(0, outBuffer, length);
-        ByteBuffers.position(outBuffer, outBuffer.position() + length);
-        return length;
+        final int read = maybeInit(inBuffer);
+        ByteBuffers.position(inBuffer, inBuffer.position() + read);
+        assertInitialized();
+        return parent.getDataCipher().doFinal(inBuffer, outBuffer);
+    }
+
+    private void assertInitialized() {
+        if (!initialized) {
+            throw new IllegalStateException("Not initialized yet");
+        }
     }
 
     @Override
     public int doFinal(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
-        update(inBuffer);
-        final IByteBuffer decrypted = verifyAndDrainOutput();
-        final int length = decrypted.capacity();
-        decrypted.getBytesTo(0, outBuffer, length);
-        return length;
+        final int read = maybeInit(inBuffer);
+        assertInitialized();
+        return parent.getDataCipher().doFinal(inBuffer.sliceFrom(read), outBuffer);
     }
 
     @Override
@@ -113,137 +111,157 @@ public class DecryptingHybridCipher implements ICipher {
     @Override
     public int doFinal(final byte[] input, final int inputOffset, final int inputLen, final byte[] output,
             final int outputOffset) {
-        update(input, inputOffset, inputLen);
-        return doFinal(output, outputOffset);
+        final int read = maybeInit(input, inputOffset, inputLen);
+        assertInitialized();
+        return parent.getDataCipher().doFinal(input, inputOffset + read, inputLen - read, output, outputOffset);
     }
 
     @Override
     public int doFinal(final byte[] output, final int offset) {
-        final IByteBuffer decrypted = verifyAndDrainOutput();
-        final int outputLength = output.length - offset;
-        if (outputLength > decrypted.capacity()) {
-            throw new IllegalArgumentException(
-                    "Insufficient output length [" + outputLength + "] for required: " + outputBufferPosition);
-        }
-        decrypted.getBytesFrom(0, output, offset);
-        return outputLength;
-    }
-
-    private IByteBuffer verifyAndDrainOutput() {
-        hash.verifyThrow(inputBuffer.sliceTo(inputBufferPosition));
-        try {
-            while (true) {
-                final Runnable next = inputBufferTasks.next();
-                next.run();
-            }
-        } catch (final NoSuchElementException e) {
-            //end reached
-        }
-        final int written = delegate.doFinal(EmptyByteBuffer.INSTANCE, outputBuffer.sliceFrom(outputBufferPosition));
-        outputBufferPosition += written;
-        return outputBuffer.sliceTo(outputBufferPosition);
+        assertInitialized();
+        return parent.getDataCipher().doFinal(output, offset);
     }
 
     @Override
     public byte[] doFinal() {
-        final IByteBuffer decrypted = verifyAndDrainOutput();
-        return decrypted.asByteArrayCopy();
+        assertInitialized();
+        return parent.getDataCipher().doFinal();
     }
 
     @Override
     public void updateAAD(final byte input) {
-        final int position = inputBufferPosition;
-        final int length = Byte.BYTES;
-        inputBuffer.putByte(position, input);
-        inputBufferPosition += length;
-        inputBufferTasks.add(() -> drainAAD(position, length));
+        oneByteBuf[0] = input;
+        updateAAD(oneByteBuf, 0, oneByteBuf.length);
     }
 
     @Override
     public void updateAAD(final byte[] input) {
-        final int position = inputBufferPosition;
-        final int length = input.length;
-        inputBuffer.putBytes(position, input);
-        inputBufferTasks.add(() -> drainAAD(position, length));
+        updateAAD(input, 0, input.length);
     }
 
     @Override
     public void updateAAD(final byte[] input, final int inputOffset, final int inputLen) {
-        final int position = inputBufferPosition;
-        final int length = inputLen;
-        inputBuffer.putBytes(position, input, inputOffset, inputLen);
-        inputBufferPosition += length;
-        inputBufferTasks.add(() -> drainAAD(position, length));
+        final int read = maybeInit(input, inputOffset, inputLen);
+        parent.getDataCipher().updateAAD(input, inputOffset + read, inputLen - read);
     }
 
     @Override
     public void updateAAD(final java.nio.ByteBuffer input) {
-        final int position = inputBufferPosition;
-        final int length = input.remaining();
-        inputBuffer.putBytes(position, input, input.position(), length);
-        inputBufferPosition += length;
-        inputBufferTasks.add(() -> drainAAD(position, length));
-        ByteBuffers.position(input, input.position() + length);
+        final int read = maybeInit(input);
+        ByteBuffers.position(input, input.position() + read);
+        parent.getDataCipher().updateAAD(input);
     }
 
     @Override
     public void updateAAD(final IByteBuffer input) {
-        final int position = inputBufferPosition;
-        final int length = input.capacity();
-        inputBuffer.putBytes(position, input);
-        inputBufferPosition += length;
-        inputBufferTasks.add(() -> drainAAD(position, length));
+        final int read = maybeInit(input);
+        parent.getDataCipher().updateAAD(input.sliceFrom(read));
     }
 
-    private void update(final byte[] input, final int inputOffset, final int inputLen) {
-        final int position = inputBufferPosition;
-        final int length = inputLen;
-        inputBuffer.putBytes(position, input, inputOffset, inputLen);
-        inputBufferPosition += length;
-        inputBufferTasks.add(() -> drainOutput(position, length));
-    }
-
-    private void update(final java.nio.ByteBuffer input) {
-        final int position = inputBufferPosition;
-        final int length = input.remaining();
-        inputBuffer.putBytes(position, input, input.position(), length);
-        inputBufferPosition += length;
-        inputBufferTasks.add(() -> drainOutput(position, length));
-        ByteBuffers.position(input, input.position() + length);
-    }
-
-    private void update(final IByteBuffer input) {
-        final int position = inputBufferPosition;
-        final int length = input.capacity();
-        inputBuffer.putBytes(position, input);
-        inputBufferPosition += length;
-        inputBufferTasks.add(() -> drainOutput(position, length));
-    }
-
-    private void drainOutput(final int position, final int length) {
-        final int toIndex = position + length;
-        final int limitedToIndex = Integers.min(toIndex, getInputBufferLimit());
-        final int limitedLength = limitedToIndex - position;
-        if (limitedLength < 0) {
-            return;
+    private int maybeInit(final java.nio.ByteBuffer inBuffer) {
+        if (initialized) {
+            return 0;
         }
-        final int written = delegate.update(inputBuffer.slice(position, limitedLength),
-                outputBuffer.sliceFrom(outputBufferPosition));
-        outputBufferPosition += written;
-    }
-
-    private void drainAAD(final int position, final int length) {
-        final int toIndex = position + length;
-        final int limitedToIndex = Integers.min(toIndex, getInputBufferLimit());
-        final int limitedLength = limitedToIndex - position;
-        if (limitedLength < 0) {
-            return;
+        int read = 0;
+        if (inputBufferSize < EncryptingHybridCipher.ENCRYPTEDDATAKEY_INDEX) {
+            final int toBeWritten = Integers.min(EncryptingHybridCipher.ENCRYPTEDDATAKEY_INDEX - inputBufferPosition,
+                    inBuffer.remaining());
+            inputBuffer.putBytesTo(inputBufferPosition, inBuffer, toBeWritten);
+            inputBufferSize += toBeWritten;
+            read += toBeWritten;
+            ByteBuffers.position(inBuffer, inBuffer.position() + toBeWritten);
+            if (inputBufferSize == EncryptingHybridCipher.ENCRYPTEDDATAKEY_INDEX) {
+                expectedInputBufferSize = inputBuffer.getInt(EncryptingHybridCipher.ENCRYPTEDDATAKEYLENGTH_INDEX)
+                        + inputBuffer.getInt(EncryptingHybridCipher.ENCRYPTEDDATAPARAMLENGTH_INDEX);
+            }
         }
-        delegate.updateAAD(inputBuffer.slice(position, limitedLength));
+        if (inputBufferSize < expectedInputBufferSize) {
+            final int toBeWritten = Integers.min(expectedInputBufferSize - inputBufferPosition, inBuffer.remaining());
+            inputBuffer.putBytesTo(inputBufferPosition, inBuffer, toBeWritten);
+            inputBufferSize += toBeWritten;
+            read += toBeWritten;
+            ByteBuffers.position(inBuffer, inBuffer.position() + toBeWritten);
+            if (inputBufferSize == expectedInputBufferSize) {
+                initialize();
+            }
+        }
+        return read;
     }
 
-    private int getInputBufferLimit() {
-        return inputBufferPosition - hash.getHashSize();
+    private int maybeInit(final IByteBuffer inBuffer) {
+        if (initialized) {
+            return 0;
+        }
+        int read = 0;
+        if (inputBufferSize < EncryptingHybridCipher.ENCRYPTEDDATAKEY_INDEX) {
+            final int toBeWritten = Integers.min(EncryptingHybridCipher.ENCRYPTEDDATAKEY_INDEX - inputBufferPosition,
+                    inBuffer.capacity());
+            inputBuffer.putBytesTo(inputBufferPosition, inBuffer, toBeWritten);
+            inputBufferSize += toBeWritten;
+            read += toBeWritten;
+            if (inputBufferSize == EncryptingHybridCipher.ENCRYPTEDDATAKEY_INDEX) {
+                expectedInputBufferSize = inputBuffer.getInt(EncryptingHybridCipher.ENCRYPTEDDATAKEYLENGTH_INDEX)
+                        + inputBuffer.getInt(EncryptingHybridCipher.ENCRYPTEDDATAPARAMLENGTH_INDEX);
+            }
+        }
+        if (inputBufferSize < expectedInputBufferSize) {
+            final int toBeWritten = Integers.min(expectedInputBufferSize - inputBufferPosition,
+                    inBuffer.remaining(read));
+            inputBuffer.putBytesTo(inputBufferPosition, inBuffer, toBeWritten);
+            inputBufferSize += toBeWritten;
+            read += toBeWritten;
+            if (inputBufferSize == expectedInputBufferSize) {
+                initialize();
+            }
+        }
+        return read;
+    }
+
+    private int maybeInit(final byte[] input, final int inputOffset, final int inputLen) {
+        if (initialized) {
+            return 0;
+        }
+        int read = 0;
+        if (inputBufferSize < EncryptingHybridCipher.ENCRYPTEDDATAKEY_INDEX) {
+            final int toBeWritten = Integers.min(EncryptingHybridCipher.ENCRYPTEDDATAKEY_INDEX - inputBufferPosition,
+                    inputLen);
+            inputBuffer.putBytes(inputBufferPosition, input, inputOffset, toBeWritten);
+            inputBufferSize += toBeWritten;
+            read += toBeWritten;
+            if (inputBufferSize == EncryptingHybridCipher.ENCRYPTEDDATAKEY_INDEX) {
+                expectedInputBufferSize = inputBuffer.getInt(EncryptingHybridCipher.ENCRYPTEDDATAKEYLENGTH_INDEX)
+                        + inputBuffer.getInt(EncryptingHybridCipher.ENCRYPTEDDATAPARAMLENGTH_INDEX);
+            }
+        }
+        if (inputBufferSize < expectedInputBufferSize) {
+            final int toBeWritten = Integers.min(expectedInputBufferSize - inputBufferPosition, inputLen - read);
+            inputBuffer.putBytes(inputBufferPosition, input, inputOffset + read, toBeWritten);
+            inputBufferSize += toBeWritten;
+            read += toBeWritten;
+            if (inputBufferSize == expectedInputBufferSize) {
+                initialize();
+            }
+        }
+        return read;
+    }
+
+    private void initialize() {
+        final int encryptedDataKeySize = inputBuffer.getInt(EncryptingHybridCipher.ENCRYPTEDDATAKEYLENGTH_INDEX);
+        final int encryptedDataParamSize = inputBuffer.getInt(EncryptingHybridCipher.ENCRYPTEDDATAPARAMLENGTH_INDEX);
+        final int encryptedDataKeyIndex = EncryptingHybridCipher.ENCRYPTEDDATAKEY_INDEX;
+        final int encryptedDataParamIndex = encryptedDataKeyIndex + encryptedDataKeySize;
+
+        final int decryptedRandomDataKeySize = parent.getKeyEncryptionFactory()
+                .decrypt(inputBuffer.slice(encryptedDataKeyIndex, encryptedDataKeySize), decryptedRandomDataKeyBuffer,
+                        parent.getKeyCipher(), prevKey);
+        final IKey randomDataKey = parent.getDataEncryptionFactory()
+                .getKey()
+                .fromBuffer(decryptedRandomDataKeyBuffer.sliceTo(decryptedRandomDataKeySize));
+        parent.getDataEncryptionFactory()
+                .init(CipherMode.Decrypt, parent.getDataCipher(), randomDataKey,
+                        inputBuffer.slice(encryptedDataParamIndex, encryptedDataParamSize));
+
+        initialized = true;
     }
 
     @Override
@@ -251,9 +269,11 @@ public class DecryptingHybridCipher implements ICipher {
     }
 
     void reset() {
+        initialized = false;
         inputBufferPosition = 0;
-        inputBufferTasks.clear();
-        outputBufferPosition = 0;
+        inputBufferSize = 0;
+        expectedInputBufferSize = -1;
+        prevKey = null;
     }
 
 }

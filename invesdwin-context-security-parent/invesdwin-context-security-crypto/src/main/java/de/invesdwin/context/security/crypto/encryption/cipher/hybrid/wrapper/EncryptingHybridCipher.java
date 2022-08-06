@@ -46,6 +46,7 @@ public class EncryptingHybridCipher implements ICipher {
         return parent.getAlgorithm();
     }
 
+    @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         if (mode != CipherMode.Encrypt) {
