@@ -138,6 +138,7 @@ public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutpu
         encrypt();
     }
 
+    @SuppressWarnings("deprecation")
     private void resetCipher() throws IOException {
         try {
             cipher.init(CipherMode.Encrypt, key, params);

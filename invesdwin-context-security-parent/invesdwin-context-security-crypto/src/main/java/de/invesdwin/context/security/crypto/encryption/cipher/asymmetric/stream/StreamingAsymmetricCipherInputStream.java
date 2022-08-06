@@ -359,6 +359,7 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
      * @throws IOException
      *             if an I/O error occurs.
      */
+    @SuppressWarnings("deprecation")
     protected void resetCipher() throws IOException {
         try {
             cipher.init(CipherMode.Decrypt, key, params);

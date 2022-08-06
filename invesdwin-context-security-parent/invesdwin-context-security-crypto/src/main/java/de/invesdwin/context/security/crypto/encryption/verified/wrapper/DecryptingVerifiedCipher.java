@@ -60,6 +60,7 @@ public class DecryptingVerifiedCipher implements ICipher {
         return getDelegate().getAlgorithm() + "With" + getHash().getAlgorithm();
     }
 
+    @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         if (mode != CipherMode.Decrypt) {

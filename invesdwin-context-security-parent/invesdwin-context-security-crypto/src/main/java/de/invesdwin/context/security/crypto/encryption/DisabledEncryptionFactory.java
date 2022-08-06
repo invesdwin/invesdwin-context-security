@@ -5,6 +5,7 @@ import java.io.OutputStream;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.key.IKey;
@@ -28,6 +29,11 @@ public final class DisabledEncryptionFactory implements IEncryptionFactory {
     @Override
     public IKey getKey() {
         return null;
+    }
+
+    @Override
+    public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
+        return 0;
     }
 
     @Override

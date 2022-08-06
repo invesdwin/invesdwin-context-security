@@ -363,6 +363,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
      * @throws IOException
      *             if an I/O error occurs.
      */
+    @SuppressWarnings("deprecation")
     protected void initCipher() throws IOException {
         try {
             cipher.init(CipherMode.Decrypt, key, params);

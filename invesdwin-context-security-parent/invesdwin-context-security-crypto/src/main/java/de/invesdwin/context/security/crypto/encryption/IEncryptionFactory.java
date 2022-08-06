@@ -3,6 +3,7 @@ package de.invesdwin.context.security.crypto.encryption;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.key.IKey;
@@ -19,6 +20,11 @@ public interface IEncryptionFactory {
     default IObjectPool<ICipher> getCipherPool() {
         return getAlgorithm().getCipherPool();
     }
+
+    /**
+     * The key might contain a CipherIV which needs data put/read to/from the paramBuffer.
+     */
+    int init(CipherMode mode, ICipher cipher, IKey key, IByteBuffer paramBuffer);
 
     /**
      * Can only be used to encrypt one payload.

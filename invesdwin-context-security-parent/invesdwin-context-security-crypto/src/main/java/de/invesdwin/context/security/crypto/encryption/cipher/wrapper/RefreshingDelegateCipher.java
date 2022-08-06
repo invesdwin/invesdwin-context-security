@@ -46,6 +46,7 @@ public class RefreshingDelegateCipher implements ICipher {
         return algorithm.getAlgorithm();
     }
 
+    @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         if (delegate != null) {

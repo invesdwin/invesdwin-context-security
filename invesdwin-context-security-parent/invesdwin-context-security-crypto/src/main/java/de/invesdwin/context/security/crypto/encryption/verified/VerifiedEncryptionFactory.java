@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.verified.algorithm.AVerifiedCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.verified.wrapper.VerifiedCipher;
@@ -15,7 +16,7 @@ import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
- * WARNING: using this is less efficient for streams than doing the authentication from the outside. Thus is because
+ * WARNING: using this is less efficient for streams than doing the authentication from the outside. This is because
  * decryption has to buffer the input for the authentication before actually starting to decrypt
  * (https://moxie.org/2011/12/13/the-cryptographic-doom-principle.html). This copy can be prevented when using the
  * approach of: VerifiedEncryptionSynchronousReader & VerifiedEncryptionSynchronousReader from
@@ -55,6 +56,11 @@ public class VerifiedEncryptionFactory implements IEncryptionFactory {
 
     public IVerificationFactory getVerificationFactory() {
         return verificationFactory;
+    }
+
+    @Override
+    public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
+        return encryptionFactory.init(mode, cipher, key, paramBuffer);
     }
 
     @Override

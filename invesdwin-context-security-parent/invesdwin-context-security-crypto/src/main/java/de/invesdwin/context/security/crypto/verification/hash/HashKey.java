@@ -67,7 +67,12 @@ public class HashKey implements IHashKey {
     }
 
     @Override
-    public int getKeySize() {
+    public int getPrimaryKeySize() {
+        return keySize;
+    }
+
+    @Override
+    public int getKeyBlockSize() {
         return keySize;
     }
 

@@ -369,6 +369,7 @@ public class SymmetricCipherInputStream extends InputStream implements ReadableB
      * @throws IOException
      *             if an I/O error occurs.
      */
+    @SuppressWarnings("deprecation")
     protected void initCipher() throws IOException {
         try {
             cipher.init(CipherMode.Decrypt, key, params);

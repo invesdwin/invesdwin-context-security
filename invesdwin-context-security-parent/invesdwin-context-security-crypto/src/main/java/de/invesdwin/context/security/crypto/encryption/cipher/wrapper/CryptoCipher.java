@@ -44,6 +44,7 @@ public class CryptoCipher implements ICipher {
         return cipher.getAlgorithm();
     }
 
+    @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         final ICipherKey cKey = (ICipherKey) key;

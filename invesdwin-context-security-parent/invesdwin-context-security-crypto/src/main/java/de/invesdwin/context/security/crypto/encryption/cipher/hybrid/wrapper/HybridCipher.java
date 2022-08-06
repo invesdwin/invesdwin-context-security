@@ -1,66 +1,81 @@
-package de.invesdwin.context.security.crypto.encryption.verified.wrapper;
+package de.invesdwin.context.security.crypto.encryption.cipher.hybrid.wrapper;
 
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.key.IKey;
-import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
-/**
- * WARNING: VerifiedCipher update calls always return a written length of 0 despite writing to the given output (same as
- * com.sun.crypto.provider.GaloisCounterMode.GCMDecrypt.doUpdate(byte[], int, int, byte[], int)). This makes using the
- * cipher directly unsuitable. It is only useful inside VerifiedEncryptionFactory (with its own drawbacks).
- */
 @NotThreadSafe
-public class VerifiedCipher implements ICipher {
+public class HybridCipher implements ICipher {
 
-    private ICipher unverifiedCipher;
-    private IHash hash;
-    private final EncryptingVerifiedCipher encryptingDelegate;
-    private final DecryptingVerifiedCipher decryptingDelegate;
+    private final IEncryptionFactory keyEncryptionFactory;
+    private final IEncryptionFactory dataEncryptionFactory;
+    private ICipher keyCipher;
+    private ICipher dataCipher;
+    private final EncryptingHybridCipher encryptingDelegate;
+    private final DecryptingHybridCipher decryptingDelegate;
     private ICipher delegate;
 
-    public VerifiedCipher(final ICipher unverifiedCipher, final IHash hash) {
-        this.unverifiedCipher = unverifiedCipher;
-        this.hash = hash;
-        this.encryptingDelegate = new EncryptingVerifiedCipher(this);
-        this.decryptingDelegate = new DecryptingVerifiedCipher(this);
+    public HybridCipher(final IEncryptionFactory keyEncryptionFactory, final IEncryptionFactory dataEncryptionFactory) {
+        this(keyEncryptionFactory, dataEncryptionFactory, keyEncryptionFactory.getAlgorithm().newCipher(),
+                dataEncryptionFactory.getAlgorithm().newCipher());
     }
 
-    public ICipher getUnverifiedCipher() {
-        return unverifiedCipher;
+    public HybridCipher(final IEncryptionFactory firstEncryptionFactory,
+            final IEncryptionFactory secondEncryptionFactory, final ICipher keyCipher, final ICipher dataCipher) {
+        this.keyEncryptionFactory = firstEncryptionFactory;
+        this.dataEncryptionFactory = secondEncryptionFactory;
+        this.keyCipher = keyCipher;
+        this.dataCipher = dataCipher;
+        this.encryptingDelegate = new EncryptingHybridCipher(this);
+        this.decryptingDelegate = new DecryptingHybridCipher(this);
     }
 
-    public void setUnverifiedCipher(final ICipher unverifiedCipher) {
-        this.unverifiedCipher = unverifiedCipher;
+    public IEncryptionFactory getKeyEncryptionFactory() {
+        return keyEncryptionFactory;
     }
 
-    public IHash getHash() {
-        return hash;
+    public IEncryptionFactory getDataEncryptionFactory() {
+        return dataEncryptionFactory;
     }
 
-    public void setHash(final IHash hash) {
-        this.hash = hash;
+    public ICipher getKeyCipher() {
+        return keyCipher;
+    }
+
+    //package private for the pool
+    void setKeyCipher(final ICipher firstCipher) {
+        this.keyCipher = firstCipher;
+    }
+
+    public ICipher getDataCipher() {
+        return dataCipher;
+    }
+
+    //package private for the pool
+    void setDataCipher(final ICipher secondCipher) {
+        this.dataCipher = secondCipher;
     }
 
     @Override
     public int getBlockSize() {
-        return unverifiedCipher.getBlockSize();
+        return keyCipher.getBlockSize();
     }
 
     @Override
     public int getHashSize() {
-        return unverifiedCipher.getHashSize() + hash.getHashSize();
+        return dataCipher.getHashSize();
     }
 
     @Override
     public String getAlgorithm() {
-        return unverifiedCipher.getAlgorithm() + "With" + hash.getAlgorithm();
+        return keyCipher.getAlgorithm() + "With" + dataCipher.getAlgorithm();
     }
 
     @Deprecated
@@ -158,13 +173,13 @@ public class VerifiedCipher implements ICipher {
 
     @Override
     public void close() {
-        if (unverifiedCipher != null) {
-            unverifiedCipher.close();
-            unverifiedCipher = null;
+        if (keyCipher != null) {
+            keyCipher.close();
+            keyCipher = null;
         }
-        if (hash != null) {
-            hash.close();
-            hash = null;
+        if (dataCipher != null) {
+            dataCipher.close();
+            dataCipher = null;
         }
         encryptingDelegate.reset();
         decryptingDelegate.reset();

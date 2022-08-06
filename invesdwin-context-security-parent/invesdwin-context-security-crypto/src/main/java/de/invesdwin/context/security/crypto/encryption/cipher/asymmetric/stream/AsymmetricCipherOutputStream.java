@@ -241,6 +241,7 @@ public class AsymmetricCipherOutputStream extends OutputStream implements Writab
      * @throws IOException
      *             if an I/O error occurs.
      */
+    @SuppressWarnings("deprecation")
     protected void initCipher() throws IOException {
         try {
             cipher.init(CipherMode.Encrypt, key, params);

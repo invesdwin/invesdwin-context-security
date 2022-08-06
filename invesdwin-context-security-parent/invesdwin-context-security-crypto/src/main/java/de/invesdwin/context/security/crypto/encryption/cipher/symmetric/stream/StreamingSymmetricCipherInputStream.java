@@ -412,6 +412,7 @@ public class StreamingSymmetricCipherInputStream extends SymmetricCipherInputStr
      * @throws IOException
      *             if an I/O error occurs.
      */
+    @SuppressWarnings("deprecation")
     protected void resetCipher(final long position) throws IOException {
         final long counter = getCounter(position);
         CipherDerivedIV.calculateIV(initIV, counter, iv.getIV());
