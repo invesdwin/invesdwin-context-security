@@ -62,8 +62,8 @@ public class EncryptingVerifiedCipher implements ICipher {
         final int length = getDelegate().update(inBuffer, outBuffer);
         getHash().update(ByteBuffers.slice(outBuffer, positionBefore, length));
         /*
-         * we need to force StreamingCipherOutputBuffer to call doFinal in the same intervals as
-         * StreamingCipherInputBuffer, thus use the settings of DecryptingVerifiedCipher. Smaller chunks will make sure
+         * we need to force StreamingCipherOutputStream to call doFinal in the same intervals as
+         * StreamingCipherInputStream, thus use the settings of DecryptingVerifiedCipher. Smaller chunks will make sure
          * that the buffering in DecryptingVerifiedCipher does not grow too large, though it will cause more network
          * overhead.
          */

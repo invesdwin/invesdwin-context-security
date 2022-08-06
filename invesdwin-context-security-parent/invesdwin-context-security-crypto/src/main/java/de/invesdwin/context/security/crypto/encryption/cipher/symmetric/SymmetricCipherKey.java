@@ -82,8 +82,13 @@ public class SymmetricCipherKey implements ICipherKey {
     }
 
     @Override
-    public int getKeySize() {
+    public int getPrimaryKeySize() {
         return keySize;
+    }
+
+    @Override
+    public int getKeyBlockSize() {
+        return keySize + Integer.BYTES + cipherIV.getIvBlockSize();
     }
 
     public static Key wrapKey(final String keyAlgorithm, final byte[] key) {

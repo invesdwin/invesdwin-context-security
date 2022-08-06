@@ -13,17 +13,11 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.hybrid.algorithm.HybridCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.hybrid.wrapper.HybridCipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherInputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.StreamingSymmetricCipherOutputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherInputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.SymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.key.IKey;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.ALazyDelegateInputStream;
 import de.invesdwin.util.streams.ALazyDelegateOutputStream;
+import de.invesdwin.util.streams.InputStreams;
 import de.invesdwin.util.streams.OutputStreams;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -53,9 +47,9 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @Immutable
 public class HybridEncryptionFactory implements IEncryptionFactory {
 
-    private static final int ENCRYPTEDSECRETLENGTH_SIZE = Integer.BYTES;
-    private static final int ENCRYPTEDSECRETLENGTH_INDEX = 0;
-    private static final int ENCRYPTEDSECRET_INDEX = ENCRYPTEDSECRETLENGTH_INDEX + ENCRYPTEDSECRETLENGTH_SIZE;
+    private static final int ENCRYPTEDDATAKEYLENGTH_SIZE = Integer.BYTES;
+    private static final int ENCRYPTEDDATAKEYLENGTH_INDEX = 0;
+    private static final int ENCRYPTEDDATAKEY_INDEX = ENCRYPTEDDATAKEYLENGTH_INDEX + ENCRYPTEDDATAKEYLENGTH_SIZE;
 
     private final IEncryptionFactory keyEncryptionFactory;
     private final IEncryptionFactory dataEncryptionFactory;
@@ -80,63 +74,69 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
+    public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
+        final HybridCipher hybridCipher = (HybridCipher) cipher;
+        hybridCipher.init(mode, key, null);
+        return 0;
+    }
+
+    @Override
     public OutputStream newEncryptor(final OutputStream out, final ICipher cipher, final IKey key) {
         final HybridCipher hybridCipher = (HybridCipher) cipher;
         return new ALazyDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
                 //prepare secret key and iv
-                final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-                final byte[] symmetricKey = new byte[secondKeySize];
+                final IKey randomDataKey = dataEncryptionFactory.getKey().newRandomInstance();
+                final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
                 try {
-                    random.nextBytes(symmetricKey);
-                } finally {
-                    CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-                }
-                final MutableIvParameterSpec iv = new MutableIvParameterSpec(
-                        ByteBuffers.allocateByteArray(symmetricCipherIV.getAlgorithm().getIvSize()));
+                    randomDataKey.toBuffer(decryptedDataKeyBuffer);
 
-                //combine secret key and iv
-                final IByteBuffer decryptedSecretBuffer = ByteBuffers
-                        .allocate(symmetricKey.length + symmetricCipherIV.getIvBlockSize());
-                decryptedSecretBuffer.putBytes(0, symmetricKey);
-                final int ivIndex = symmetricKey.length;
-                symmetricCipherIV.putIV(decryptedSecretBuffer.sliceFrom(ivIndex), iv);
+                    //encrypt secret key and iv and send it over the wire with the encrypted length
+                    final IByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+                    try {
+                        final int encryptedDataKeySize = keyEncryptionFactory.encrypt(decryptedDataKeyBuffer,
+                                encryptedDataKeyBuffer, hybridCipher.getKeyCipher());
+                        OutputStreams.writeInt(out, encryptedDataKeySize);
+                        encryptedDataKeyBuffer.getBytesTo(0, out, encryptedDataKeySize);
+                    } catch (final IOException e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        ByteBuffers.EXPANDABLE_POOL.returnObject(encryptedDataKeyBuffer);
+                    }
 
-                //encrypt secret key and iv and send it over the wire with the encrypted length
-                final IByteBuffer encryptedSecretBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-                try {
-                    final int encryptedLength = keyEncryptionFactory.encrypt(decryptedSecretBuffer,
-                            decryptedSecretBuffer, hybridCipher.getKeyCipher());
-                    OutputStreams.writeInt(out, encryptedLength);
-                    encryptedSecretBuffer.getBytesTo(0, out, encryptedLength);
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
                 } finally {
-                    ByteBuffers.EXPANDABLE_POOL.returnObject(encryptedSecretBuffer);
+                    ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
                 }
 
                 //switch to symmetric encryption using the secret key and iv
-                try {
-                    return new SymmetricCipherOutputStream(dataEncryptionFactory.getAlgorithm(), out,
-                            hybridCipher.getDataCipher(), symmetricKey, iv.getIV());
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
-                }
+                return dataEncryptionFactory.newEncryptor(out, hybridCipher.getDataCipher(), randomDataKey);
             }
         };
     }
 
     @Override
     public InputStream newDecryptor(final InputStream in, final ICipher cipher, final IKey key) {
+        final HybridCipher hybridCipher = (HybridCipher) cipher;
         return new ALazyDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
-                final byte[] iv = symmetricCipherIV.getNewIV(in);
+                final IByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+                final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
                 try {
-                    return new SymmetricCipherInputStream(algorithm, in, cipher, key, iv);
+                    final int encryptedDataKeySize = InputStreams.readInt(in);
+                    encryptedDataKeyBuffer.putBytesTo(0, in, encryptedDataKeySize);
+                    final int decryptedSize = keyEncryptionFactory.decrypt(
+                            encryptedDataKeyBuffer.sliceTo(encryptedDataKeySize), decryptedDataKeyBuffer,
+                            hybridCipher.getKeyCipher());
+                    final IKey randomDataKey = dataEncryptionFactory.getKey()
+                            .fromBuffer(decryptedDataKeyBuffer.sliceTo(decryptedSize));
+                    return dataEncryptionFactory.newDecryptor(in, hybridCipher.getDataCipher(), randomDataKey);
                 } catch (final IOException e) {
                     throw new RuntimeException(e);
+                } finally {
+                    ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
+                    ByteBuffers.EXPANDABLE_POOL.returnObject(encryptedDataKeyBuffer);
                 }
             }
         };
@@ -148,54 +148,57 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
         return new ALazyDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
-                final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-                final byte[] symmetricKey = new byte[secondKeySize];
+                //prepare secret key and iv
+                final IKey randomDataKey = dataEncryptionFactory.getKey().newRandomInstance();
+                final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
                 try {
-                    random.nextBytes(symmetricKey);
+                    randomDataKey.toBuffer(decryptedDataKeyBuffer);
+
+                    //encrypt secret key and iv and send it over the wire with the encrypted length
+                    final IByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+                    try {
+                        final int encryptedDataKeySize = keyEncryptionFactory.encrypt(decryptedDataKeyBuffer,
+                                encryptedDataKeyBuffer, hybridCipher.getKeyCipher());
+                        OutputStreams.writeInt(out, encryptedDataKeySize);
+                        encryptedDataKeyBuffer.getBytesTo(0, out, encryptedDataKeySize);
+                    } catch (final IOException e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        ByteBuffers.EXPANDABLE_POOL.returnObject(encryptedDataKeyBuffer);
+                    }
+
                 } finally {
-                    CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-                }
-                final MutableIvParameterSpec iv = new MutableIvParameterSpec(
-                        ByteBuffers.allocateByteArray(symmetricCipherIV.getAlgorithm().getIvSize()));
-
-                final IByteBuffer decryptedSecretBuffer = ByteBuffers
-                        .allocate(symmetricKey.length + symmetricCipherIV.getIvBlockSize());
-                decryptedSecretBuffer.putBytes(0, symmetricKey);
-                final int ivIndex = symmetricKey.length;
-                symmetricCipherIV.putIV(decryptedSecretBuffer.sliceFrom(ivIndex), iv);
-
-                final IByteBuffer encryptedSecretBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-                try {
-                    final int encryptedLength = keyEncryptionFactory.encrypt(decryptedSecretBuffer,
-                            decryptedSecretBuffer, hybridCipher.getKeyCipher());
-                    OutputStreams.writeInt(out, encryptedLength);
-                    encryptedSecretBuffer.getBytesTo(0, out, encryptedLength);
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    ByteBuffers.EXPANDABLE_POOL.returnObject(encryptedSecretBuffer);
+                    ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
                 }
 
-                try {
-                    return new StreamingSymmetricCipherOutputStream(dataEncryptionFactory.getAlgorithm(), out,
-                            hybridCipher.getDataCipher(), symmetricKey, iv.getIV());
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
-                }
+                //switch to symmetric encryption using the secret key and iv
+                return dataEncryptionFactory.newStreamingEncryptor(out, hybridCipher.getDataCipher(), randomDataKey);
             }
         };
     }
 
     @Override
     public InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher, final IKey key) {
+        final HybridCipher hybridCipher = (HybridCipher) cipher;
         return new ALazyDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
-                final byte[] iv = symmetricCipherIV.getNewIV(in);
+                final IByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+                final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
                 try {
-                    return new StreamingSymmetricCipherInputStream(algorithm, in, cipher, key, iv);
+                    final int encryptedDataKeySize = InputStreams.readInt(in);
+                    encryptedDataKeyBuffer.putBytesTo(0, in, encryptedDataKeySize);
+                    final int decryptedSize = keyEncryptionFactory.decrypt(
+                            encryptedDataKeyBuffer.sliceTo(encryptedDataKeySize), decryptedDataKeyBuffer,
+                            hybridCipher.getKeyCipher());
+                    final IKey randomDataKey = dataEncryptionFactory.getKey()
+                            .fromBuffer(decryptedDataKeyBuffer.sliceTo(decryptedSize));
+                    return dataEncryptionFactory.newStreamingDecryptor(in, hybridCipher.getDataCipher(), randomDataKey);
                 } catch (final IOException e) {
                     throw new RuntimeException(e);
+                } finally {
+                    ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
+                    ByteBuffers.EXPANDABLE_POOL.returnObject(encryptedDataKeyBuffer);
                 }
             }
         };
@@ -204,54 +207,48 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
     @Override
     public int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher, final IKey key) {
         final HybridCipher hybridCipher = (HybridCipher) cipher;
-        final MutableIvParameterSpec iv = symmetricCipherIV.borrowDestIV();
-        try {
-            //prepare secret key and iv
-            final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-            final byte[] symmetricKey = new byte[secondKeySize];
-            try {
-                random.nextBytes(symmetricKey);
-            } finally {
-                CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-            }
 
-            //combine secret key and iv
-            final IByteBuffer decryptedSecretBuffer = ByteBuffers
-                    .allocate(symmetricKey.length + symmetricCipherIV.getIvBlockSize());
-            decryptedSecretBuffer.putBytes(0, symmetricKey);
-            final int ivIndex = symmetricKey.length;
-            symmetricCipherIV.putIV(decryptedSecretBuffer.sliceFrom(ivIndex), iv);
+        //prepare secret key and iv
+        final IKey randomDataKey = dataEncryptionFactory.getKey().newRandomInstance();
+        final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+        try {
+            randomDataKey.toBuffer(decryptedDataKeyBuffer);
 
             //encrypt secret key and iv and send it over the wire with the encrypted length
-            final int encryptedSecretSize = keyEncryptionFactory.encrypt(decryptedSecretBuffer,
-                    dest.sliceFrom(ENCRYPTEDSECRET_INDEX), hybridCipher.getKeyCipher());
-            dest.putInt(ENCRYPTEDSECRETLENGTH_INDEX, encryptedSecretSize);
+            final int encryptedDataKeySize = keyEncryptionFactory.encrypt(decryptedDataKeyBuffer,
+                    dest.sliceFrom(ENCRYPTEDDATAKEY_INDEX), hybridCipher.getKeyCipher());
+            dest.putInt(ENCRYPTEDDATAKEYLENGTH_INDEX, encryptedDataKeySize);
 
-            //finally add the symmetrically encrypted payload
-            final int payloadIndex = ENCRYPTEDSECRET_INDEX + encryptedSecretSize;
-            final ICipher symmetricCipher = hybridCipher.getDataCipher();
-            symmetricCipher.init(CipherMode.Encrypt, dataEncryptionFactory.getAlgorithm().wrapKey(symmetricKey),
-                    symmetricCipherIV.wrapParam(iv));
-            final IByteBuffer payloadBuffer = dest.sliceFrom(payloadIndex);
-            final int payloadLength = symmetricCipher.doFinal(src, payloadBuffer);
-            return payloadIndex + payloadLength;
+            final int payloadIndex = ENCRYPTEDDATAKEY_INDEX + encryptedDataKeySize;
+            final int payloadSize = dataEncryptionFactory.encrypt(src, dest.sliceFrom(payloadIndex),
+                    hybridCipher.getDataCipher(), randomDataKey);
+
+            return payloadIndex + payloadSize;
         } finally {
-            symmetricCipherIV.returnDestIV(iv);
+            ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
         }
     }
 
     @Override
     public int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher, final IKey key) {
-        final MutableIvParameterSpec iv = symmetricCipherIV.borrowDestIV();
+        final HybridCipher hybridCipher = (HybridCipher) cipher;
+
+        final int encryptedDataKeySize = src.getInt(ENCRYPTEDDATAKEYLENGTH_INDEX);
+
+        final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
+        final IKey randomDataKey;
         try {
-            symmetricCipherIV.getIV(src, iv);
-            init(cipher, CipherMode.Decrypt, symmetricCipherIV.wrapParam(iv));
-            final IByteBuffer payloadBuffer = src.sliceFrom(symmetricCipherIV.getIvBlockSize());
-            final int length = cipher.doFinal(payloadBuffer, dest);
-            return length;
+            final int decryptedSize = keyEncryptionFactory.decrypt(
+                    src.slice(ENCRYPTEDDATAKEY_INDEX, encryptedDataKeySize), decryptedDataKeyBuffer,
+                    hybridCipher.getKeyCipher());
+            randomDataKey = dataEncryptionFactory.getKey().fromBuffer(decryptedDataKeyBuffer.sliceTo(decryptedSize));
         } finally {
-            symmetricCipherIV.returnDestIV(iv);
+            ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
         }
+
+        final int payloadIndex = ENCRYPTEDDATAKEY_INDEX + encryptedDataKeySize;
+        return dataEncryptionFactory.decrypt(src.sliceFrom(payloadIndex), dest, hybridCipher.getDataCipher(),
+                randomDataKey);
     }
 
     @SuppressWarnings("deprecation")

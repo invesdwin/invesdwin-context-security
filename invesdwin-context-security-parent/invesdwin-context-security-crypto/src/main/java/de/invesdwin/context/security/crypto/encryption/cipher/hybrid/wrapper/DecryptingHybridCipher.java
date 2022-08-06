@@ -54,6 +54,9 @@ public class DecryptingHybridCipher implements ICipher {
         if (mode != CipherMode.Decrypt) {
             throw new IllegalArgumentException("Only decryption supported");
         }
+        if (params != null) {
+            throw new IllegalArgumentException("params not supported here: " + params);
+        }
         delegate.init(mode, key, params);
         verificationFactory.init(hash);
         reset();

@@ -29,7 +29,7 @@ public class JceCipherWithKeyBlockSize extends JceCipher {
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
         if (key != prevKey) {
-            blockSize = key.getKeySize();
+            blockSize = key.getPrimaryKeySize();
             prevKey = key;
         }
         super.init(mode, key, params);

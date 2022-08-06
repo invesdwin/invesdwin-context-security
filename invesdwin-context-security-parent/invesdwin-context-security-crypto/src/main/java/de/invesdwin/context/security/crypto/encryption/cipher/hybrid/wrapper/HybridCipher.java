@@ -37,6 +37,14 @@ public class HybridCipher implements ICipher {
         this.decryptingDelegate = new DecryptingHybridCipher(this);
     }
 
+    public IEncryptionFactory getKeyEncryptionFactory() {
+        return keyEncryptionFactory;
+    }
+
+    public IEncryptionFactory getDataEncryptionFactory() {
+        return dataEncryptionFactory;
+    }
+
     public ICipher getKeyCipher() {
         return keyCipher;
     }

@@ -27,7 +27,8 @@ public class AsymmetricCipherKey implements ICipherKey {
     private final IAsymmetricCipherAlgorithm algorithm;
     private final PublicKey publicKey;
     private final PrivateKey privateKey;
-    private final int keySize;
+    private final int privateKeySize;
+    private final int publicKeySize;
 
     public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm,
             final IDerivedKeyProvider derivedKeyProvider) {
@@ -54,7 +55,8 @@ public class AsymmetricCipherKey implements ICipherKey {
         this.algorithm = asymmetricKey.algorithm;
         this.publicKey = asymmetricKey.publicKey;
         this.privateKey = asymmetricKey.privateKey;
-        this.keySize = asymmetricKey.keySize;
+        this.privateKeySize = asymmetricKey.privateKeySize;
+        this.publicKeySize = asymmetricKey.publicKeySize;
     }
 
     public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm, final PublicKey publicKey,
@@ -62,7 +64,8 @@ public class AsymmetricCipherKey implements ICipherKey {
         this.algorithm = algorithm;
         this.publicKey = publicKey;
         this.privateKey = privateKey;
-        this.keySize = privateKey.getEncoded().length;
+        this.privateKeySize = privateKey.getEncoded().length;
+        this.publicKeySize = publicKey.getEncoded().length;
     }
 
     @Override
@@ -81,8 +84,13 @@ public class AsymmetricCipherKey implements ICipherKey {
     }
 
     @Override
-    public int getKeySize() {
-        return keySize;
+    public int getPrimaryKeySize() {
+        return privateKeySize;
+    }
+
+    @Override
+    public int getKeyBlockSize() {
+        return privateKeySize + Integer.BYTES + publicKeySize;
     }
 
     @Override
@@ -141,7 +149,7 @@ public class AsymmetricCipherKey implements ICipherKey {
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
             final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm.getKeyAlgorithm());
-            final int lengthBits = keySize * Byte.SIZE;
+            final int lengthBits = privateKeySize * Byte.SIZE;
             generator.initialize(lengthBits, random);
             final KeyPair keyPair = generator.generateKeyPair();
             return new AsymmetricCipherKey(algorithm, keyPair);

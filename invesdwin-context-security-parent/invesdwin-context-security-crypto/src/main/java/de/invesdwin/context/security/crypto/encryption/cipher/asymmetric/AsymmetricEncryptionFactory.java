@@ -64,6 +64,12 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
     }
 
     @Override
+    public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
+        cipher.init(mode, key, algorithm.getParam());
+        return 0;
+    }
+
+    @Override
     public OutputStream newEncryptor(final OutputStream out, final ICipher cipher, final IKey key) {
         try {
             return new AsymmetricCipherOutputStream(algorithm, out, cipher, key);

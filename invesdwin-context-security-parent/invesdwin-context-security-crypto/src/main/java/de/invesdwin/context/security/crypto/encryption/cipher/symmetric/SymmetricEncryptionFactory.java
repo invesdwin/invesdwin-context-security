@@ -20,9 +20,11 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.S
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
+import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.ALazyDelegateInputStream;
 import de.invesdwin.util.streams.ALazyDelegateOutputStream;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
@@ -83,6 +85,28 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     @Override
     public SymmetricCipherKey getKey() {
         return key;
+    }
+
+    @Override
+    public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
+        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
+        final ICipherIV cipherIV = cKey.getCipherIV();
+        final MutableIvParameterSpec iv = new MutableIvParameterSpec(
+                ByteBuffers.allocateByteArray(cipherIV.getAlgorithm().getIvSize()));
+        final int length;
+        switch (mode) {
+        case Encrypt:
+            length = cipherIV.putIV(paramBuffer, iv);
+            break;
+        case Decrypt:
+            cipherIV.getIV(paramBuffer, iv);
+            length = 0;
+            break;
+        default:
+            throw UnknownArgumentException.newInstance(CipherMode.class, mode);
+        }
+        cipher.init(mode, key, cipherIV.wrapParam(iv));
+        return length;
     }
 
     @Override
