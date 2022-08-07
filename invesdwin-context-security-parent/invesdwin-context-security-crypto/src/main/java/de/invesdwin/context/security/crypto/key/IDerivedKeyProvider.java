@@ -7,6 +7,8 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetr
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricCipherKey;
 import de.invesdwin.context.security.crypto.verification.hash.HashKey;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
+import de.invesdwin.context.security.crypto.verification.signature.SignatureKey;
+import de.invesdwin.context.security.crypto.verification.signature.algorithm.ISignatureAlgorithm;
 import de.invesdwin.util.error.UnknownArgumentException;
 
 public interface IDerivedKeyProvider {
@@ -30,5 +32,7 @@ public interface IDerivedKeyProvider {
     AsymmetricCipherKey newDerivedKey(IAsymmetricCipherAlgorithm algorithm, byte[] info, int length);
 
     HashKey newDerivedKey(IHashAlgorithm algorithm, byte[] info, int length);
+
+    SignatureKey newDerivedKey(ISignatureAlgorithm algorithm, byte[] info, int length);
 
 }

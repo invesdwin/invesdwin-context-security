@@ -46,10 +46,10 @@ public class JceMacHash implements IHash {
     }
 
     @Override
-    public void init(final IKey key) {
+    public void init(final HashMode mode, final IKey key) {
         try {
             final IHashKey cKey = (IHashKey) key;
-            mac.init(cKey.getKey(HashMode.Sign));
+            mac.init(cKey.getKey(mode));
         } catch (final InvalidKeyException e) {
             throw new RuntimeException(e);
         }

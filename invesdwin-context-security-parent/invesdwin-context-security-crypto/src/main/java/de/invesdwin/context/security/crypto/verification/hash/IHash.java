@@ -18,7 +18,7 @@ public interface IHash extends Closeable {
      * Params are handled by the implementation. For example an IV that is randomized on init or an Hmac length that is
      * defined in the constructor of the implementation and then passed as a param.
      */
-    void init(IKey key);
+    void init(HashMode mode, IKey key);
 
     default void update(final IByteBuffer input) {
         final java.nio.ByteBuffer inputNio = input.asNioByteBuffer();

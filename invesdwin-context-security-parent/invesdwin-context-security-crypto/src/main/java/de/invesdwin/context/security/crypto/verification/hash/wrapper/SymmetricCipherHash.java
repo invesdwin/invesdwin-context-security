@@ -113,12 +113,11 @@ public class SymmetricCipherHash implements IHash {
     }
 
     @Override
-    public void init(final IKey key) {
+    public void init(final HashMode mode, final IKey key) {
         if (key != prevKey) {
             this.prevKey = key;
             final IHashKey cKey = (IHashKey) key;
-            this.prevSymmetricKey = new SymmetricCipherKey(cipherIV.getAlgorithm(), cKey.getKey(HashMode.Sign),
-                    cipherIV);
+            this.prevSymmetricKey = new SymmetricCipherKey(cipherIV.getAlgorithm(), cKey.getKey(mode), cipherIV);
         }
         reset();
         data.initLu();

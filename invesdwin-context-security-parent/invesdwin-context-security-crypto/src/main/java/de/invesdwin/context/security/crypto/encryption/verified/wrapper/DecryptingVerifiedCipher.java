@@ -80,7 +80,7 @@ public class DecryptingVerifiedCipher implements ICipher {
         } else {
             getDelegate().init(mode, cKey.getEncryptionKey(), params);
         }
-        getHash().init(cKey.getVerificationKey());
+        getHash().init(mode.getHashMode(), cKey.getVerificationKey());
         reset();
     }
 

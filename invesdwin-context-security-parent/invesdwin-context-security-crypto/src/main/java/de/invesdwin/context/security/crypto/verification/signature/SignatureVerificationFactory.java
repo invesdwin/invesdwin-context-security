@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.verification.hash;
+package de.invesdwin.context.security.crypto.verification.signature;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,45 +9,53 @@ import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.IVerificationFactory;
 import de.invesdwin.context.security.crypto.verification.VerificationDelegateSerde;
-import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
+import de.invesdwin.context.security.crypto.verification.hash.HashMode;
+import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.stream.ChannelLayeredHashInputStream;
 import de.invesdwin.context.security.crypto.verification.hash.stream.ChannelLayeredHashOutputStream;
 import de.invesdwin.context.security.crypto.verification.hash.stream.LayeredHashInputStream;
 import de.invesdwin.context.security.crypto.verification.hash.stream.LayeredHashOutputStream;
+import de.invesdwin.context.security.crypto.verification.signature.algorithm.ISignatureAlgorithm;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
-public class HashVerificationFactory implements IVerificationFactory {
+public class SignatureVerificationFactory implements IVerificationFactory {
 
-    private final IHashAlgorithm algorithm;
-    private final HashKey key;
+    private final ISignatureAlgorithm algorithm;
+    private final SignatureKey key;
 
-    public HashVerificationFactory(final byte[] key) {
-        this(new HashKey(IHashAlgorithm.DEFAULT, key));
+    public SignatureVerificationFactory(final byte[] publicKey, final byte[] privateKey, final int keySize) {
+        this(ISignatureAlgorithm.DEFAULT, publicKey, privateKey, keySize);
     }
 
-    public HashVerificationFactory(final IDerivedKeyProvider derivedKeyProvider) {
-        this(IHashAlgorithm.DEFAULT, derivedKeyProvider);
+    public SignatureVerificationFactory(final ISignatureAlgorithm algorithm, final byte[] publicKey,
+            final byte[] privateKey, final int keySize) {
+        this(new SignatureKey(algorithm, publicKey, privateKey, keySize));
     }
 
-    public HashVerificationFactory(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
-        this(new HashKey(algorithm, derivedKeyProvider));
+    public SignatureVerificationFactory(final IDerivedKeyProvider derivedKeyProvider) {
+        this(ISignatureAlgorithm.DEFAULT, derivedKeyProvider);
     }
 
-    public HashVerificationFactory(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
-            final int derivedKeySize) {
-        this(new HashKey(algorithm, derivedKeyProvider, derivedKeySize));
+    public SignatureVerificationFactory(final ISignatureAlgorithm algorithm,
+            final IDerivedKeyProvider derivedKeyProvider) {
+        this(new SignatureKey(algorithm, derivedKeyProvider));
     }
 
-    public HashVerificationFactory(final HashKey key) {
+    public SignatureVerificationFactory(final ISignatureAlgorithm algorithm,
+            final IDerivedKeyProvider derivedKeyProvider, final int derivedKeySize) {
+        this(new SignatureKey(algorithm, derivedKeyProvider, derivedKeySize));
+    }
+
+    public SignatureVerificationFactory(final SignatureKey key) {
         this.algorithm = key.getAlgorithm();
         this.key = key;
     }
 
     @Override
-    public IHashAlgorithm getAlgorithm() {
+    public ISignatureAlgorithm getAlgorithm() {
         return algorithm;
     }
 
@@ -57,7 +65,7 @@ public class HashVerificationFactory implements IVerificationFactory {
     }
 
     @Override
-    public HashKey getKey() {
+    public SignatureKey getKey() {
         return key;
     }
 

@@ -4,6 +4,7 @@ import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.CryptoProperties;
 import de.invesdwin.context.security.crypto.verification.hash.HashKey;
+import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.hmac.HmacAlgorithm;
@@ -54,7 +55,7 @@ public class HkdfDerivationFactory implements IDerivationFactory {
         if (keyMaterial != null && keyMaterial.length > 0) {
             final IHash hash = algorithm.getHashPool().borrowObject();
             try {
-                hash.init(new HashKey(algorithm, Bytes.concat(salt, pepper)));
+                hash.init(HashMode.Sign, new HashKey(algorithm, Bytes.concat(salt, pepper)));
                 return hash.doFinal(keyMaterial);
             } finally {
                 algorithm.getHashPool().returnObject(hash);
@@ -68,7 +69,7 @@ public class HkdfDerivationFactory implements IDerivationFactory {
     public byte[] expand(final byte[] key, final byte[] pInfo, final int length) {
         final IHash mac = algorithm.getHashPool().borrowObject();
         try {
-            mac.init(new HashKey(algorithm, key));
+            mac.init(HashMode.Sign, new HashKey(algorithm, key));
             final byte[] info;
             if (pInfo == null) {
                 info = new byte[0];

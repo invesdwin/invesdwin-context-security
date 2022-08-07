@@ -1,6 +1,5 @@
-package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric;
+package de.invesdwin.context.security.crypto.verification.signature;
 
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -13,46 +12,45 @@ import java.security.spec.X509EncodedKeySpec;
 
 import javax.annotation.concurrent.Immutable;
 
-import de.invesdwin.context.security.crypto.encryption.cipher.ICipherKey;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.verification.signature.algorithm.ISignatureAlgorithm;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
-public class AsymmetricCipherKey implements ICipherKey {
+public class SignatureKey implements ISignatureKey {
 
-    private final IAsymmetricCipherAlgorithm algorithm;
+    private final ISignatureAlgorithm algorithm;
     private final PublicKey publicKey;
     private final PrivateKey privateKey;
     private final int keySize;
     private final int privateKeyBlockSize;
     private final int publicKeyBlockSize;
 
-    public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm,
-            final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider, algorithm.getDefaultKeySize());
+    public SignatureKey(final ISignatureAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
+        this(algorithm, derivedKeyProvider, algorithm.getKeySize());
     }
 
-    public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
+    public SignatureKey(final ISignatureAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
             final int derivedKeyLength) {
-        this(derivedKeyProvider.newDerivedKey(algorithm,
-                ("cipher-asymmetric-key-" + algorithm.getAlgorithm()).getBytes(), derivedKeyLength));
+        this(derivedKeyProvider.newDerivedKey(algorithm, ("signature-key-" + algorithm.getAlgorithm()).getBytes(),
+                derivedKeyLength));
     }
 
-    public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm, final byte[] publicKey,
-            final byte[] privateKey, final int keySize) {
+    public SignatureKey(final ISignatureAlgorithm algorithm, final byte[] publicKey, final byte[] privateKey,
+            final int keySize) {
         this(algorithm, wrapPublicKey(algorithm.getKeyAlgorithm(), publicKey),
                 wrapPrivateKey(algorithm.getKeyAlgorithm(), privateKey), keySize);
     }
 
-    public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm, final KeyPair keyPair, final int keySize) {
+    public SignatureKey(final ISignatureAlgorithm algorithm, final KeyPair keyPair, final int keySize) {
         this(algorithm, keyPair.getPublic(), keyPair.getPrivate(), keySize);
     }
 
-    protected AsymmetricCipherKey(final AsymmetricCipherKey asymmetricKey) {
+    private SignatureKey(final SignatureKey asymmetricKey) {
         this.algorithm = asymmetricKey.algorithm;
         this.publicKey = asymmetricKey.publicKey;
         this.privateKey = asymmetricKey.privateKey;
@@ -61,8 +59,8 @@ public class AsymmetricCipherKey implements ICipherKey {
         this.publicKeyBlockSize = asymmetricKey.publicKeyBlockSize;
     }
 
-    public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm, final PublicKey publicKey,
-            final PrivateKey privateKey, final int keySize) {
+    public SignatureKey(final ISignatureAlgorithm algorithm, final PublicKey publicKey, final PrivateKey privateKey,
+            final int keySize) {
         this.algorithm = algorithm;
         this.publicKey = publicKey;
         this.privateKey = privateKey;
@@ -72,17 +70,17 @@ public class AsymmetricCipherKey implements ICipherKey {
     }
 
     @Override
-    public IAsymmetricCipherAlgorithm getAlgorithm() {
+    public ISignatureAlgorithm getAlgorithm() {
         return algorithm;
     }
 
     @Override
-    public Key getEncryptKey() {
+    public PublicKey getVerifyKey() {
         return publicKey;
     }
 
     @Override
-    public Key getDecryptKey() {
+    public PrivateKey getSignKey() {
         return privateKey;
     }
 
@@ -132,13 +130,10 @@ public class AsymmetricCipherKey implements ICipherKey {
         final byte[] privateKeyBytes = ByteBuffers.allocateByteArray(buffer.remaining(position));
         buffer.getBytes(position, privateKeyBytes);
         position += privateKeyBytes.length;
-        return new AsymmetricCipherKey(algorithm, publicKeyBytes, privateKeyBytes, keySize);
+        return new SignatureKey(algorithm, publicKeyBytes, privateKeyBytes, keySize);
     }
 
     public static PrivateKey wrapPrivateKey(final String keyAlgorithm, final byte[] privateKey) {
-        if (privateKey == null) {
-            return null;
-        }
         try {
             return KeyFactory.getInstance(keyAlgorithm).generatePrivate(new PKCS8EncodedKeySpec(privateKey));
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
@@ -147,9 +142,6 @@ public class AsymmetricCipherKey implements ICipherKey {
     }
 
     public static PublicKey wrapPublicKey(final String keyAlgorithm, final byte[] publicKey) {
-        if (publicKey == null) {
-            return null;
-        }
         try {
             return KeyFactory.getInstance(keyAlgorithm).generatePublic(new X509EncodedKeySpec(publicKey));
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
@@ -165,7 +157,7 @@ public class AsymmetricCipherKey implements ICipherKey {
             final int lengthBits = keySize * Byte.SIZE;
             generator.initialize(lengthBits, random);
             final KeyPair keyPair = generator.generateKeyPair();
-            return new AsymmetricCipherKey(algorithm, keyPair, keySize);
+            return new SignatureKey(algorithm, keyPair, keySize);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } finally {

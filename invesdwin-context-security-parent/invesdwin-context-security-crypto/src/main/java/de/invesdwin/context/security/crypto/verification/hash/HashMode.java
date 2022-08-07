@@ -14,11 +14,21 @@ public enum HashMode {
         public Key getKey(final IHashKey key) {
             return key.getSignKey();
         }
+
+        @Override
+        public CipherMode getCipherMode() {
+            return CipherMode.Encrypt;
+        }
     },
     Verify {
         @Override
         public Key getKey(final IHashKey key) {
             return key.getVerifyKey();
+        }
+
+        @Override
+        public CipherMode getCipherMode() {
+            return CipherMode.Decrypt;
         }
     };
 
@@ -34,5 +44,7 @@ public enum HashMode {
             throw UnknownArgumentException.newInstance(CipherMode.class, cipherMode);
         }
     }
+
+    public abstract CipherMode getCipherMode();
 
 }

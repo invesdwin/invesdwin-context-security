@@ -37,12 +37,12 @@ public class ChecksumHash implements IHash {
     }
 
     @Override
-    public void init(final IKey key) {
+    public void init(final HashMode mode, final IKey key) {
         checksum.reset();
         if (key != null) {
             //we use the key as a pepper (static salt)
             final IHashKey cKey = (IHashKey) key;
-            final byte[] encoded = cKey.getKey(HashMode.Sign).getEncoded();
+            final byte[] encoded = cKey.getKey(mode).getEncoded();
             checksum.update(encoded);
             prevKey = encoded;
         } else {

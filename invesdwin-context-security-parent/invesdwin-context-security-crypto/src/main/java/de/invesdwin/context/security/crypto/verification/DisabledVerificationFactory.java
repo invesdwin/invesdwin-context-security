@@ -7,6 +7,7 @@ import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.DisabledHash;
+import de.invesdwin.context.security.crypto.verification.hash.DisabledHashKey;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.stream.ChannelLayeredHashInputStream;
@@ -36,7 +37,7 @@ public final class DisabledVerificationFactory implements IVerificationFactory {
 
     @Override
     public IKey getKey() {
-        return null;
+        return DisabledHashKey.INSTANCE;
     }
 
     @Override

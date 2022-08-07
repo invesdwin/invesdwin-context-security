@@ -3,6 +3,7 @@ package de.invesdwin.context.security.crypto.verification.hash.wrapper;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -32,13 +33,13 @@ public class LazyDelegateHash implements IHash {
     }
 
     @Override
-    public void init(final IKey key) {
+    public void init(final HashMode mode, final IKey key) {
         if (prevKey == key) {
             //init not needed if it is the same key
             reset(); //checks itself if reset is needed
             return;
         }
-        delegate.init(key);
+        delegate.init(mode, key);
         prevKey = key;
         needsReset = false;
     }

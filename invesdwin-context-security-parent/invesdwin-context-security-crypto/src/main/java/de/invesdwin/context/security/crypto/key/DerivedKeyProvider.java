@@ -15,6 +15,8 @@ import de.invesdwin.context.security.crypto.key.derivation.IDerivationFactory;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
 import de.invesdwin.context.security.crypto.verification.hash.HashKey;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
+import de.invesdwin.context.security.crypto.verification.signature.SignatureKey;
+import de.invesdwin.context.security.crypto.verification.signature.algorithm.ISignatureAlgorithm;
 
 /**
  * Key derivation techniques are: Password+PBKDF2+HKDFexpands or Random+HKDFextract+HKDFexpands
@@ -70,6 +72,24 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
             generator.initialize(lengthBits, random);
             final KeyPair keyPair = generator.generateKeyPair();
             return new AsymmetricCipherKey(algorithm, keyPair, length);
+        } catch (final NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public SignatureKey newDerivedKey(final ISignatureAlgorithm algorithm, final byte[] info, final int length) {
+        try {
+            final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm.getKeyAlgorithm());
+            //we need to use a pseudorandom generator in order to be able to seed it
+            final java.security.SecureRandom random = java.security.SecureRandom.getInstance("SHA1PRNG");
+            //we need a deterministic pseudorandom seed
+            final byte[] seed = newDerivedKey(info, length);
+            random.setSeed(seed);
+            final int lengthBits = length * Byte.SIZE;
+            generator.initialize(lengthBits, random);
+            final KeyPair keyPair = generator.generateKeyPair();
+            return new SignatureKey(algorithm, keyPair, length);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

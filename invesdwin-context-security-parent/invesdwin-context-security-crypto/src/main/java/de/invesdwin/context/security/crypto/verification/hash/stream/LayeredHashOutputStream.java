@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.streams.ASimpleDelegateOutputStream;
 
@@ -16,7 +17,7 @@ public class LayeredHashOutputStream extends ASimpleDelegateOutputStream {
     public LayeredHashOutputStream(final OutputStream delegate, final IHash hash, final IKey key) {
         super(delegate);
         this.hash = hash;
-        hash.init(key);
+        hash.init(HashMode.Sign, key);
     }
 
     public void init() {
@@ -41,9 +42,8 @@ public class LayeredHashOutputStream extends ASimpleDelegateOutputStream {
         hash.update(b, off, len);
     }
 
-    public byte[] doFinal() {
-        //resets the mac to its previous initial state
-        return hash.doFinal();
+    public IHash getHash() {
+        return hash;
     }
 
     @Override

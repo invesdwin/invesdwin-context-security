@@ -46,12 +46,12 @@ public class JceDigestHash implements IHash {
     }
 
     @Override
-    public void init(final IKey key) {
+    public void init(final HashMode mode, final IKey key) {
         digest.reset();
         if (key != null) {
             //we use the key as a pepper (static salt)
             final IHashKey cKey = (IHashKey) key;
-            final byte[] encoded = cKey.getKey(HashMode.Sign).getEncoded();
+            final byte[] encoded = cKey.getKey(mode).getEncoded();
             digest.update(encoded);
             prevKey = encoded;
         } else {

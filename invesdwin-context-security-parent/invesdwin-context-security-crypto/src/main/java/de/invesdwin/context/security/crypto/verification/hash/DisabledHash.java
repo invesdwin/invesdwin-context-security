@@ -22,7 +22,7 @@ public final class DisabledHash implements IHash {
     }
 
     @Override
-    public void init(final IKey key) {
+    public void init(final HashMode mode, final IKey key) {
     }
 
     @Override
