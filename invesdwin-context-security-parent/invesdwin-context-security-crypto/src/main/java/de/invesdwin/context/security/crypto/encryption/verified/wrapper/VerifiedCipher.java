@@ -4,9 +4,11 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.context.security.crypto.verification.IVerificationFactory;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -17,19 +19,32 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
  * cipher directly unsuitable. It is only useful inside VerifiedEncryptionFactory (with its own drawbacks).
  */
 @NotThreadSafe
-public class VerifiedCipher implements ICipher {
+public class VerifiedCipher implements IVerifiedCipher {
 
+    private final IEncryptionFactory encryptionFactory;
+    private final IVerificationFactory verificationFactory;
     private ICipher unverifiedCipher;
     private IHash hash;
     private final EncryptingVerifiedCipher encryptingDelegate;
     private final DecryptingVerifiedCipher decryptingDelegate;
-    private ICipher delegate;
+    private IVerifiedCipher delegate;
 
-    public VerifiedCipher(final ICipher unverifiedCipher, final IHash hash) {
+    public VerifiedCipher(final IEncryptionFactory unverifiedEncryptionFactory,
+            final IVerificationFactory verificationFactory, final ICipher unverifiedCipher, final IHash hash) {
+        this.encryptionFactory = unverifiedEncryptionFactory;
+        this.verificationFactory = verificationFactory;
         this.unverifiedCipher = unverifiedCipher;
         this.hash = hash;
         this.encryptingDelegate = new EncryptingVerifiedCipher(this);
         this.decryptingDelegate = new DecryptingVerifiedCipher(this);
+    }
+
+    public IEncryptionFactory getEncryptionFactory() {
+        return encryptionFactory;
+    }
+
+    public IVerificationFactory getVerificationFactory() {
+        return verificationFactory;
     }
 
     public ICipher getUnverifiedCipher() {
@@ -63,9 +78,27 @@ public class VerifiedCipher implements ICipher {
         return unverifiedCipher.getAlgorithm() + "With" + hash.getAlgorithm();
     }
 
+    /**
+     * This will be called by encryptionFactory.
+     */
     @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
+        initDelegate(mode);
+        delegate.init(mode, key, params);
+    }
+
+    /**
+     * This will be called by VerifiedEncryptionFactory.
+     */
+    @Deprecated
+    @Override
+    public int init(final CipherMode mode, final IKey key, final IByteBuffer paramBuffer) {
+        initDelegate(mode);
+        return delegate.init(mode, key, paramBuffer);
+    }
+
+    private void initDelegate(final CipherMode mode) {
         switch (mode) {
         case Encrypt:
             delegate = encryptingDelegate;
@@ -76,7 +109,6 @@ public class VerifiedCipher implements ICipher {
         default:
             throw UnknownArgumentException.newInstance(CipherMode.class, mode);
         }
-        delegate.init(mode, key, params);
     }
 
     @Override

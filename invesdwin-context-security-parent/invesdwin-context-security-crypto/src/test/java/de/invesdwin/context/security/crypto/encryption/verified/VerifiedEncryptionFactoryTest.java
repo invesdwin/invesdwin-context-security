@@ -8,6 +8,10 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.AsymmetricEncryptionFactoryTest;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeySize;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricCipherKey;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactoryTest;
@@ -86,6 +90,65 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         final int decryptedSize = factory.decrypt(encrypted.sliceTo(encryptedSize), dst);
         Assertions.assertThat(decryptedSize).isEqualTo(src.capacity());
         Assertions.assertThat(ByteBuffers.equals(src, dst.sliceTo(decryptedSize))).isTrue();
+    }
+
+    @Test
+    public void testCipher() {
+        final DerivedKeyProvider derivedKeyProvider;
+        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+        try {
+            final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
+            random.nextBytes(key);
+            derivedKeyProvider = DerivedKeyProvider
+                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
+        } finally {
+            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
+        }
+        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeySize.DEFAULT.getBytes());
+        for (final AesAlgorithm algorithm : AesAlgorithm.values()) {
+            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
+                //requires padding
+                continue;
+            }
+            final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
+            final CipherCountedIV countedIV = new CipherCountedIV(algorithm);
+            final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
+                    derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize()));
+            final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
+            for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
+                final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
+                for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
+                    log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
+                    final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,
+                            derivedKeyProvider);
+                    final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory,
+                            verificationFactory);
+                    testCipher(factory, "1234567890", "0987654321");
+                    testCipher(factory, "0987654321", "1234567890");
+                }
+            }
+        }
+    }
+
+    private void testCipher(final VerifiedEncryptionFactory factory, final String... payloads) {
+        for (final String payload : payloads) {
+            final ICipher cipher = factory.getCipherPool().borrowObject();
+            try {
+                final String srcStr = payload;
+                final IByteBuffer src = ByteBuffers.wrap(srcStr.getBytes());
+                final IByteBuffer encrypted = ByteBuffers.allocateExpandable();
+                final int paramsLength = factory.init(CipherMode.Encrypt, cipher, factory.getKey(), encrypted);
+                final int encryptedSize = cipher.doFinal(src, encrypted.sliceFrom(paramsLength));
+                final IByteBuffer dst = ByteBuffers.allocateExpandable();
+                final int paramsLength2 = factory.init(CipherMode.Decrypt, cipher, factory.getKey(), encrypted);
+                Assertions.assertThat(paramsLength2).isEqualTo(paramsLength);
+                final int decryptedSize = cipher.doFinal(encrypted.slice(paramsLength, encryptedSize), dst);
+                Assertions.assertThat(decryptedSize).isEqualTo(src.capacity());
+                Assertions.assertThat(ByteBuffers.equals(src, dst.sliceTo(decryptedSize))).isTrue();
+            } finally {
+                factory.getCipherPool().returnObject(cipher);
+            }
+        }
     }
 
     @Test

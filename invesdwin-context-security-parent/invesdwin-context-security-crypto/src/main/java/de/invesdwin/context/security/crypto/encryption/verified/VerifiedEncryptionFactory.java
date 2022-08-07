@@ -58,9 +58,11 @@ public class VerifiedEncryptionFactory implements IEncryptionFactory {
         return verificationFactory;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
-        return encryptionFactory.init(mode, cipher, key, paramBuffer);
+        final VerifiedCipher cCipher = (VerifiedCipher) cipher;
+        return cCipher.init(mode, key, paramBuffer);
     }
 
     @Override

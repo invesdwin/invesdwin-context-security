@@ -59,7 +59,8 @@ public abstract class AVerifiedCipherAlgorithm implements ICipherAlgorithm {
 
     @Override
     public ICipher newCipher() {
-        return new VerifiedCipher(getCipherAlgorithm().newCipher(), getHashAlgorithm().newHash());
+        return new VerifiedCipher(getEncryptionFactory(), getVerificationFactory(), getCipherAlgorithm().newCipher(),
+                getHashAlgorithm().newHash());
     }
 
     @Override

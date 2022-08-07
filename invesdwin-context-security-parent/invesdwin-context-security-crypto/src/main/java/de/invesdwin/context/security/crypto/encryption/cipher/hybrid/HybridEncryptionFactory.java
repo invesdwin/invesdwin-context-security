@@ -73,6 +73,7 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
         return keyEncryptionFactory.getKey();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
         final HybridCipher hybridCipher = (HybridCipher) cipher;

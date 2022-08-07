@@ -177,6 +177,7 @@ public class SymmetricCipherHash implements IHash {
         return data.hashSize;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void reset() {
         cipherIV.putIV(ivBlock, iv);
@@ -201,6 +202,7 @@ public class SymmetricCipherHash implements IHash {
         return verify(ByteBuffers.wrap(input), ByteBuffers.wrap(signature));
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
         cipherIV.getIV(signature, iv);

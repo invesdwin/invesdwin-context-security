@@ -7,6 +7,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
+import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeySize;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.AsymmetricCipherInputStream;
@@ -56,6 +58,47 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         final int decryptedSize = factory.decrypt(encrypted.sliceTo(encryptedSize), dst);
         Assertions.assertThat(decryptedSize).isEqualTo(src.capacity());
         Assertions.assertThat(ByteBuffers.equals(src, dst.sliceTo(decryptedSize))).isTrue();
+    }
+
+    @Test
+    public void testCipher() {
+        final DerivedKeyProvider derivedKeyProvider;
+        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+        try {
+            final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
+            random.nextBytes(key);
+            derivedKeyProvider = DerivedKeyProvider
+                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
+        } finally {
+            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
+        }
+        for (final RsaAlgorithm algorithm : RsaAlgorithm.values()) {
+            final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
+            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
+            testCipher(factory, "1234567890", "0987654321");
+            testCipher(factory, "0987654321", "1234567890");
+        }
+    }
+
+    private void testCipher(final AsymmetricEncryptionFactory factory, final String... payloads) {
+        final ICipher cipher = factory.getCipherPool().borrowObject();
+        for (final String payload : payloads) {
+            try {
+                final String srcStr = payload;
+                final IByteBuffer src = ByteBuffers.wrap(srcStr.getBytes());
+                final IByteBuffer encrypted = ByteBuffers.allocateExpandable();
+                final int paramsLength = factory.init(CipherMode.Encrypt, cipher, factory.getKey(), encrypted);
+                final int encryptedSize = cipher.doFinal(src, encrypted.sliceFrom(paramsLength));
+                final IByteBuffer dst = ByteBuffers.allocateExpandable();
+                final int paramsLength2 = factory.init(CipherMode.Decrypt, cipher, factory.getKey(), encrypted);
+                Assertions.assertThat(paramsLength2).isEqualTo(paramsLength);
+                final int decryptedSize = cipher.doFinal(encrypted.slice(paramsLength, encryptedSize), dst);
+                Assertions.assertThat(decryptedSize).isEqualTo(src.capacity());
+                Assertions.assertThat(ByteBuffers.equals(src, dst.sliceTo(decryptedSize))).isTrue();
+            } finally {
+                factory.getCipherPool().returnObject(cipher);
+            }
+        }
     }
 
     @Test

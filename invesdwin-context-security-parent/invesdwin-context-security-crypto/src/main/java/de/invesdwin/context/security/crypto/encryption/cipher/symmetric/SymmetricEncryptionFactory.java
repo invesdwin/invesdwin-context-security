@@ -87,6 +87,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
         return key;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
         final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
@@ -100,7 +101,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
             break;
         case Decrypt:
             cipherIV.getIV(paramBuffer, iv);
-            length = 0;
+            length = cipherIV.getIvBlockSize();
             break;
         default:
             throw UnknownArgumentException.newInstance(CipherMode.class, mode);
@@ -173,6 +174,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
         };
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher, final IKey key) {
         final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
@@ -189,6 +191,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher, final IKey key) {
         final SymmetricCipherKey cKey = (SymmetricCipherKey) key;

@@ -18,7 +18,7 @@ import de.invesdwin.util.streams.buffer.bytes.EmptyByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
-public class DecryptingVerifiedCipher implements ICipher {
+public class DecryptingVerifiedCipher implements IVerifiedCipher {
 
     private final VerifiedCipher parent;
 
@@ -60,6 +60,9 @@ public class DecryptingVerifiedCipher implements ICipher {
         return getDelegate().getAlgorithm() + "With" + getHash().getAlgorithm();
     }
 
+    /**
+     * This will be called by encryptionFactory.
+     */
     @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
@@ -70,6 +73,23 @@ public class DecryptingVerifiedCipher implements ICipher {
         getDelegate().init(mode, cKey.getEncryptionKey(), params);
         getHash().init(cKey.getVerificationKey());
         reset();
+    }
+
+    /**
+     * This will be called by VerifiedEncryptionFactory.
+     */
+    @Deprecated
+    @Override
+    public int init(final CipherMode mode, final IKey key, final IByteBuffer paramsBuffer) {
+        if (mode != CipherMode.Decrypt) {
+            throw new IllegalArgumentException("Only decryption supported");
+        }
+        final VerifiedCipherKey cKey = (VerifiedCipherKey) key;
+        final int paramsSize = parent.getEncryptionFactory()
+                .init(mode, parent.getUnverifiedCipher(), cKey.getEncryptionKey(), paramsBuffer);
+        getHash().init(cKey.getVerificationKey());
+        reset();
+        return paramsSize;
     }
 
     @Override

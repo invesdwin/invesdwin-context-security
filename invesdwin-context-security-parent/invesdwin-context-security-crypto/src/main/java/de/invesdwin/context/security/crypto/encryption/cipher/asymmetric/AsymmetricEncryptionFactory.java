@@ -63,6 +63,7 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
         return key;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
         cipher.init(mode, key, algorithm.getParam());
@@ -105,6 +106,7 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int encrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher, final IKey key) {
         cipher.init(CipherMode.Encrypt, key, algorithm.getParam());
@@ -112,6 +114,7 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
         return length;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int decrypt(final IByteBuffer src, final IByteBuffer dest, final ICipher cipher, final IKey key) {
         cipher.init(CipherMode.Decrypt, key, algorithm.getParam());

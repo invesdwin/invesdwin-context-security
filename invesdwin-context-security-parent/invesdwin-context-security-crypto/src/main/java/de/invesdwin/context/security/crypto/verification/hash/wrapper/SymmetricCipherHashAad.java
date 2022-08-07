@@ -119,6 +119,7 @@ public class SymmetricCipherHashAad implements IHash {
         return hashSize;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void reset() {
         cipherIV.putIV(ivBlock, iv);
@@ -140,6 +141,7 @@ public class SymmetricCipherHashAad implements IHash {
     /**
      * https://stackoverflow.com/questions/48548394/how-to-verify-a-gmac
      */
+    @SuppressWarnings("deprecation")
     @Override
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
         /*
