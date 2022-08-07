@@ -70,10 +70,11 @@ public class HybridEncryptionFactoryTest extends ATest {
                     final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
                             asymmetricAlgorithm, derivedKeyProvider);
                     for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
-                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
                             new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
+                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
                             new HybridEncryptionFactory(symmetricFactory, symmetricFactory),
                             new HybridEncryptionFactory(asymmetricFactory, asymmetricFactory) }) {
+                        log.info(" * %s", factory.getAlgorithm().getAlgorithm());
                         testEncryptionAndDecryption(factory, "1234567890");
                         testEncryptionAndDecryption(factory, "0987654321");
                     }
@@ -124,10 +125,11 @@ public class HybridEncryptionFactoryTest extends ATest {
                     final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
                             asymmetricAlgorithm, derivedKeyProvider);
                     for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
-                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
                             new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
+                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
                             new HybridEncryptionFactory(symmetricFactory, symmetricFactory),
                             new HybridEncryptionFactory(asymmetricFactory, asymmetricFactory) }) {
+                        log.info(" * %s", factory.getAlgorithm().getAlgorithm());
                         testCipher(factory, "1234567890", "0987654321");
                         testCipher(factory, "0987654321", "1234567890");
                     }
@@ -188,10 +190,11 @@ public class HybridEncryptionFactoryTest extends ATest {
                     final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
                             asymmetricAlgorithm, derivedKeyProvider);
                     for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
-                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
                             new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
+                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
                             new HybridEncryptionFactory(symmetricFactory, symmetricFactory),
                             new HybridEncryptionFactory(asymmetricFactory, asymmetricFactory) }) {
+                        log.info(" * %s", factory.getAlgorithm().getAlgorithm());
                         try {
                             testCipherStream(factory, "1234567890", "0987654321");
                             testCipherStream(factory, "0987654321", "1234567890");
@@ -270,10 +273,11 @@ public class HybridEncryptionFactoryTest extends ATest {
                     final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
                             asymmetricAlgorithm, derivedKeyProvider);
                     for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
-                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
                             new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
+                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
                             new HybridEncryptionFactory(symmetricFactory, symmetricFactory),
                             new HybridEncryptionFactory(asymmetricFactory, asymmetricFactory) }) {
+                        log.info(" * %s", factory.getAlgorithm().getAlgorithm());
                         try {
                             testStreamingCipherStream(factory, "1234567890", "0987654321");
                             testStreamingCipherStream(factory, "0987654321", "1234567890");

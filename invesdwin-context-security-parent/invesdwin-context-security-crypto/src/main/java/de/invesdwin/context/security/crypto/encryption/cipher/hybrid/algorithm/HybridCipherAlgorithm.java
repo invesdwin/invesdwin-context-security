@@ -55,7 +55,7 @@ public class HybridCipherAlgorithm implements ICipherAlgorithm {
 
     @Override
     public String getAlgorithm() {
-        return getKeyCipherAlgorithm().getAlgorithm() + "With" + getDataCipherAlgorithm().getAlgorithm();
+        return getKeyCipherAlgorithm().getAlgorithm() + " -> " + getDataCipherAlgorithm().getAlgorithm();
     }
 
     @Override
