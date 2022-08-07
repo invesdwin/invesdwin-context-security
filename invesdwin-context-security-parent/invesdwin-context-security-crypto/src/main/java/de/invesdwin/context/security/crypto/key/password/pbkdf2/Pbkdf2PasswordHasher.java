@@ -27,7 +27,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
      * About 200ms on an I9-9900k
      */
     public static final int DEFAULT_ITERATIONS = 200_000;
-    public static final IHashAlgorithm DEFAULT_MAC_ALGORITHM = HmacAlgorithm.HMAC_SHA_512;
+    public static final IHashAlgorithm DEFAULT_HASH_ALGORITHM = HmacAlgorithm.HMAC_SHA_512;
     public static final Pbkdf2PasswordHasher INSTANCE = new Pbkdf2PasswordHasher();
 
     private final int iterations;
@@ -45,14 +45,14 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
     }
 
     public Pbkdf2PasswordHasher(final byte[] pepper, final int iterations) {
-        this(pepper, iterations, DEFAULT_MAC_ALGORITHM);
+        this(pepper, iterations, DEFAULT_HASH_ALGORITHM);
     }
 
-    public Pbkdf2PasswordHasher(final byte[] pepper, final int iterations, final IHashAlgorithm macAlgorithm) {
+    public Pbkdf2PasswordHasher(final byte[] pepper, final int iterations, final IHashAlgorithm hashAlgorithm) {
         this.pepper = pepper;
         this.iterations = iterations;
-        this.macAlgorithm = macAlgorithm;
-        this.algorithm = ALGORITHM_PREFIX + macAlgorithm.getAlgorithm();
+        this.macAlgorithm = hashAlgorithm;
+        this.algorithm = ALGORITHM_PREFIX + hashAlgorithm.getAlgorithm();
         this.secretKeyFactoryPool = new SecretKeyFactoryObjectPool(algorithm);
     }
 
