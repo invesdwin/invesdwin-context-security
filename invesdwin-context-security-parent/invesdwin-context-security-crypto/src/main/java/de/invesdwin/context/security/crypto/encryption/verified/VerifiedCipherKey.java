@@ -21,8 +21,8 @@ public class VerifiedCipherKey implements IKey {
     }
 
     @Override
-    public int getPrimaryKeySize() {
-        return encryptionKey.getPrimaryKeySize();
+    public int getKeySize() {
+        return encryptionKey.getKeySize();
     }
 
     @Override
@@ -64,6 +64,21 @@ public class VerifiedCipherKey implements IKey {
         final IKey randomEncryptionKey = encryptionKey.newRandomInstance();
         final IKey randomVerificationKey = verificationKey.newRandomInstance();
         return new VerifiedCipherKey(randomEncryptionKey, randomVerificationKey);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T unwrap(final Class<T> type) {
+        if (type.isAssignableFrom(getClass())) {
+            return (T) this;
+        } else {
+            final T unwrappedEncryption = encryptionKey.unwrap(type);
+            if (unwrappedEncryption != null) {
+                return unwrappedEncryption;
+            } else {
+                return verificationKey.unwrap(type);
+            }
+        }
     }
 
 }

@@ -112,7 +112,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
 
     @Override
     public OutputStream newEncryptor(final OutputStream out, final ICipher cipher, final IKey key) {
-        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
+        final SymmetricCipherKey cKey = key.unwrap(SymmetricCipherKey.class);
         return new ALazyDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
@@ -128,7 +128,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
 
     @Override
     public InputStream newDecryptor(final InputStream in, final ICipher cipher, final IKey key) {
-        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
+        final SymmetricCipherKey cKey = key.unwrap(SymmetricCipherKey.class);
         return new ALazyDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
@@ -144,7 +144,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
 
     @Override
     public OutputStream newStreamingEncryptor(final OutputStream out, final ICipher cipher, final IKey key) {
-        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
+        final SymmetricCipherKey cKey = key.unwrap(SymmetricCipherKey.class);
         return new ALazyDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
@@ -160,7 +160,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
 
     @Override
     public InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher, final IKey key) {
-        final SymmetricCipherKey cKey = (SymmetricCipherKey) key;
+        final SymmetricCipherKey cKey = key.unwrap(SymmetricCipherKey.class);
         return new ALazyDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {

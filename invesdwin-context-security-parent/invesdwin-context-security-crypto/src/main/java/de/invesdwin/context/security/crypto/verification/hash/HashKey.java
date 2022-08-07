@@ -67,7 +67,7 @@ public class HashKey implements IHashKey {
     }
 
     @Override
-    public int getPrimaryKeySize() {
+    public int getKeySize() {
         return keySize;
     }
 
@@ -98,6 +98,16 @@ public class HashKey implements IHashKey {
             return new HashKey(algorithm, randomKey);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T unwrap(final Class<T> type) {
+        if (type.isAssignableFrom(getClass())) {
+            return (T) this;
+        } else {
+            return null;
         }
     }
 

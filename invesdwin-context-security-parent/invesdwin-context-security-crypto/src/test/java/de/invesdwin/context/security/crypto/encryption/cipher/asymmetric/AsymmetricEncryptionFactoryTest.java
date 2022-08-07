@@ -1,6 +1,8 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -11,10 +13,6 @@ import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeySize;
-import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.AsymmetricCipherInputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.AsymmetricCipherOutputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.StreamingAsymmetricCipherInputStream;
-import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.stream.StreamingAsymmetricCipherOutputStream;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
@@ -115,24 +113,23 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         }
         for (final RsaAlgorithm algorithm : RsaAlgorithm.values()) {
             final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
+            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
             try {
-                testCipherStream(algorithm, key, "1234567890", "0987654321");
-                testCipherStream(algorithm, key, "0987654321", "1234567890");
+                testCipherStream(factory, "1234567890", "0987654321");
+                testCipherStream(factory, "0987654321", "1234567890");
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    private void testCipherStream(final IAsymmetricCipherAlgorithm algorithm, final AsymmetricCipherKey key,
-            final String... payloads) throws IOException {
+    private void testCipherStream(final AsymmetricEncryptionFactory factory, final String... payloads)
+            throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
-        final AsymmetricCipherOutputStream encryptingStream = new AsymmetricCipherOutputStream(algorithm,
-                encryptedOutputStream, key);
+        final OutputStream encryptingStream = factory.newEncryptor(encryptedOutputStream);
 
         final FastByteArrayInputStream encryptedInputStream = new FastByteArrayInputStream(Bytes.EMPTY_ARRAY);
-        final AsymmetricCipherInputStream decryptingStream = new AsymmetricCipherInputStream(algorithm,
-                encryptedInputStream, key);
+        final InputStream decryptingStream = factory.newDecryptor(encryptedInputStream);
 
         final FastByteArrayOutputStream payloadsOutputStream = new FastByteArrayOutputStream();
 
@@ -176,24 +173,23 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         }
         for (final RsaAlgorithm algorithm : RsaAlgorithm.values()) {
             final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
+            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
             try {
-                testStreamingCipherStream(algorithm, key, "1234567890", "0987654321");
-                testStreamingCipherStream(algorithm, key, "0987654321", "1234567890");
+                testStreamingCipherStream(factory, "1234567890", "0987654321");
+                testStreamingCipherStream(factory, "0987654321", "1234567890");
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    private void testStreamingCipherStream(final IAsymmetricCipherAlgorithm algorithm, final AsymmetricCipherKey key,
-            final String... payloads) throws IOException {
+    private void testStreamingCipherStream(final AsymmetricEncryptionFactory factory, final String... payloads)
+            throws IOException {
         final FastByteArrayOutputStream encryptedOutputStream = new FastByteArrayOutputStream();
-        final StreamingAsymmetricCipherOutputStream encryptingStream = new StreamingAsymmetricCipherOutputStream(
-                algorithm, encryptedOutputStream, key);
+        final OutputStream encryptingStream = factory.newStreamingEncryptor(encryptedOutputStream);
 
         final FastByteArrayInputStream encryptedInputStream = new FastByteArrayInputStream(Bytes.EMPTY_ARRAY);
-        final StreamingAsymmetricCipherInputStream decryptingStream = new StreamingAsymmetricCipherInputStream(
-                algorithm, encryptedInputStream, key);
+        final InputStream decryptingStream = factory.newStreamingDecryptor(encryptedInputStream);
 
         for (final String payload : payloads) {
             encryptedInputStream.reset();

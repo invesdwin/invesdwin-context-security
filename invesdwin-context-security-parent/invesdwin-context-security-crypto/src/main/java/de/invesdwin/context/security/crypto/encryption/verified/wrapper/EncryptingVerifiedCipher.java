@@ -6,6 +6,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.ByteBufferAlgorithmParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.verified.VerifiedCipherKey;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
@@ -14,7 +15,7 @@ import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
-public class EncryptingVerifiedCipher implements IVerifiedCipher {
+public class EncryptingVerifiedCipher implements ICipher {
 
     private final VerifiedCipher parent;
 
@@ -45,9 +46,6 @@ public class EncryptingVerifiedCipher implements IVerifiedCipher {
         return getDelegate().getAlgorithm() + "With" + getHash().getAlgorithm();
     }
 
-    /**
-     * This will be called by encryptionFactory.
-     */
     @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
@@ -55,26 +53,16 @@ public class EncryptingVerifiedCipher implements IVerifiedCipher {
             throw new IllegalArgumentException("Only encryption supported");
         }
         final VerifiedCipherKey cKey = (VerifiedCipherKey) key;
-        getDelegate().init(mode, cKey.getEncryptionKey(), params);
-        getHash().init(cKey.getVerificationKey());
-        reset();
-    }
-
-    /**
-     * This will be called by VerifiedEncryptionFactory.
-     */
-    @Deprecated
-    @Override
-    public int init(final CipherMode mode, final IKey key, final IByteBuffer paramsBuffer) {
-        if (mode != CipherMode.Encrypt) {
-            throw new IllegalArgumentException("Only encryption supported");
+        if (params instanceof ByteBufferAlgorithmParameterSpec) {
+            final ByteBufferAlgorithmParameterSpec cParams = (ByteBufferAlgorithmParameterSpec) params;
+            final int paramsSize = parent.getEncryptionFactory()
+                    .init(mode, parent.getUnverifiedCipher(), cKey.getEncryptionKey(), cParams.getBuffer());
+            cParams.setSize(paramsSize);
+        } else {
+            getDelegate().init(mode, cKey.getEncryptionKey(), params);
         }
-        final VerifiedCipherKey cKey = (VerifiedCipherKey) key;
-        final int paramsSize = parent.getEncryptionFactory()
-                .init(mode, parent.getUnverifiedCipher(), cKey.getEncryptionKey(), paramsBuffer);
         getHash().init(cKey.getVerificationKey());
         reset();
-        return paramsSize;
     }
 
     @Override

@@ -13,6 +13,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.hybrid.algorithm.HybridCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.hybrid.wrapper.HybridCipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.ByteBufferAlgorithmParameterSpec;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.streams.ALazyDelegateInputStream;
@@ -77,8 +78,9 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
     @Override
     public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
         final HybridCipher hybridCipher = (HybridCipher) cipher;
-        hybridCipher.init(mode, key, null);
-        return 0;
+        final ByteBufferAlgorithmParameterSpec params = new ByteBufferAlgorithmParameterSpec(paramBuffer);
+        hybridCipher.init(mode, key, params);
+        return params.getSize();
     }
 
     @Override

@@ -19,7 +19,7 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
  * cipher directly unsuitable. It is only useful inside VerifiedEncryptionFactory (with its own drawbacks).
  */
 @NotThreadSafe
-public class VerifiedCipher implements IVerifiedCipher {
+public class VerifiedCipher implements ICipher {
 
     private final IEncryptionFactory encryptionFactory;
     private final IVerificationFactory verificationFactory;
@@ -27,7 +27,7 @@ public class VerifiedCipher implements IVerifiedCipher {
     private IHash hash;
     private final EncryptingVerifiedCipher encryptingDelegate;
     private final DecryptingVerifiedCipher decryptingDelegate;
-    private IVerifiedCipher delegate;
+    private ICipher delegate;
 
     public VerifiedCipher(final IEncryptionFactory unverifiedEncryptionFactory,
             final IVerificationFactory verificationFactory, final ICipher unverifiedCipher, final IHash hash) {
@@ -78,27 +78,9 @@ public class VerifiedCipher implements IVerifiedCipher {
         return unverifiedCipher.getAlgorithm() + "With" + hash.getAlgorithm();
     }
 
-    /**
-     * This will be called by encryptionFactory.
-     */
     @Deprecated
     @Override
     public void init(final CipherMode mode, final IKey key, final AlgorithmParameterSpec params) {
-        initDelegate(mode);
-        delegate.init(mode, key, params);
-    }
-
-    /**
-     * This will be called by VerifiedEncryptionFactory.
-     */
-    @Deprecated
-    @Override
-    public int init(final CipherMode mode, final IKey key, final IByteBuffer paramBuffer) {
-        initDelegate(mode);
-        return delegate.init(mode, key, paramBuffer);
-    }
-
-    private void initDelegate(final CipherMode mode) {
         switch (mode) {
         case Encrypt:
             delegate = encryptingDelegate;
@@ -109,6 +91,7 @@ public class VerifiedCipher implements IVerifiedCipher {
         default:
             throw UnknownArgumentException.newInstance(CipherMode.class, mode);
         }
+        delegate.init(mode, key, params);
     }
 
     @Override

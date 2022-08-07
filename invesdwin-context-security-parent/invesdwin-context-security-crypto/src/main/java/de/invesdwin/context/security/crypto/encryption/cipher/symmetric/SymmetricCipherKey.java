@@ -82,7 +82,7 @@ public class SymmetricCipherKey implements ICipherKey {
     }
 
     @Override
-    public int getPrimaryKeySize() {
+    public int getKeySize() {
         return keySize;
     }
 
@@ -137,6 +137,16 @@ public class SymmetricCipherKey implements ICipherKey {
         }
         final ICipherIV randomCipherIV = cipherIV.newRandomInstance();
         return new SymmetricCipherKey(algorithm, randomKey, randomCipherIV);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T unwrap(final Class<T> type) {
+        if (type.isAssignableFrom(getClass())) {
+            return (T) this;
+        } else {
+            return null;
+        }
     }
 
 }

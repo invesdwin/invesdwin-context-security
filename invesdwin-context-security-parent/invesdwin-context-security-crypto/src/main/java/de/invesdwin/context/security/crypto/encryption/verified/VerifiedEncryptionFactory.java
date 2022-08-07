@@ -8,6 +8,7 @@ import javax.annotation.concurrent.Immutable;
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.ByteBufferAlgorithmParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.verified.algorithm.AVerifiedCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.verified.wrapper.VerifiedCipher;
 import de.invesdwin.context.security.crypto.key.IKey;
@@ -62,7 +63,9 @@ public class VerifiedEncryptionFactory implements IEncryptionFactory {
     @Override
     public int init(final CipherMode mode, final ICipher cipher, final IKey key, final IByteBuffer paramBuffer) {
         final VerifiedCipher cCipher = (VerifiedCipher) cipher;
-        return cCipher.init(mode, key, paramBuffer);
+        final ByteBufferAlgorithmParameterSpec params = new ByteBufferAlgorithmParameterSpec(paramBuffer);
+        cCipher.init(mode, key, params);
+        return params.getSize();
     }
 
     @Override

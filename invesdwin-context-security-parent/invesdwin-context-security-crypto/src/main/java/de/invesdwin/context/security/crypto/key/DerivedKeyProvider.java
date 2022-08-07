@@ -69,7 +69,7 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
             final int lengthBits = length * Byte.SIZE;
             generator.initialize(lengthBits, random);
             final KeyPair keyPair = generator.generateKeyPair();
-            return new AsymmetricCipherKey(algorithm, keyPair);
+            return new AsymmetricCipherKey(algorithm, keyPair, length);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

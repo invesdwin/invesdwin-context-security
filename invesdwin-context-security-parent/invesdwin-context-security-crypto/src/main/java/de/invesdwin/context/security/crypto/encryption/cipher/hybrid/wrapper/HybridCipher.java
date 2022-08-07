@@ -181,8 +181,6 @@ public class HybridCipher implements ICipher {
             dataCipher.close();
             dataCipher = null;
         }
-        encryptingDelegate.reset();
-        decryptingDelegate.reset();
     }
 
 }

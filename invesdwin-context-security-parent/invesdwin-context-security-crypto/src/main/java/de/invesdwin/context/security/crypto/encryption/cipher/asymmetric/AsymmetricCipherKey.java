@@ -27,8 +27,9 @@ public class AsymmetricCipherKey implements ICipherKey {
     private final IAsymmetricCipherAlgorithm algorithm;
     private final PublicKey publicKey;
     private final PrivateKey privateKey;
-    private final int privateKeySize;
-    private final int publicKeySize;
+    private final int keySize;
+    private final int privateKeyBlockSize;
+    private final int publicKeyBlockSize;
 
     public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm,
             final IDerivedKeyProvider derivedKeyProvider) {
@@ -42,30 +43,32 @@ public class AsymmetricCipherKey implements ICipherKey {
     }
 
     public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm, final byte[] publicKey,
-            final byte[] privateKey) {
+            final byte[] privateKey, final int keySize) {
         this(algorithm, wrapPublicKey(algorithm.getKeyAlgorithm(), publicKey),
-                wrapPrivateKey(algorithm.getKeyAlgorithm(), privateKey));
+                wrapPrivateKey(algorithm.getKeyAlgorithm(), privateKey), keySize);
     }
 
-    public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm, final KeyPair keyPair) {
-        this(algorithm, keyPair.getPublic(), keyPair.getPrivate());
+    public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm, final KeyPair keyPair, final int keySize) {
+        this(algorithm, keyPair.getPublic(), keyPair.getPrivate(), keySize);
     }
 
     private AsymmetricCipherKey(final AsymmetricCipherKey asymmetricKey) {
         this.algorithm = asymmetricKey.algorithm;
         this.publicKey = asymmetricKey.publicKey;
         this.privateKey = asymmetricKey.privateKey;
-        this.privateKeySize = asymmetricKey.privateKeySize;
-        this.publicKeySize = asymmetricKey.publicKeySize;
+        this.keySize = asymmetricKey.keySize;
+        this.privateKeyBlockSize = asymmetricKey.privateKeyBlockSize;
+        this.publicKeyBlockSize = asymmetricKey.publicKeyBlockSize;
     }
 
     public AsymmetricCipherKey(final IAsymmetricCipherAlgorithm algorithm, final PublicKey publicKey,
-            final PrivateKey privateKey) {
+            final PrivateKey privateKey, final int keySize) {
         this.algorithm = algorithm;
         this.publicKey = publicKey;
         this.privateKey = privateKey;
-        this.privateKeySize = privateKey.getEncoded().length;
-        this.publicKeySize = publicKey.getEncoded().length;
+        this.keySize = keySize;
+        this.privateKeyBlockSize = privateKey.getEncoded().length;
+        this.publicKeyBlockSize = publicKey.getEncoded().length;
     }
 
     @Override
@@ -84,13 +87,13 @@ public class AsymmetricCipherKey implements ICipherKey {
     }
 
     @Override
-    public int getPrimaryKeySize() {
-        return privateKeySize;
+    public int getKeySize() {
+        return keySize;
     }
 
     @Override
     public int getKeyBlockSize() {
-        return privateKeySize + Integer.BYTES + publicKeySize;
+        return privateKeyBlockSize + Integer.BYTES + publicKeyBlockSize;
     }
 
     @Override
@@ -105,6 +108,8 @@ public class AsymmetricCipherKey implements ICipherKey {
         final byte[] privateKeyBytes = privateKey.getEncoded();
         final byte[] publicKeyBytes = publicKey.getEncoded();
         int position = 0;
+        buffer.putInt(position, keySize);
+        position += Integer.BYTES;
         buffer.putInt(position, privateKeyBytes.length);
         position += Integer.BYTES;
         buffer.putBytes(position, privateKeyBytes);
@@ -117,6 +122,8 @@ public class AsymmetricCipherKey implements ICipherKey {
     @Override
     public IKey fromBuffer(final IByteBuffer buffer) {
         int position = 0;
+        final int keySize = buffer.getInt(position);
+        position += Integer.BYTES;
         final int privateKeySize = buffer.getInt(position);
         position += Integer.BYTES;
         final byte[] privateKeyBytes = ByteBuffers.allocateByteArray(privateKeySize);
@@ -125,7 +132,7 @@ public class AsymmetricCipherKey implements ICipherKey {
         final byte[] publicKeyBytes = ByteBuffers.allocateByteArray(buffer.remaining(position));
         buffer.getBytes(position, publicKeyBytes);
         position += publicKeyBytes.length;
-        return new AsymmetricCipherKey(algorithm, privateKeyBytes, publicKeyBytes);
+        return new AsymmetricCipherKey(algorithm, privateKeyBytes, publicKeyBytes, keySize);
     }
 
     public static PrivateKey wrapPrivateKey(final String keyAlgorithm, final byte[] privateKey) {
@@ -149,14 +156,24 @@ public class AsymmetricCipherKey implements ICipherKey {
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
             final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm.getKeyAlgorithm());
-            final int lengthBits = privateKeySize * Byte.SIZE;
+            final int lengthBits = keySize * Byte.SIZE;
             generator.initialize(lengthBits, random);
             final KeyPair keyPair = generator.generateKeyPair();
-            return new AsymmetricCipherKey(algorithm, keyPair);
+            return new AsymmetricCipherKey(algorithm, keyPair, keySize);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T unwrap(final Class<T> type) {
+        if (type.isAssignableFrom(getClass())) {
+            return (T) this;
+        } else {
+            return null;
         }
     }
 

@@ -7,18 +7,20 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.ByteBufferAlgorithmParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.verified.VerifiedCipherKey;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.collections.iterable.buffer.BufferingIterator;
 import de.invesdwin.util.collections.iterable.buffer.IBufferingIterator;
+import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.math.Integers;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.EmptyByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
-public class DecryptingVerifiedCipher implements IVerifiedCipher {
+public class DecryptingVerifiedCipher implements ICipher {
 
     private final VerifiedCipher parent;
 
@@ -70,26 +72,16 @@ public class DecryptingVerifiedCipher implements IVerifiedCipher {
             throw new IllegalArgumentException("Only decryption supported");
         }
         final VerifiedCipherKey cKey = (VerifiedCipherKey) key;
-        getDelegate().init(mode, cKey.getEncryptionKey(), params);
-        getHash().init(cKey.getVerificationKey());
-        reset();
-    }
-
-    /**
-     * This will be called by VerifiedEncryptionFactory.
-     */
-    @Deprecated
-    @Override
-    public int init(final CipherMode mode, final IKey key, final IByteBuffer paramsBuffer) {
-        if (mode != CipherMode.Decrypt) {
-            throw new IllegalArgumentException("Only decryption supported");
+        if (params instanceof ByteBufferAlgorithmParameterSpec) {
+            final ByteBufferAlgorithmParameterSpec cParams = (ByteBufferAlgorithmParameterSpec) params;
+            final int paramsSize = parent.getEncryptionFactory()
+                    .init(mode, parent.getUnverifiedCipher(), cKey.getEncryptionKey(), cParams.getBuffer());
+            cParams.setSize(paramsSize);
+        } else {
+            getDelegate().init(mode, cKey.getEncryptionKey(), params);
         }
-        final VerifiedCipherKey cKey = (VerifiedCipherKey) key;
-        final int paramsSize = parent.getEncryptionFactory()
-                .init(mode, parent.getUnverifiedCipher(), cKey.getEncryptionKey(), paramsBuffer);
         getHash().init(cKey.getVerificationKey());
         reset();
-        return paramsSize;
     }
 
     @Override
@@ -118,21 +110,35 @@ public class DecryptingVerifiedCipher implements IVerifiedCipher {
 
     @Override
     public int doFinal(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
-        update(inBuffer);
-        final IByteBuffer decrypted = verifyAndDrainOutput();
-        final int length = decrypted.capacity();
-        decrypted.getBytesTo(0, outBuffer, length);
-        ByteBuffers.position(outBuffer, outBuffer.position() + length);
-        return length;
+        if (inputBufferPosition == 0) {
+            //skip buffer
+            final int written = doFinal(ByteBuffers.wrap(inBuffer), ByteBuffers.wrap(outBuffer));
+            ByteBuffers.position(inBuffer, inBuffer.limit());
+            ByteBuffers.position(outBuffer, outBuffer.position() + written);
+            return written;
+        } else {
+            update(inBuffer);
+            final IByteBuffer decrypted = verifyAndDrainOutput();
+            final int length = decrypted.capacity();
+            decrypted.getBytesTo(0, outBuffer, length);
+            ByteBuffers.position(outBuffer, outBuffer.position() + length);
+            return length;
+        }
     }
 
     @Override
     public int doFinal(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
-        update(inBuffer);
-        final IByteBuffer decrypted = verifyAndDrainOutput();
-        final int length = decrypted.capacity();
-        decrypted.getBytesTo(0, outBuffer, length);
-        return length;
+        if (inputBufferPosition == 0) {
+            //skip buffer
+            final IByteBuffer inBufferSliced = getHash().verifyAndSlice(inBuffer);
+            return getDelegate().doFinal(inBufferSliced, outBuffer);
+        } else {
+            update(inBuffer);
+            final IByteBuffer decrypted = verifyAndDrainOutput();
+            final int length = decrypted.capacity();
+            decrypted.getBytesTo(0, outBuffer, length);
+            return length;
+        }
     }
 
     @Override
@@ -143,20 +149,40 @@ public class DecryptingVerifiedCipher implements IVerifiedCipher {
     @Override
     public int doFinal(final byte[] input, final int inputOffset, final int inputLen, final byte[] output,
             final int outputOffset) {
-        update(input, inputOffset, inputLen);
-        return doFinal(output, outputOffset);
+        if (inputBufferPosition == 0) {
+            return doFinal(ByteBuffers.wrap(input, inputOffset, inputLen), ByteBuffers.wrapFrom(output, outputOffset));
+        } else {
+            update(input, inputOffset, inputLen);
+            return doFinal(output, outputOffset);
+        }
     }
 
     @Override
     public int doFinal(final byte[] output, final int offset) {
-        final IByteBuffer decrypted = verifyAndDrainOutput();
-        final int outputLength = output.length - offset;
-        if (outputLength > decrypted.capacity()) {
-            throw new IllegalArgumentException(
-                    "Insufficient output length [" + outputLength + "] for required: " + outputBufferPosition);
+        if (inputBufferPosition == 0) {
+            //nothing to verify
+            return 0;
+        } else {
+            final IByteBuffer decrypted = verifyAndDrainOutput();
+            final int outputLength = output.length - offset;
+            if (outputLength > decrypted.capacity()) {
+                throw new IllegalArgumentException(
+                        "Insufficient output length [" + outputLength + "] for required: " + outputBufferPosition);
+            }
+            decrypted.getBytesFrom(0, output, offset);
+            return outputLength;
         }
-        decrypted.getBytesFrom(0, output, offset);
-        return outputLength;
+    }
+
+    @Override
+    public byte[] doFinal() {
+        if (inputBufferPosition == 0) {
+            //nothing to verify
+            return Bytes.EMPTY_ARRAY;
+        } else {
+            final IByteBuffer decrypted = verifyAndDrainOutput();
+            return decrypted.asByteArrayCopy();
+        }
     }
 
     private IByteBuffer verifyAndDrainOutput() {
@@ -173,12 +199,6 @@ public class DecryptingVerifiedCipher implements IVerifiedCipher {
                 outputBuffer.sliceFrom(outputBufferPosition));
         outputBufferPosition += written;
         return outputBuffer.sliceTo(outputBufferPosition);
-    }
-
-    @Override
-    public byte[] doFinal() {
-        final IByteBuffer decrypted = verifyAndDrainOutput();
-        return decrypted.asByteArrayCopy();
     }
 
     @Override

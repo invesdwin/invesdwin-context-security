@@ -55,7 +55,6 @@ public final class VerifiedCipherObjectPool extends ATimeoutObjectPool<ICipher> 
         hashPool.returnObject(cElement.getHash());
         cElement.setUnverifiedCipher(null);
         cElement.setHash(null);
-
     }
 
 }

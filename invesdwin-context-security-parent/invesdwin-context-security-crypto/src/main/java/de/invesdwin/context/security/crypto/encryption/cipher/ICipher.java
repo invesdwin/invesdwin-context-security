@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.security.spec.AlgorithmParameterSpec;
 
 import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.util.math.Integers;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -26,7 +27,7 @@ public interface ICipher extends Closeable {
 
     default int update(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
         if (outBuffer.isExpandable()) {
-            outBuffer.ensureCapacity(getBlockSize());
+            outBuffer.ensureCapacity(Integers.max(getBlockSize(), inBuffer.capacity()));
         }
 
         final java.nio.ByteBuffer inBufferNio = inBuffer.asNioByteBuffer();
@@ -51,7 +52,7 @@ public interface ICipher extends Closeable {
 
     default int doFinal(final IByteBuffer inBuffer, final IByteBuffer outBuffer) {
         if (outBuffer.isExpandable()) {
-            outBuffer.ensureCapacity(getBlockSize());
+            outBuffer.ensureCapacity(Integers.max(getBlockSize(), inBuffer.capacity()));
         }
 
         final java.nio.ByteBuffer inBufferNio = inBuffer.asNioByteBuffer();
