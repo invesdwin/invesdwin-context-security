@@ -65,7 +65,7 @@ public class EncryptingHybridCipher implements ICipher {
         paramsBuffer.putInt(ENCRYPTEDDATAPARAMLENGTH_INDEX, paramSize);
         paramsBufferSize += paramSize;
 
-        cParams.setSize(paramSize);
+        cParams.setSize(paramsBufferSize);
     }
 
     @Override

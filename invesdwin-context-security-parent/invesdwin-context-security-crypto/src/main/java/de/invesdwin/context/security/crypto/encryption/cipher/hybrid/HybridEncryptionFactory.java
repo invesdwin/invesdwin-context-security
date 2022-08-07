@@ -93,13 +93,14 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
                 final IKey randomDataKey = dataEncryptionFactory.getKey().newRandomInstance();
                 final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
                 try {
-                    randomDataKey.toBuffer(decryptedDataKeyBuffer);
+                    final int decryptedSize = randomDataKey.toBuffer(decryptedDataKeyBuffer);
 
                     //encrypt secret key and iv and send it over the wire with the encrypted length
                     final IByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
                     try {
-                        final int encryptedDataKeySize = keyEncryptionFactory.encrypt(decryptedDataKeyBuffer,
-                                encryptedDataKeyBuffer, hybridCipher.getKeyCipher());
+                        final int encryptedDataKeySize = keyEncryptionFactory.encrypt(
+                                decryptedDataKeyBuffer.sliceTo(decryptedSize), encryptedDataKeyBuffer,
+                                hybridCipher.getKeyCipher());
                         OutputStreams.writeInt(out, encryptedDataKeySize);
                         encryptedDataKeyBuffer.getBytesTo(0, out, encryptedDataKeySize);
                     } catch (final IOException e) {
@@ -155,13 +156,14 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
                 final IKey randomDataKey = dataEncryptionFactory.getKey().newRandomInstance();
                 final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
                 try {
-                    randomDataKey.toBuffer(decryptedDataKeyBuffer);
+                    final int decryptedSize = randomDataKey.toBuffer(decryptedDataKeyBuffer);
 
                     //encrypt secret key and iv and send it over the wire with the encrypted length
                     final IByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
                     try {
-                        final int encryptedDataKeySize = keyEncryptionFactory.encrypt(decryptedDataKeyBuffer,
-                                encryptedDataKeyBuffer, hybridCipher.getKeyCipher());
+                        final int encryptedDataKeySize = keyEncryptionFactory.encrypt(
+                                decryptedDataKeyBuffer.sliceTo(decryptedSize), encryptedDataKeyBuffer,
+                                hybridCipher.getKeyCipher());
                         OutputStreams.writeInt(out, encryptedDataKeySize);
                         encryptedDataKeyBuffer.getBytesTo(0, out, encryptedDataKeySize);
                     } catch (final IOException e) {
@@ -215,10 +217,10 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
         final IKey randomDataKey = dataEncryptionFactory.getKey().newRandomInstance();
         final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
         try {
-            randomDataKey.toBuffer(decryptedDataKeyBuffer);
+            final int decryptedSize = randomDataKey.toBuffer(decryptedDataKeyBuffer);
 
             //encrypt secret key and iv and send it over the wire with the encrypted length
-            final int encryptedDataKeySize = keyEncryptionFactory.encrypt(decryptedDataKeyBuffer,
+            final int encryptedDataKeySize = keyEncryptionFactory.encrypt(decryptedDataKeyBuffer.sliceTo(decryptedSize),
                     dest.sliceFrom(ENCRYPTEDDATAKEY_INDEX), hybridCipher.getKeyCipher());
             dest.putInt(ENCRYPTEDDATAKEYLENGTH_INDEX, encryptedDataKeySize);
 

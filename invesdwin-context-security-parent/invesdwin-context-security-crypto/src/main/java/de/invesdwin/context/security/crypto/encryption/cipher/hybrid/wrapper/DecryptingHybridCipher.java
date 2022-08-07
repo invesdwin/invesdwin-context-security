@@ -60,7 +60,8 @@ public class DecryptingHybridCipher implements ICipher {
                 .init(mode, parent.getDataCipher(), randomDataKey,
                         paramsBuffer.slice(encryptedDataParamIndex, encryptedDataParamSize));
 
-        cParams.setSize(encryptedDataKeyIndex + encryptedDataKeySize + encryptedDataParamSize);
+        final int paramsBufferSize = encryptedDataKeyIndex + encryptedDataKeySize + encryptedDataParamSize;
+        cParams.setSize(paramsBufferSize);
     }
 
     @Override

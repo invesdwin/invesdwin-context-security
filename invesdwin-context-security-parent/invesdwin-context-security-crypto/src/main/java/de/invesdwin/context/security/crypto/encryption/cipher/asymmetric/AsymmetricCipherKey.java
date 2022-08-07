@@ -105,17 +105,17 @@ public class AsymmetricCipherKey implements ICipherKey {
          * bidirectional communication (if desired). Though ideally the inverse direction should use a different session
          * key anyhow (which HybridEncryptionFactory makes sure of).
          */
-        final byte[] privateKeyBytes = privateKey.getEncoded();
         final byte[] publicKeyBytes = publicKey.getEncoded();
+        final byte[] privateKeyBytes = privateKey.getEncoded();
         int position = 0;
         buffer.putInt(position, keySize);
         position += Integer.BYTES;
-        buffer.putInt(position, privateKeyBytes.length);
+        buffer.putInt(position, publicKeyBytes.length);
         position += Integer.BYTES;
-        buffer.putBytes(position, privateKeyBytes);
-        position += privateKeyBytes.length;
         buffer.putBytes(position, publicKeyBytes);
         position += publicKeyBytes.length;
+        buffer.putBytes(position, privateKeyBytes);
+        position += privateKeyBytes.length;
         return position;
     }
 
@@ -124,15 +124,15 @@ public class AsymmetricCipherKey implements ICipherKey {
         int position = 0;
         final int keySize = buffer.getInt(position);
         position += Integer.BYTES;
-        final int privateKeySize = buffer.getInt(position);
+        final int publicKeySize = buffer.getInt(position);
         position += Integer.BYTES;
-        final byte[] privateKeyBytes = ByteBuffers.allocateByteArray(privateKeySize);
-        buffer.getBytes(position, privateKeyBytes);
-        position += privateKeyBytes.length;
-        final byte[] publicKeyBytes = ByteBuffers.allocateByteArray(buffer.remaining(position));
+        final byte[] publicKeyBytes = ByteBuffers.allocateByteArray(publicKeySize);
         buffer.getBytes(position, publicKeyBytes);
         position += publicKeyBytes.length;
-        return new AsymmetricCipherKey(algorithm, privateKeyBytes, publicKeyBytes, keySize);
+        final byte[] privateKeyBytes = ByteBuffers.allocateByteArray(buffer.remaining(position));
+        buffer.getBytes(position, privateKeyBytes);
+        position += privateKeyBytes.length;
+        return new AsymmetricCipherKey(algorithm, publicKeyBytes, privateKeyBytes, keySize);
     }
 
     public static PrivateKey wrapPrivateKey(final String keyAlgorithm, final byte[] privateKey) {

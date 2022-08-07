@@ -5,6 +5,7 @@ import javax.annotation.concurrent.Immutable;
 import de.invesdwin.context.security.crypto.encryption.IEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.hybrid.wrapper.HybridCipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.hybrid.wrapper.HybridCipherObjectPool;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
@@ -50,7 +51,8 @@ public class HybridCipherAlgorithm implements ICipherAlgorithm {
 
     @Override
     public ICipher newCipher() {
-        return keyEncryptionFactory.getAlgorithm().newCipher();
+        return new HybridCipher(getKeyEncryptionFactory(), getDataEncryptionFactory(),
+                getKeyCipherAlgorithm().newCipher(), getDataCipherAlgorithm().newCipher());
     }
 
     @Override
