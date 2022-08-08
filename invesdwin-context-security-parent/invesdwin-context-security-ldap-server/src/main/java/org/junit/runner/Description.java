@@ -3,14 +3,15 @@ package org.junit.runner;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.concurrent.NotThreadSafe;
+
+import de.invesdwin.util.collections.Arrays;
+import de.invesdwin.util.collections.Collections;
 
 /**
  * A <code>Description</code> describes a test which is to be run or has been run. <code>Descriptions</code> can be

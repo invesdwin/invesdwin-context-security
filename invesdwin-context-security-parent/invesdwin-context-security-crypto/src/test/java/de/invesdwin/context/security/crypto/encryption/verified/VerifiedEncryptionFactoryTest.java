@@ -3,7 +3,6 @@ package de.invesdwin.context.security.crypto.encryption.verified;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -30,6 +29,7 @@ import de.invesdwin.context.security.crypto.verification.hash.HashVerificationFa
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
+import de.invesdwin.util.collections.Arrays;
 import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;

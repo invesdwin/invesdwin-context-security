@@ -62,7 +62,7 @@ public class EmbeddedDirectoryServerTest extends ATest {
         try {
             final String principal = "foo@INVESDWIN.DE";
             final File keytab = new File(ContextProperties.getCacheDirectory(), "foo.keytab");
-            final String passphrase = UUIDs.newPseudorandomUUID();
+            final String passphrase = UUIDs.newPseudoRandomUUID();
             directoryServer.createKerberosPrincipal(principal, passphrase);
             Keytabs.createKeytab(principal, passphrase, keytab);
 

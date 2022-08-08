@@ -1,13 +1,12 @@
 package de.invesdwin.context.security.crypto.key.password.bcrypt;
 
-import java.util.Arrays;
-
 import javax.annotation.concurrent.Immutable;
 
 import com.password4j.BadParametersException;
 import com.password4j.BcryptFunction;
 import com.password4j.types.Bcrypt;
 
+import de.invesdwin.util.collections.Arrays;
 import de.invesdwin.util.math.Bytes;
 
 @Immutable

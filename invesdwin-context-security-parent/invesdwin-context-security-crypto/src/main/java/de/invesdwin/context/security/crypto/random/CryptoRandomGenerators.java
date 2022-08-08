@@ -4,7 +4,6 @@ import java.security.GeneralSecurityException;
 
 import javax.annotation.concurrent.Immutable;
 
-import org.apache.commons.crypto.random.CryptoRandom;
 import org.apache.commons.crypto.random.CryptoRandomFactory;
 
 import de.invesdwin.context.system.properties.SystemProperties;
@@ -17,7 +16,8 @@ public final class CryptoRandomGenerators {
 
     public static CryptoRandomGenerator newCryptoRandom() {
         try {
-            final CryptoRandom cryptoRandom = CryptoRandomFactory.getCryptoRandom(SystemProperties.SYSTEM_PROPERTIES);
+            final org.apache.commons.crypto.random.CryptoRandom cryptoRandom = CryptoRandomFactory
+                    .getCryptoRandom(SystemProperties.SYSTEM_PROPERTIES);
             return new CryptoRandomGenerator(cryptoRandom);
         } catch (final GeneralSecurityException e) {
             throw new RuntimeException(e);

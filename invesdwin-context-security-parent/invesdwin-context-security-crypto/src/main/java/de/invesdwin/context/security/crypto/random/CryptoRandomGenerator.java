@@ -1,23 +1,19 @@
 package de.invesdwin.context.security.crypto.random;
 
 import java.io.Closeable;
-import java.security.SecureRandomParameters;
-import java.util.Random;
 
 import javax.annotation.concurrent.Immutable;
 
-import org.apache.commons.crypto.random.CryptoRandom;
-import org.apache.commons.math3.random.RandomGenerator;
-
 import de.invesdwin.util.lang.Closeables;
 import de.invesdwin.util.lang.finalizer.AFinalizer;
+import de.invesdwin.util.math.random.IRandomGenerator;
 
 @Immutable
-public class CryptoRandomGenerator extends java.security.SecureRandom implements RandomGenerator, Closeable {
+public class CryptoRandomGenerator extends java.security.SecureRandom implements IRandomGenerator, Closeable {
 
     private final CryptoRandomGeneratorFinalizer finalizer;
 
-    public CryptoRandomGenerator(final CryptoRandom delegate) {
+    public CryptoRandomGenerator(final org.apache.commons.crypto.random.CryptoRandom delegate) {
         this.finalizer = new CryptoRandomGeneratorFinalizer(delegate);
         finalizer.register(this);
     }
@@ -65,12 +61,6 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
         finalizer.random.nextBytes(bytes);
     }
 
-    @Deprecated
-    @Override
-    public void nextBytes(final byte[] bytes, final SecureRandomParameters params) {
-        finalizer.random.nextBytes(bytes);
-    }
-
     @Override
     public int nextInt() {
         return finalizer.random.nextInt();
@@ -106,30 +96,63 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
         return finalizer.random.nextGaussian();
     }
 
-    @Deprecated
-    @Override
-    public void reseed() {
-        //noop
-    }
-
-    @Deprecated
-    @Override
-    public void reseed(final SecureRandomParameters params) {
-        //noop
-    }
-
     @Override
     public void close() {
         finalizer.close();
     }
 
-    private static final class CryptoRandomGeneratorFinalizer extends AFinalizer {
-        private CryptoRandom cryptoRandom;
-        private Random random;
+    @Override
+    public float nextFloat(final float minInclusive, final float maxExclusive) {
+        return IRandomGenerator.super.nextFloat(minInclusive, maxExclusive);
+    }
 
-        private CryptoRandomGeneratorFinalizer(final CryptoRandom cryptoRandom) {
+    @Override
+    public double nextDouble(final double maxExclusive) {
+        return IRandomGenerator.super.nextDouble(maxExclusive);
+    }
+
+    @Override
+    public int nextInt(final int minInclusive, final int maxExclusive) {
+        return IRandomGenerator.super.nextInt(minInclusive, maxExclusive);
+    }
+
+    @Override
+    public float nextFloat(final float maxExclusive) {
+        return IRandomGenerator.super.nextFloat(maxExclusive);
+    }
+
+    @Override
+    public long nextLong(final long maxExclusive) {
+        return IRandomGenerator.super.nextLong(maxExclusive);
+    }
+
+    @Override
+    public double nextDouble(final double minInclusive, final double maxExclusive) {
+        return IRandomGenerator.super.nextDouble(minInclusive, maxExclusive);
+    }
+
+    @Override
+    public long nextLong(final long minInclusive, final long maxExclusive) {
+        return IRandomGenerator.super.nextLong(minInclusive, maxExclusive);
+    }
+
+    @Override
+    public double nextGaussian(final double mean, final double stddev) {
+        return IRandomGenerator.super.nextGaussian(mean, stddev);
+    }
+
+    @Override
+    public double nextExponential() {
+        return IRandomGenerator.super.nextExponential();
+    }
+
+    private static final class CryptoRandomGeneratorFinalizer extends AFinalizer {
+        private org.apache.commons.crypto.random.CryptoRandom cryptoRandom;
+        private java.util.Random random;
+
+        private CryptoRandomGeneratorFinalizer(final org.apache.commons.crypto.random.CryptoRandom cryptoRandom) {
             this.cryptoRandom = cryptoRandom;
-            this.random = (Random) cryptoRandom;
+            this.random = (java.util.Random) cryptoRandom;
         }
 
         @Override

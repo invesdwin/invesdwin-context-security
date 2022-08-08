@@ -1,7 +1,6 @@
 package de.invesdwin.context.security.web;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +19,7 @@ import de.invesdwin.context.beans.init.locations.AConditionalContextLocation;
 import de.invesdwin.context.beans.init.locations.IContextLocation;
 import de.invesdwin.context.beans.init.locations.PositionedResource;
 import de.invesdwin.context.beans.init.locations.position.ResourcePosition;
+import de.invesdwin.util.collections.Arrays;
 
 @Named
 @Immutable

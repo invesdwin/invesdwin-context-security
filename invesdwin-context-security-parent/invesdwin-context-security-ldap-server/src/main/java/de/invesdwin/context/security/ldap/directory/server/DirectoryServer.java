@@ -202,7 +202,7 @@ public class DirectoryServer {
         //                + "\n"//
         createKerberosPrincipal(
                 "krbtgt/" + KerberosProperties.KERBEROS_PRIMARY_REALM + "@" + KerberosProperties.KERBEROS_PRIMARY_REALM,
-                UUIDs.newPseudorandomUUID());
+                UUIDs.newPseudoRandomUUID());
         //                //dn: uid=ldap,ou=users,dc=example,dc=com
         //                //objectClass: top
         //                //objectClass: person
@@ -231,7 +231,7 @@ public class DirectoryServer {
         //                + KerberosProperties.KERBEROS_PRIMARY_REALM + "\n"//
         //                + "krb5KeyVersionNumber: 0\n"
         createKerberosPrincipal("ldap/" + KerberosProperties.KERBEROS_SERVER_URI.getHost() + "@"
-                + KerberosProperties.KERBEROS_PRIMARY_REALM, UUIDs.newPseudorandomUUID());
+                + KerberosProperties.KERBEROS_PRIMARY_REALM, UUIDs.newPseudoRandomUUID());
     }
 
     private void logServerStarting() {
