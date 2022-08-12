@@ -10,25 +10,25 @@ import javax.annotation.concurrent.NotThreadSafe;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.signature.SignatureKey;
 import de.invesdwin.util.error.UnknownArgumentException;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @NotThreadSafe
 public class JceSignatureHash implements IHash {
 
     private final Signature signature;
-    private final int hashSize;
     private HashMode prevMode;
     private IKey prevKey;
 
-    public JceSignatureHash(final String algorithm, final int hashSize) {
-        this(getJceSignatureInstance(algorithm), hashSize);
+    public JceSignatureHash(final String algorithm) {
+        this(getJceSignatureInstance(algorithm));
     }
 
-    public JceSignatureHash(final Signature signature, final int hashSize) {
+    public JceSignatureHash(final Signature signature) {
         this.signature = signature;
-        this.hashSize = hashSize;
     }
 
     public static Signature getJceSignatureInstance(final String algorithm) {
@@ -45,8 +45,13 @@ public class JceSignatureHash implements IHash {
     }
 
     @Override
+    public boolean isDynamicHashSize() {
+        return true;
+    }
+
+    @Override
     public int getHashSize() {
-        return hashSize;
+        return IHashAlgorithm.DYNAMIC_HASH_SIZE;
     }
 
     @Override
@@ -113,7 +118,11 @@ public class JceSignatureHash implements IHash {
                     + HashMode.Sign.name() + ": " + prevMode);
         }
         try {
-            return signature.sign();
+            final byte[] signed = signature.sign();
+            final IByteBuffer signedSizedBuffer = ByteBuffers.allocate(signed.length + Integer.BYTES);
+            signedSizedBuffer.putBytes(0, signed);
+            signedSizedBuffer.putInt(signed.length, signed.length);
+            return signedSizedBuffer.asByteArray();
         } catch (final SignatureException e) {
             throw new RuntimeException(e);
         }
@@ -132,7 +141,10 @@ public class JceSignatureHash implements IHash {
                     + HashMode.Sign.name() + ": " + prevMode);
         }
         try {
-            return signature.sign(output, offset, output.length - offset);
+            final int signedLength = signature.sign(output, offset, output.length - offset);
+            final IByteBuffer wrappedOutput = ByteBuffers.wrap(output);
+            wrappedOutput.putInt(offset + signedLength, signedLength);
+            return signedLength + Integer.BYTES;
         } catch (final SignatureException e) {
             throw new RuntimeException(e);
         }

@@ -15,8 +15,8 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 @Immutable
 public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
 
-    public static final AsymmetricCipherSignatureAlgorithm DEFAULT = new AsymmetricCipherSignatureAlgorithm(IHashAlgorithm.DEFAULT,
-            IAsymmetricCipherAlgorithm.DEFAULT);
+    public static final AsymmetricCipherSignatureAlgorithm DEFAULT = new AsymmetricCipherSignatureAlgorithm(
+            IHashAlgorithm.DEFAULT, IAsymmetricCipherAlgorithm.DEFAULT);
 
     private final IHashAlgorithm hashAlgorithm;
     private final AsymmetricEncryptionFactory asymmetricEncryptionFactory;
@@ -52,7 +52,12 @@ public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
 
     @Override
     public int getHashSize() {
-        return hashAlgorithm.getHashSize();
+        return DYNAMIC_HASH_SIZE;
+    }
+
+    @Override
+    public boolean isDynamicHashSize() {
+        return true;
     }
 
     @Override

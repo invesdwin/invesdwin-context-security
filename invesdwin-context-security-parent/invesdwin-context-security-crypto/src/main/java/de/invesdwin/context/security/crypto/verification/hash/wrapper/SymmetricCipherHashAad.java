@@ -48,6 +48,11 @@ public class SymmetricCipherHashAad implements IHash {
     }
 
     @Override
+    public boolean isDynamicHashSize() {
+        return false;
+    }
+
+    @Override
     public int getHashSize() {
         return hashSize;
     }

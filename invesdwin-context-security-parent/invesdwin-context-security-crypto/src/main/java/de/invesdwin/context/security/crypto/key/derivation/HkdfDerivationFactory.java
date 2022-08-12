@@ -33,6 +33,9 @@ public class HkdfDerivationFactory implements IDerivationFactory {
     public HkdfDerivationFactory(final byte[] pepper, final IHashAlgorithm algorithm) {
         this.pepper = pepper;
         this.algorithm = algorithm;
+        if (algorithm.getHashSize() <= 0) {
+            throw new IllegalArgumentException("HashSize should be positive non zero: " + algorithm.getHashSize());
+        }
     }
 
     @Override

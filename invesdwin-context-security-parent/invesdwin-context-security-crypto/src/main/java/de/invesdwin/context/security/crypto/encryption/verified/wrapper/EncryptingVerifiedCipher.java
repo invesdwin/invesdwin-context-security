@@ -33,12 +33,12 @@ public class EncryptingVerifiedCipher implements ICipher {
 
     @Override
     public int getBlockSize() {
-        return getDelegate().getBlockSize();
+        return parent.getBlockSize();
     }
 
     @Override
     public int getHashSize() {
-        return getDelegate().getHashSize() + getHash().getHashSize();
+        return parent.getHashSize();
     }
 
     @Override

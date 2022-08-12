@@ -10,6 +10,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.IVerificationFactory;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -28,6 +29,7 @@ public class VerifiedCipher implements ICipher {
     private final EncryptingVerifiedCipher encryptingDelegate;
     private final DecryptingVerifiedCipher decryptingDelegate;
     private ICipher delegate;
+    private int hashSize;
 
     public VerifiedCipher(final IEncryptionFactory unverifiedEncryptionFactory,
             final IVerificationFactory verificationFactory, final ICipher unverifiedCipher, final IHash hash) {
@@ -37,6 +39,15 @@ public class VerifiedCipher implements ICipher {
         this.hash = hash;
         this.encryptingDelegate = new EncryptingVerifiedCipher(this);
         this.decryptingDelegate = new DecryptingVerifiedCipher(this);
+
+        final int cipherHashSize = unverifiedCipher.getHashSize();
+        final int hashSize = getHash().getHashSize();
+        if (getHash().isDynamicHashSize() || hashSize <= IHashAlgorithm.DYNAMIC_HASH_SIZE
+                || cipherHashSize <= IHashAlgorithm.DYNAMIC_HASH_SIZE) {
+            this.hashSize = IHashAlgorithm.DYNAMIC_HASH_SIZE;
+        } else {
+            this.hashSize = cipherHashSize + hashSize;
+        }
     }
 
     public IEncryptionFactory getEncryptionFactory() {
@@ -70,7 +81,7 @@ public class VerifiedCipher implements ICipher {
 
     @Override
     public int getHashSize() {
-        return unverifiedCipher.getHashSize() + hash.getHashSize();
+        return hashSize;
     }
 
     @Override

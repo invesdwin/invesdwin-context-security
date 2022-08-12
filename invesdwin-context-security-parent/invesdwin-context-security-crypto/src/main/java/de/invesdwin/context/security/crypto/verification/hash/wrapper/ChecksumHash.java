@@ -32,6 +32,11 @@ public class ChecksumHash implements IHash {
     }
 
     @Override
+    public boolean isDynamicHashSize() {
+        return false;
+    }
+
+    @Override
     public int getHashSize() {
         return HASH_SIZE;
     }

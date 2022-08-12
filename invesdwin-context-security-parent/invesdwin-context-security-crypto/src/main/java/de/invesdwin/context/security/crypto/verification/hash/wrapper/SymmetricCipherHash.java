@@ -124,6 +124,11 @@ public class SymmetricCipherHash implements IHash {
     }
 
     @Override
+    public boolean isDynamicHashSize() {
+        return false;
+    }
+
+    @Override
     public int getHashSize() {
         return data.hashSize;
     }

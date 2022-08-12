@@ -9,6 +9,7 @@ import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.DisabledHashKey;
 import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.signature.SignatureKey;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -36,8 +37,13 @@ public class CipherSignatureHash implements IHash {
     }
 
     @Override
+    public boolean isDynamicHashSize() {
+        return true;
+    }
+
+    @Override
     public int getHashSize() {
-        return hash.getHashSize();
+        return IHashAlgorithm.DYNAMIC_HASH_SIZE;
     }
 
     @Override
@@ -72,21 +78,24 @@ public class CipherSignatureHash implements IHash {
     public byte[] doFinal() {
         final byte[] toBeEncrypted = hash.doFinal();
         final int encryptedSize = cipher.doFinal(ByteBuffers.wrap(toBeEncrypted), encryptedHashBuffer);
-        return encryptedHashBuffer.asByteArrayCopyTo(encryptedSize);
+        encryptedHashBuffer.putInt(encryptedSize, encryptedSize);
+        return encryptedHashBuffer.asByteArrayCopyTo(encryptedSize + Integer.BYTES);
     }
 
     @Override
     public byte[] doFinal(final byte[] input) {
         final byte[] toBeEncrypted = hash.doFinal(input);
         final int encryptedSize = cipher.doFinal(ByteBuffers.wrap(toBeEncrypted), encryptedHashBuffer);
-        return encryptedHashBuffer.asByteArrayCopyTo(encryptedSize);
+        encryptedHashBuffer.putInt(encryptedSize, encryptedSize);
+        return encryptedHashBuffer.asByteArrayCopyTo(encryptedSize + Integer.BYTES);
     }
 
     @Override
     public int doFinal(final byte[] output, final int offset) {
         final byte[] toBeEncrypted = hash.doFinal();
         final int encryptedSize = cipher.doFinal(ByteBuffers.wrap(toBeEncrypted), encryptedHashBuffer);
-        encryptedHashBuffer.getBytes(0, output, offset, encryptedSize);
+        encryptedHashBuffer.putInt(encryptedSize, encryptedSize);
+        encryptedHashBuffer.getBytes(0, output, offset, encryptedSize + Integer.BYTES);
         return encryptedSize;
     }
 
@@ -99,6 +108,26 @@ public class CipherSignatureHash implements IHash {
     public void close() {
         prevMode = null;
         prevKey = null;
+    }
+
+    @Override
+    public boolean verify(final byte[] signedInput) {
+        return IHash.super.verify(signedInput);
+    }
+
+    @Override
+    public IByteBuffer verifyAndSlice(final IByteBuffer signedInput) {
+        return IHash.super.verifyAndSlice(signedInput);
+    }
+
+    @Override
+    public void verifyThrow(final IByteBuffer signedInput) {
+        IHash.super.verifyThrow(signedInput);
+    }
+
+    @Override
+    public boolean verify(final IByteBuffer signedInput) {
+        return IHash.super.verify(signedInput);
     }
 
     @Override

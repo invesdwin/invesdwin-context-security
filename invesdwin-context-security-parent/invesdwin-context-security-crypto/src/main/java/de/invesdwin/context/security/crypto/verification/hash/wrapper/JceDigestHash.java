@@ -41,6 +41,11 @@ public class JceDigestHash implements IHash {
     }
 
     @Override
+    public boolean isDynamicHashSize() {
+        return false;
+    }
+
+    @Override
     public int getHashSize() {
         return digest.getDigestLength();
     }

@@ -41,6 +41,11 @@ public class JceMacHash implements IHash {
     }
 
     @Override
+    public boolean isDynamicHashSize() {
+        return false;
+    }
+
+    @Override
     public int getHashSize() {
         return mac.getMacLength();
     }

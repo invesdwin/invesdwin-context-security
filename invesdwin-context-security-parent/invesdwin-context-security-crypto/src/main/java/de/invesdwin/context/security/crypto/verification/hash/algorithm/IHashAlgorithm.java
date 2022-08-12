@@ -14,6 +14,8 @@ public interface IHashAlgorithm extends IHashFactory {
             HmacAlgorithm.values(), CmacAlgorithm.values(), GmacAlgorithm.values(), KmacAlgorithm.values(),
             SkeinMacAlgorithm.values());
 
+    int DYNAMIC_HASH_SIZE = -1;
+
     String getKeyAlgorithm();
 
     String getAlgorithm();
@@ -21,6 +23,10 @@ public interface IHashAlgorithm extends IHashFactory {
     int getKeySize();
 
     int getHashSize();
+
+    default boolean isDynamicHashSize() {
+        return getHashSize() <= DYNAMIC_HASH_SIZE;
+    }
 
     HashAlgorithmType getType();
 

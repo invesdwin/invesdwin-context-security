@@ -3,6 +3,7 @@ package de.invesdwin.context.security.crypto.verification.hash;
 import java.io.Closeable;
 
 import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -10,7 +11,14 @@ public interface IHash extends Closeable {
 
     String getAlgorithm();
 
+    /**
+     * -1 means a dynamic hash size, the size of the hash is put as an integer to the end of the hash
+     */
     int getHashSize();
+
+    default boolean isDynamicHashSize() {
+        return getHashSize() <= IHashAlgorithm.DYNAMIC_HASH_SIZE;
+    }
 
     /**
      * This will skip init if the same key is used and do a reset instead if needed.
@@ -61,16 +69,34 @@ public interface IHash extends Closeable {
     }
 
     default boolean verify(final IByteBuffer signedInput) {
-        final int signatureIndex = signedInput.remaining(getHashSize());
-        final IByteBuffer input = signedInput.newSlice(0, signatureIndex);
-        final IByteBuffer signature = signedInput.sliceFrom(signatureIndex);
+        final int hashSize;
+        final int hashIndex;
+        if (isDynamicHashSize()) {
+            final int hashSizeIndex = signedInput.remaining(Integer.BYTES);
+            hashSize = signedInput.getInt(hashSizeIndex);
+            hashIndex = hashSizeIndex - hashSize;
+        } else {
+            hashSize = getHashSize();
+            hashIndex = signedInput.remaining(hashSize);
+        }
+        final IByteBuffer input = signedInput.newSlice(0, hashIndex);
+        final IByteBuffer signature = signedInput.slice(hashIndex, hashSize);
         return verify(input, signature);
     }
 
     default IByteBuffer verifyAndSlice(final IByteBuffer signedInput) {
-        final int signatureIndex = signedInput.remaining(getHashSize());
-        final IByteBuffer input = signedInput.newSlice(0, signatureIndex);
-        final IByteBuffer signature = signedInput.sliceFrom(signatureIndex);
+        final int hashSize;
+        final int hashIndex;
+        if (isDynamicHashSize()) {
+            final int hashSizeIndex = signedInput.remaining(Integer.BYTES);
+            hashSize = signedInput.getInt(hashSizeIndex);
+            hashIndex = hashSizeIndex - hashSize;
+        } else {
+            hashSize = getHashSize();
+            hashIndex = signedInput.remaining(hashSize);
+        }
+        final IByteBuffer input = signedInput.newSlice(0, hashIndex);
+        final IByteBuffer signature = signedInput.slice(hashIndex, hashSize);
         if (!verify(input, signature)) {
             throw new IllegalArgumentException("Hash mismatch");
         }
@@ -80,9 +106,18 @@ public interface IHash extends Closeable {
     boolean verify(IByteBuffer input, IByteBuffer signature);
 
     default void verifyThrow(final IByteBuffer signedInput) {
-        final int signatureIndex = signedInput.remaining(getHashSize());
-        final IByteBuffer input = signedInput.newSlice(0, signatureIndex);
-        final IByteBuffer signature = signedInput.sliceFrom(signatureIndex);
+        final int hashSize;
+        final int hashIndex;
+        if (isDynamicHashSize()) {
+            final int hashSizeIndex = signedInput.remaining(Integer.BYTES);
+            hashSize = signedInput.getInt(hashSizeIndex);
+            hashIndex = hashSizeIndex - hashSize;
+        } else {
+            hashSize = getHashSize();
+            hashIndex = signedInput.remaining(hashSize);
+        }
+        final IByteBuffer input = signedInput.newSlice(0, hashIndex);
+        final IByteBuffer signature = signedInput.slice(hashIndex, hashSize);
         verifyThrow(input, signature);
     }
 

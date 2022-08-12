@@ -28,6 +28,11 @@ public class LazyDelegateHash implements IHash {
     }
 
     @Override
+    public boolean isDynamicHashSize() {
+        return false;
+    }
+
+    @Override
     public int getHashSize() {
         return delegate.getHashSize();
     }
