@@ -14,6 +14,8 @@ public enum AesKeySize {
      * https://www.ubiqsecurity.com/128bit-or-256bit-encryption-which-to-use/
      * 
      * 128 is supposed to be significantly faster than 256
+     * 
+     * 256 is about 40% slower than 128 according to this: https://security.stackexchange.com/a/19762
      */
     public static final AesKeySize DEFAULT = AesKeySize._128;
 
