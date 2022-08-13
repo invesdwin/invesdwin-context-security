@@ -1,4 +1,4 @@
-package de.invesdwin.context.security.crypto.encryption.verified;
+package de.invesdwin.context.security.crypto.verification.hash;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,10 +23,10 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.Ciphe
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherPresharedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherRandomIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
+import de.invesdwin.context.security.crypto.encryption.verified.VerifiedEncryptionFactory;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
-import de.invesdwin.context.security.crypto.verification.hash.HashVerificationFactory;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
@@ -38,7 +38,7 @@ import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 
 @NotThreadSafe
-public class VerifiedEncryptionFactoryTest extends ATest {
+public class HashVerificationFactoryTest extends ATest {
 
     @Test
     public void testEncryptionAndDecryption() {

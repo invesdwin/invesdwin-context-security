@@ -68,8 +68,16 @@ public class AsymmetricCipherKey implements ICipherKey {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
         this.keySizeBits = keySizeBits;
-        this.privateKeyBlockSize = privateKey.getEncoded().length;
-        this.publicKeyBlockSize = publicKey.getEncoded().length;
+        if (privateKey != null) {
+            this.privateKeyBlockSize = privateKey.getEncoded().length;
+        } else {
+            this.privateKeyBlockSize = 0;
+        }
+        if (publicKey != null) {
+            this.publicKeyBlockSize = publicKey.getEncoded().length;
+        } else {
+            this.publicKeyBlockSize = 0;
+        }
     }
 
     @Override

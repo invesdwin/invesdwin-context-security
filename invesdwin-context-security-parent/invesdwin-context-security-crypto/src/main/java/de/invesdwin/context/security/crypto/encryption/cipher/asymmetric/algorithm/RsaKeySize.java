@@ -6,6 +6,7 @@ import javax.annotation.concurrent.Immutable;
 public enum RsaKeySize {
     _1024(1024),
     _2048(2048),
+    _3072(3072),
     _4096(4096);
 
     /**

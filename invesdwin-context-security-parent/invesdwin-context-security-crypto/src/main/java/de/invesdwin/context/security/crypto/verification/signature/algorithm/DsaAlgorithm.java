@@ -2,7 +2,6 @@ package de.invesdwin.context.security.crypto.verification.signature.algorithm;
 
 import javax.annotation.concurrent.Immutable;
 
-import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.HashAlgorithmType;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
@@ -36,8 +35,7 @@ public enum DsaAlgorithm implements ISignatureAlgorithm {
     SHA3_224withDDSA("SHA3-224withDDSA"),
     SHA3_256withDDSA("SHA3-256withDDSA"),
     SHA3_384withDDSA("SHA3-384withDDSA"),
-    SHA3_512withDDSA("SHA3-512withDDSA"),
-    NONEwithDSA("NONEwithDSA");
+    SHA3_512withDDSA("SHA3-512withDDSA");
 
     public static final DsaAlgorithm DEFAULT = SHA256withDSA;
 
@@ -61,7 +59,7 @@ public enum DsaAlgorithm implements ISignatureAlgorithm {
 
     @Override
     public int getDefaultKeySizeBits() {
-        return RsaAlgorithm.DEFAULT.getDefaultKeySizeBits();
+        return DsaKeySize.DEFAULT.getBits();
     }
 
     @Override

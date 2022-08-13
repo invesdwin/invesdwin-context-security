@@ -29,7 +29,7 @@ public class LazyDelegateHash implements IHash {
 
     @Override
     public boolean isDynamicHashSize() {
-        return false;
+        return delegate.isDynamicHashSize();
     }
 
     @Override
@@ -47,42 +47,49 @@ public class LazyDelegateHash implements IHash {
         delegate.init(mode, key);
         prevKey = key;
         needsReset = false;
+        System.out.println("init " + mode + "  false");
     }
 
     @Override
     public void update(final byte input) {
         needsReset = true;
         delegate.update(input);
+        System.out.println("update true");
     }
 
     @Override
     public void update(final java.nio.ByteBuffer input) {
         needsReset = true;
         delegate.update(input);
+        System.out.println("update true");
     }
 
     @Override
     public void update(final IByteBuffer input) {
         needsReset = true;
         delegate.update(input);
+        System.out.println("update true");
     }
 
     @Override
     public void update(final byte[] input) {
         needsReset = true;
         delegate.update(input);
+        System.out.println("update true");
     }
 
     @Override
     public void update(final byte[] input, final int inputOffset, final int inputLen) {
         needsReset = true;
         delegate.update(input, inputOffset, inputLen);
+        System.out.println("update true");
     }
 
     @Override
     public byte[] doFinal() {
         final byte[] result = delegate.doFinal();
         needsReset = false;
+        System.out.println("doFinal 1 false");
         return result;
     }
 
@@ -90,14 +97,16 @@ public class LazyDelegateHash implements IHash {
     public byte[] doFinal(final byte[] input) {
         final byte[] result = delegate.doFinal(input);
         needsReset = false;
+        System.out.println("doFinal 2 false");
         return result;
     }
 
     @Override
     public int doFinal(final byte[] output, final int offset) {
-        delegate.doFinal(output, offset);
+        final int written = delegate.doFinal(output, offset);
         needsReset = false;
-        return delegate.getHashSize();
+        System.out.println("doFinal 3 false");
+        return written;
     }
 
     @Override
@@ -106,19 +115,22 @@ public class LazyDelegateHash implements IHash {
             delegate.reset();
         }
         needsReset = false;
+        System.out.println("reset false");
     }
 
     @Override
     public boolean verify(final byte[] input, final byte[] signature) {
         final boolean verified = delegate.verify(input, signature);
-        needsReset = true;
+        needsReset = false;
+        System.out.println("verify 1 true");
         return verified;
     }
 
     @Override
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
         final boolean verified = delegate.verify(input, signature);
-        needsReset = true;
+        needsReset = false;
+        System.out.println("verify 2 true");
         return verified;
     }
 

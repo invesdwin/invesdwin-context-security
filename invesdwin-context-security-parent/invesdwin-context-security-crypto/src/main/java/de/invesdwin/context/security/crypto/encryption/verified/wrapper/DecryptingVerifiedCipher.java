@@ -294,7 +294,13 @@ public class DecryptingVerifiedCipher implements ICipher {
     }
 
     private int getInputBufferLimit() {
-        return inputBufferPosition - getHash().getHashSize();
+        if (getHash().isDynamicHashSize()) {
+            final int hashSize = inputBuffer.getInt(inputBufferPosition - Integer.BYTES);
+            return inputBufferPosition - hashSize;
+        } else {
+            return inputBufferPosition - getHash().getHashSize();
+        }
+
     }
 
     @Override
