@@ -1,5 +1,6 @@
 package de.invesdwin.context.security.crypto.verification.hash.wrapper;
 
+import java.security.Key;
 import java.util.zip.Checksum;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -47,9 +48,14 @@ public class ChecksumHash implements IHash {
         if (key != null) {
             //we use the key as a pepper (static salt)
             final IHashKey cKey = (IHashKey) key;
-            final byte[] encoded = cKey.getKey(mode).getEncoded();
-            checksum.update(encoded);
-            prevKey = encoded;
+            final Key modeKey = cKey.getKey(mode);
+            if (modeKey != null) {
+                final byte[] encoded = modeKey.getEncoded();
+                checksum.update(encoded);
+                prevKey = encoded;
+            } else {
+                prevKey = null;
+            }
         } else {
             prevKey = null;
         }
