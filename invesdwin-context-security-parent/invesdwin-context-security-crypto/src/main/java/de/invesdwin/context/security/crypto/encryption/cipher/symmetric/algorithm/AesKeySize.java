@@ -10,7 +10,12 @@ public enum AesKeySize {
 
     public static final AesKeySize BLOCK_SIZE = AesKeySize._128;
 
-    public static final AesKeySize DEFAULT = AesKeySize._256;
+    /**
+     * https://www.ubiqsecurity.com/128bit-or-256bit-encryption-which-to-use/
+     * 
+     * 128 is supposed to be significantly faster than 256
+     */
+    public static final AesKeySize DEFAULT = AesKeySize._128;
 
     private int bytes;
     private int bits;
