@@ -52,10 +52,7 @@ public enum RsaSignatureAlgorithm implements ISignatureAlgorithm {
     RIPEMD160withRSA_X9_31("RIPEMD160withRSA/X9.31"),
     WHIRLPOOLwithRSA_X9_31("WHIRLPOOLwithRSA/X9.31");
 
-    /**
-     * Faster version with potential native acceleration (SHA-256 with RSA)
-     */
-    public static final ISignatureAlgorithm DEFAULT = AsymmetricCipherSignatureAlgorithm.DEFAULT;
+    public static final RsaSignatureAlgorithm DEFAULT = SHA256withRSA;
 
     private final String algorithm;
     private final HashObjectPool hashPool;

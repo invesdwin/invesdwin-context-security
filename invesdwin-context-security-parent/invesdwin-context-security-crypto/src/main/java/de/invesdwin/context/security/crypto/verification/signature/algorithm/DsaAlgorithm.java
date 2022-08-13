@@ -39,6 +39,8 @@ public enum DsaAlgorithm implements ISignatureAlgorithm {
     SHA3_512withDDSA("SHA3-512withDDSA"),
     NONEwithDSA("NONEwithDSA");
 
+    public static final DsaAlgorithm DEFAULT = SHA256withDSA;
+
     private final String algorithm;
     private final HashObjectPool hashPool;
 
