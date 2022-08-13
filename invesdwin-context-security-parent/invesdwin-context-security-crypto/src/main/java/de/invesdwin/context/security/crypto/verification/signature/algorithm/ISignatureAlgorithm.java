@@ -8,8 +8,9 @@ public interface ISignatureAlgorithm extends IHashAlgorithm {
     ISignatureAlgorithm DEFAULT = EddsaAlgorithm.DEFAULT;
 
     @SuppressWarnings("deprecation")
-    ISignatureAlgorithm[] VALUES = Arrays.concat(ISignatureAlgorithm.class, DsaAlgorithm.values(),
-            EcdsaAlgorithm.values(), EddsaAlgorithm.values(), RsaSignatureAlgorithm.values(),
-            AsymmetricCipherSignatureAlgorithm.VALUES);
+    static ISignatureAlgorithm[] values() {
+        return Arrays.concat(ISignatureAlgorithm.class, DsaAlgorithm.values(), EcdsaAlgorithm.values(),
+                EddsaAlgorithm.values(), RsaSignatureAlgorithm.values(), AsymmetricCipherSignatureAlgorithm.values());
+    }
 
 }

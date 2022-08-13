@@ -38,7 +38,7 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.VALUES) {
+        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.values()) {
             final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
             final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
             testEncryptionAndDecryption(factory, "1234567890");
@@ -69,7 +69,7 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.VALUES) {
+        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.values()) {
             final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
             final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
             testCipher(factory, "1234567890", "0987654321");
@@ -110,7 +110,7 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.VALUES) {
+        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.values()) {
             final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
             final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
             try {
@@ -170,7 +170,7 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.VALUES) {
+        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.values()) {
             final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
             final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
             try {

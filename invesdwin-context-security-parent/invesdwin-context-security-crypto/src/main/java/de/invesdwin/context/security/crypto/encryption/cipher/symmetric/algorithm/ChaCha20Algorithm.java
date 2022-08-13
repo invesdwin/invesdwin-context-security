@@ -6,6 +6,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.annotation.concurrent.Immutable;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.ChaCha20ParameterSpec;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
@@ -22,12 +23,12 @@ public enum ChaCha20Algorithm implements ISymmetricCipherAlgorithm {
     ChaCha20("ChaCha20", 12, 0) {
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
-            return new MutableIvParameterSpec(iv);
+            return new ChaCha20ParameterSpec(iv, 0);
         }
 
         @Override
         public AlgorithmParameterSpec wrapParam(final MutableIvParameterSpec iv) {
-            return iv;
+            return wrapParam(iv.getIV());
         }
     },
     /**
@@ -70,7 +71,7 @@ public enum ChaCha20Algorithm implements ISymmetricCipherAlgorithm {
 
     @Override
     public int getDefaultKeySizeBits() {
-        return AesKeySize.DEFAULT.getBits();
+        return ChaCha20KeySize.DEFAULT.getBits();
     }
 
     @Override
@@ -111,5 +112,4 @@ public enum ChaCha20Algorithm implements ISymmetricCipherAlgorithm {
             throw new RuntimeException(e);
         }
     }
-
 }

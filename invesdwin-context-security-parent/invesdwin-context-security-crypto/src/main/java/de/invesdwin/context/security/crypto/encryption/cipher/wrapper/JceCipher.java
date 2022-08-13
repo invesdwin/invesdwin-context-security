@@ -29,7 +29,9 @@ public class JceCipher implements ICipher {
 
     @Override
     public int getBlockSize() {
-        return cipher.getBlockSize();
+        final int blockSize = cipher.getBlockSize();
+        assert blockSize != 0 : "cipher.getBlockSize() should not be 0: " + cipher.getAlgorithm();
+        return blockSize;
     }
 
     @Override

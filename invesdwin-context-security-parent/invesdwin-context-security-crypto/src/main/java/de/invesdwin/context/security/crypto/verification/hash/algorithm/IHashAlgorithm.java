@@ -10,11 +10,13 @@ public interface IHashAlgorithm extends IHashFactory {
 
     IHashAlgorithm DEFAULT = HmacAlgorithm.DEFAULT;
 
-    IHashAlgorithm[] VALUES = Arrays.concat(IHashAlgorithm.class, ChecksumAlgorithm.values(), DigestAlgorithm.values(),
-            HmacAlgorithm.values(), CmacAlgorithm.values(), GmacAlgorithm.values(), KmacAlgorithm.values(),
-            SkeinMacAlgorithm.values());
-
     int DYNAMIC_HASH_SIZE = -1;
+
+    static IHashAlgorithm[] values() {
+        return Arrays.concat(IHashAlgorithm.class, ChecksumAlgorithm.values(), DigestAlgorithm.values(),
+                HmacAlgorithm.values(), CmacAlgorithm.values(), GmacAlgorithm.values(), KmacAlgorithm.values(),
+                SkeinMacAlgorithm.values());
+    }
 
     String getKeyAlgorithm();
 

@@ -23,18 +23,6 @@ public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
             //no need to use HMAC_SHA_256, since RSA already provides the integrity and authentication in addition to the non-repudiation
             DigestAlgorithm.SHA_256, IAsymmetricCipherAlgorithm.DEFAULT);
 
-    public static final AsymmetricCipherSignatureAlgorithm[] VALUES;
-
-    static {
-        final List<AsymmetricCipherSignatureAlgorithm> values = new ArrayList<>();
-        for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.VALUES) {
-            for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
-                values.add(new AsymmetricCipherSignatureAlgorithm(hashAlgorithm, asymmetricAlgorithm));
-            }
-        }
-        VALUES = values.toArray(new AsymmetricCipherSignatureAlgorithm[0]);
-    }
-
     private final IHashAlgorithm hashAlgorithm;
     private final AsymmetricEncryptionFactory asymmetricEncryptionFactory;
     private final HashObjectPool hashPool;
@@ -50,6 +38,16 @@ public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
         this.hashAlgorithm = hashAlgorithm;
         this.asymmetricEncryptionFactory = asymmetricEncryptionFactory;
         this.hashPool = new HashObjectPool(this);
+    }
+
+    public static AsymmetricCipherSignatureAlgorithm[] values() {
+        final List<AsymmetricCipherSignatureAlgorithm> values = new ArrayList<>();
+        for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
+            for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.values()) {
+                values.add(new AsymmetricCipherSignatureAlgorithm(hashAlgorithm, asymmetricAlgorithm));
+            }
+        }
+        return values.toArray(new AsymmetricCipherSignatureAlgorithm[0]);
     }
 
     @Override

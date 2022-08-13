@@ -52,20 +52,21 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeySize.DEFAULT.getBits());
-        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.VALUES) {
+        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires padding
                 continue;
             }
+            final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
+                    algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(algorithm);
             final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
-                    derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize()));
+                    derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
                 final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
-                for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
+                for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.values()) {
                     log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
                     final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,
                             derivedKeyProvider);
@@ -101,20 +102,21 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeySize.DEFAULT.getBits());
-        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.VALUES) {
+        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires padding
                 continue;
             }
+            final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
+                    algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(algorithm);
             final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
-                    derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize()));
+                    derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
                 final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
-                for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
+                for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.values()) {
                     log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
                     final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,
                             derivedKeyProvider);
@@ -160,20 +162,21 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeySize.DEFAULT.getBits());
-        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.VALUES) {
+        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires padding
                 continue;
             }
+            final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
+                    algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(algorithm);
             final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
-                    derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize()));
+                    derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
                 final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
-                for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
+                for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.values()) {
                     log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
                     final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,
                             derivedKeyProvider);
@@ -238,20 +241,21 @@ public class VerifiedEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeySize.DEFAULT.getBits());
-        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.VALUES) {
+        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
             if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
                 //requires padding
                 continue;
             }
+            final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
+                    algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(algorithm);
             final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
-                    derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize()));
+                    derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
                 final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
-                for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
+                for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.values()) {
                     log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
                     final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,
                             derivedKeyProvider);

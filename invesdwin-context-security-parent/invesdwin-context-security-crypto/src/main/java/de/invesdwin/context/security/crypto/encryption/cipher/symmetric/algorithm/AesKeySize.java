@@ -26,7 +26,7 @@ public enum AesKeySize {
     }
 
     public int getBytes() {
-        return bits * Byte.SIZE;
+        return bits / Byte.SIZE;
     }
 
     public int getBits() {

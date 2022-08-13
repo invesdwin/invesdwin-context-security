@@ -10,23 +10,23 @@ import javax.crypto.NoSuchPaddingException;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
-import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipher;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipherWithKeyBlockSize;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
 public enum EciesAlgorithm implements IAsymmetricCipherAlgorithm {
-    ECIESwithSHA1("ECIES"),
+    ECIESwithSHA1("ECIESwithSHA1"),
     ECIESwithSHA256("ECIESwithSHA256"),
     ECIESwithSHA384("ECIESwithSHA384"),
     ECIESwithSHA512("ECIESwithSHA512"),
-    ECIESwithSHA1andAESCBC("ECIESwithAESCBC"),
-    ECIESwithSHA1andDESedeCBC("ECIESwithDESedeCBC"),
-    ECIESwithSHA256andAESCBC("ECIESwithSHA256andAESCBC"),
-    ECIESwithSHA256andDESedeCBC("ECIESwithSHA256andDESedeCBC"),
-    ECIESwithSHA384andAESCBC("ECIESwithSHA384andAESCBC"),
-    ECIESwithSHA384andDESedeCBC("ECIESwithSHA384andDESedeCBC"),
-    ECIESwithSHA512andAESCBC("ECIESwithSHA512andAESCBC"),
-    ECIESwithSHA512andDESedeCBC("ECIESwithSHA512andDESedeCBC");
+    ECIESwithSHA1andAESCBC("ECIESwithSHA1andAES-CBC"),
+    ECIESwithSHA1andDESedeCBC("ECIESwithSHA1andDESede-CBC"),
+    ECIESwithSHA256andAESCBC("ECIESwithSHA256andAES-CBC"),
+    ECIESwithSHA256andDESedeCBC("ECIESwithSHA256andDESede-CBC"),
+    ECIESwithSHA384andAESCBC("ECIESwithSHA384andAES-CBC"),
+    ECIESwithSHA384andDESedeCBC("ECIESwithSHA384andDESede-CBC"),
+    ECIESwithSHA512andAESCBC("ECIESwithSHA512andAES-CBC"),
+    ECIESwithSHA512andDESedeCBC("ECIESwithSHA512andDESede-CBC");
 
     public static final EciesAlgorithm DEFAULT = ECIESwithSHA256;
 
@@ -62,7 +62,7 @@ public enum EciesAlgorithm implements IAsymmetricCipherAlgorithm {
     @Override
     public ICipher newCipher() {
         try {
-            return new JceCipher(Cipher.getInstance(getAlgorithm()), 0);
+            return new JceCipherWithKeyBlockSize(Cipher.getInstance(getAlgorithm()), 0);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new RuntimeException(e);
         }
