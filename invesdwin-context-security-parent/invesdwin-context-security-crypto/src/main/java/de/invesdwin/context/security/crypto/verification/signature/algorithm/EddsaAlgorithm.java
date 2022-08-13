@@ -16,14 +16,16 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 public enum EddsaAlgorithm implements ISignatureAlgorithm {
     /**
      * https://paretosecurity.com/auditor/checks/ssh-keys-strength
+     * 
+     * https://winscp.net/eng/docs/ui_puttygen (255 is the actual key size, 256 is accepted for backwards compatibility)
      */
-    Ed25519("Ed25519", "Ed25519", 256, 64),
+    Ed25519("Ed25519", "Ed25519", 255, 64),
     /**
      * should be 50% as slower than Ed25519
      * 
      * https://crypto.stackexchange.com/questions/67457/elliptic-curve-ed25519-vs-ed448-differences
      */
-    Ed448("Ed448", "Ed448", 456, 114);
+    Ed448("Ed448", "Ed448", 448, 114);
 
     /**
      * Recommended by: https://goteleport.com/blog/comparing-ssh-keys/

@@ -122,11 +122,15 @@ public class JceSignatureHash implements IHash {
                     + HashMode.Sign.name() + ": " + prevMode);
         }
         try {
-            final byte[] signed = signature.sign();
-            final IByteBuffer signedSizedBuffer = ByteBuffers.allocate(signed.length + Integer.BYTES);
-            signedSizedBuffer.putBytes(0, signed);
-            signedSizedBuffer.putInt(signed.length, signed.length);
-            return signedSizedBuffer.asByteArray();
+            if (isDynamicHashSize()) {
+                final byte[] signed = signature.sign();
+                final IByteBuffer signedSizedBuffer = ByteBuffers.allocate(signed.length + Integer.BYTES);
+                signedSizedBuffer.putBytes(0, signed);
+                signedSizedBuffer.putInt(signed.length, signed.length);
+                return signedSizedBuffer.asByteArray();
+            } else {
+                return signature.sign();
+            }
         } catch (final SignatureException e) {
             throw new RuntimeException(e);
         }
@@ -145,10 +149,14 @@ public class JceSignatureHash implements IHash {
                     + HashMode.Sign.name() + ": " + prevMode);
         }
         try {
-            final int signedLength = signature.sign(output, offset, output.length - offset);
-            final IByteBuffer wrappedOutput = ByteBuffers.wrap(output);
-            wrappedOutput.putInt(offset + signedLength, signedLength);
-            return signedLength + Integer.BYTES;
+            if (isDynamicHashSize()) {
+                final int signedLength = signature.sign(output, offset, output.length - offset);
+                final IByteBuffer wrappedOutput = ByteBuffers.wrap(output);
+                wrappedOutput.putInt(offset + signedLength, signedLength);
+                return signedLength + Integer.BYTES;
+            } else {
+                return signature.sign(output, offset, output.length - offset);
+            }
         } catch (final SignatureException e) {
             throw new RuntimeException(e);
         }

@@ -57,7 +57,7 @@ public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
 
     @Override
     public String getAlgorithm() {
-        return hashAlgorithm.getAlgorithm() + "With" + asymmetricEncryptionFactory.getAlgorithm().getAlgorithm();
+        return hashAlgorithm.getAlgorithm() + " with " + asymmetricEncryptionFactory.getAlgorithm().getAlgorithm();
     }
 
     @Override
