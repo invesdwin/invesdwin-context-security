@@ -51,7 +51,7 @@ public class CipherSignatureHash implements IHash {
         final SignatureKey cKey = (SignatureKey) key;
         hash.init(mode, DisabledHashKey.INSTANCE);
         encryptionFactory.init(mode.getCipherMode(), cipher, new SignatureCipherKey(encryptionFactory.getAlgorithm(),
-                cKey.getVerifyKey(), cKey.getSignKey(), cKey.getKeySize()), null);
+                cKey.getVerifyKey(), cKey.getSignKey(), cKey.getKeySizeBits()), null);
     }
 
     @Override

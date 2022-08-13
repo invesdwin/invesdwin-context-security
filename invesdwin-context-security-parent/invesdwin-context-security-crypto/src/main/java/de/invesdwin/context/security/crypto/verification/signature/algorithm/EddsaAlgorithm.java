@@ -17,13 +17,13 @@ public enum EddsaAlgorithm implements ISignatureAlgorithm {
     /**
      * https://paretosecurity.com/auditor/checks/ssh-keys-strength
      */
-    Ed25519("Ed25519", "Ed25519", 32, 64),
+    Ed25519("Ed25519", "Ed25519", 256, 64),
     /**
      * should be 50% as slower than Ed25519
      * 
      * https://crypto.stackexchange.com/questions/67457/elliptic-curve-ed25519-vs-ed448-differences
      */
-    Ed448("Ed448", "Ed448", 57, 114);
+    Ed448("Ed448", "Ed448", 456, 114);
 
     /**
      * Recommended by: https://goteleport.com/blog/comparing-ssh-keys/
@@ -32,14 +32,15 @@ public enum EddsaAlgorithm implements ISignatureAlgorithm {
 
     private final String algorithm;
     private final String keyAlgorithm;
-    private final int defaultKeySize;
+    private final int defaultKeySizeBits;
     private final int hashSize;
     private final HashObjectPool hashPool;
 
-    EddsaAlgorithm(final String algorithm, final String keyAlgorithm, final int defaultKeySize, final int hashSize) {
+    EddsaAlgorithm(final String algorithm, final String keyAlgorithm, final int defaultKeySizeBits,
+            final int hashSize) {
         this.algorithm = algorithm;
         this.keyAlgorithm = keyAlgorithm;
-        this.defaultKeySize = defaultKeySize;
+        this.defaultKeySizeBits = defaultKeySizeBits;
         this.hashSize = hashSize;
         this.hashPool = new HashObjectPool(this);
     }
@@ -55,8 +56,8 @@ public enum EddsaAlgorithm implements ISignatureAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return defaultKeySize;
+    public int getDefaultKeySizeBits() {
+        return defaultKeySizeBits;
     }
 
     @Override

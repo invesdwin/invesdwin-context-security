@@ -9,7 +9,7 @@ public interface ICipherAlgorithm extends ICipherFactory {
 
     String getAlgorithm();
 
-    int getDefaultKeySize();
+    int getDefaultKeySizeBits();
 
     IObjectPool<ICipher> getCipherPool();
 

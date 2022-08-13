@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeySize;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
@@ -39,7 +38,7 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final RsaAlgorithm algorithm : RsaAlgorithm.values()) {
+        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.VALUES) {
             final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
             final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
             testEncryptionAndDecryption(factory, "1234567890");
@@ -70,7 +69,7 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final RsaAlgorithm algorithm : RsaAlgorithm.values()) {
+        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.VALUES) {
             final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
             final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
             testCipher(factory, "1234567890", "0987654321");
@@ -111,7 +110,7 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final RsaAlgorithm algorithm : RsaAlgorithm.values()) {
+        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.VALUES) {
             final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
             final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
             try {
@@ -171,7 +170,7 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final RsaAlgorithm algorithm : RsaAlgorithm.values()) {
+        for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.VALUES) {
             final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
             final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
             try {

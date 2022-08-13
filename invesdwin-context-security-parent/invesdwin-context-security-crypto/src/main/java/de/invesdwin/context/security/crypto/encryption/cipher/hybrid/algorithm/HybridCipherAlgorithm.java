@@ -45,8 +45,8 @@ public class HybridCipherAlgorithm implements ICipherAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return getKeyCipherAlgorithm().getDefaultKeySize();
+    public int getDefaultKeySizeBits() {
+        return getKeyCipherAlgorithm().getDefaultKeySizeBits();
     }
 
     @Override

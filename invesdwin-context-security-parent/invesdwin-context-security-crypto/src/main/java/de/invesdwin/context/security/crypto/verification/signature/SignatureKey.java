@@ -26,45 +26,45 @@ public class SignatureKey implements ISignatureKey {
     private final ISignatureAlgorithm algorithm;
     private final PublicKey publicKey;
     private final PrivateKey privateKey;
-    private final int keySize;
+    private final int keySizeBits;
     private final int privateKeyBlockSize;
     private final int publicKeyBlockSize;
 
     public SignatureKey(final ISignatureAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider, algorithm.getDefaultKeySize());
+        this(algorithm, derivedKeyProvider, algorithm.getDefaultKeySizeBits());
     }
 
     public SignatureKey(final ISignatureAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
-            final int derivedKeyLength) {
+            final int derivedKeySizeBits) {
         this(derivedKeyProvider.newDerivedKey(algorithm, ("signature-key-" + algorithm.getAlgorithm()).getBytes(),
-                derivedKeyLength));
+                derivedKeySizeBits));
     }
 
     public SignatureKey(final ISignatureAlgorithm algorithm, final byte[] publicKey, final byte[] privateKey,
-            final int keySize) {
+            final int keySizeBits) {
         this(algorithm, wrapPublicKey(algorithm.getKeyAlgorithm(), publicKey),
-                wrapPrivateKey(algorithm.getKeyAlgorithm(), privateKey), keySize);
+                wrapPrivateKey(algorithm.getKeyAlgorithm(), privateKey), keySizeBits);
     }
 
-    public SignatureKey(final ISignatureAlgorithm algorithm, final KeyPair keyPair, final int keySize) {
-        this(algorithm, keyPair.getPublic(), keyPair.getPrivate(), keySize);
+    public SignatureKey(final ISignatureAlgorithm algorithm, final KeyPair keyPair, final int keySizeBits) {
+        this(algorithm, keyPair.getPublic(), keyPair.getPrivate(), keySizeBits);
     }
 
     private SignatureKey(final SignatureKey asymmetricKey) {
         this.algorithm = asymmetricKey.algorithm;
         this.publicKey = asymmetricKey.publicKey;
         this.privateKey = asymmetricKey.privateKey;
-        this.keySize = asymmetricKey.keySize;
+        this.keySizeBits = asymmetricKey.keySizeBits;
         this.privateKeyBlockSize = asymmetricKey.privateKeyBlockSize;
         this.publicKeyBlockSize = asymmetricKey.publicKeyBlockSize;
     }
 
     public SignatureKey(final ISignatureAlgorithm algorithm, final PublicKey publicKey, final PrivateKey privateKey,
-            final int keySize) {
+            final int keySizeBits) {
         this.algorithm = algorithm;
         this.publicKey = publicKey;
         this.privateKey = privateKey;
-        this.keySize = keySize;
+        this.keySizeBits = keySizeBits;
         this.privateKeyBlockSize = privateKey.getEncoded().length;
         this.publicKeyBlockSize = publicKey.getEncoded().length;
     }
@@ -85,8 +85,8 @@ public class SignatureKey implements ISignatureKey {
     }
 
     @Override
-    public int getKeySize() {
-        return keySize;
+    public int getKeySizeBits() {
+        return keySizeBits;
     }
 
     @Override
@@ -106,7 +106,7 @@ public class SignatureKey implements ISignatureKey {
         final byte[] publicKeyBytes = publicKey.getEncoded();
         final byte[] privateKeyBytes = privateKey.getEncoded();
         int position = 0;
-        buffer.putInt(position, keySize);
+        buffer.putInt(position, keySizeBits);
         position += Integer.BYTES;
         buffer.putInt(position, publicKeyBytes.length);
         position += Integer.BYTES;
@@ -120,7 +120,7 @@ public class SignatureKey implements ISignatureKey {
     @Override
     public IKey fromBuffer(final IByteBuffer buffer) {
         int position = 0;
-        final int keySize = buffer.getInt(position);
+        final int keySizeBits = buffer.getInt(position);
         position += Integer.BYTES;
         final int publicKeySize = buffer.getInt(position);
         position += Integer.BYTES;
@@ -130,7 +130,7 @@ public class SignatureKey implements ISignatureKey {
         final byte[] privateKeyBytes = ByteBuffers.allocateByteArray(buffer.remaining(position));
         buffer.getBytes(position, privateKeyBytes);
         position += privateKeyBytes.length;
-        return new SignatureKey(algorithm, publicKeyBytes, privateKeyBytes, keySize);
+        return new SignatureKey(algorithm, publicKeyBytes, privateKeyBytes, keySizeBits);
     }
 
     public static PrivateKey wrapPrivateKey(final String keyAlgorithm, final byte[] privateKey) {
@@ -154,10 +154,10 @@ public class SignatureKey implements ISignatureKey {
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
             final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm.getKeyAlgorithm());
-            final int lengthBits = keySize * Byte.SIZE;
+            final int lengthBits = keySizeBits;
             generator.initialize(lengthBits, random);
             final KeyPair keyPair = generator.generateKeyPair();
-            return new SignatureKey(algorithm, keyPair, keySize);
+            return new SignatureKey(algorithm, keyPair, keySizeBits);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } finally {

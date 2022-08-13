@@ -4,23 +4,16 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 @NotThreadSafe
 public enum EcdsaKeySize {
-    _256(32),
-    _384(48),
-    //should actually be 521, so maybe give length in bits to DerivedKeyGenerator?
-    _512(64);
+    _256(256),
+    _384(384),
+    _521(521);
 
-    public static final EcdsaKeySize DEFAULT = EcdsaKeySize._512;
+    public static final EcdsaKeySize DEFAULT = EcdsaKeySize._521;
 
-    private int bytes;
     private int bits;
 
-    EcdsaKeySize(final int bytes) {
-        this.bytes = bytes;
-        this.bits = bytes * Byte.SIZE;
-    }
-
-    public int getBytes() {
-        return bytes;
+    EcdsaKeySize(final int bits) {
+        this.bits = bits;
     }
 
     public int getBits() {

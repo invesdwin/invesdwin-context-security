@@ -18,16 +18,16 @@ public class HashKey implements IHashKey {
 
     private final IHashAlgorithm algorithm;
     private final Key key;
-    private final int keySize;
+    private final int keySizeBits;
 
     public HashKey(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider, algorithm.getDefaultKeySize());
+        this(algorithm, derivedKeyProvider, algorithm.getDefaultKeySizeBits());
     }
 
     public HashKey(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
-            final int derivedKeySize) {
+            final int derivedKeySizeBits) {
         this(derivedKeyProvider.newDerivedKey(algorithm, ("hash-key-" + algorithm.getAlgorithm()).getBytes(),
-                derivedKeySize));
+                derivedKeySizeBits));
     }
 
     public HashKey(final IHashAlgorithm algorithm, final byte[] key) {
@@ -37,13 +37,13 @@ public class HashKey implements IHashKey {
     private HashKey(final HashKey hashKey) {
         this.algorithm = hashKey.algorithm;
         this.key = hashKey.key;
-        this.keySize = hashKey.keySize;
+        this.keySizeBits = hashKey.keySizeBits;
     }
 
     public HashKey(final IHashAlgorithm algorithm, final Key key) {
         this.algorithm = algorithm;
         this.key = key;
-        this.keySize = key.getEncoded().length;
+        this.keySizeBits = key.getEncoded().length * Byte.SIZE;
     }
 
     @Override
@@ -67,13 +67,13 @@ public class HashKey implements IHashKey {
     }
 
     @Override
-    public int getKeySize() {
-        return keySize;
+    public int getKeySizeBits() {
+        return keySizeBits;
     }
 
     @Override
     public int getKeyBlockSize() {
-        return keySize;
+        return keySizeBits;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class HashKey implements IHashKey {
 
     @Override
     public IKey newRandomInstance() {
-        final byte[] randomKey = ByteBuffers.allocateByteArray(keySize);
+        final byte[] randomKey = ByteBuffers.allocateByteArray(keySizeBits);
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
             random.nextBytes(randomKey);

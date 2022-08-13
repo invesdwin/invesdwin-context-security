@@ -73,8 +73,8 @@ public enum RsaSignatureAlgorithm implements ISignatureAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return RsaAlgorithm.DEFAULT.getDefaultKeySize();
+    public int getDefaultKeySizeBits() {
+        return RsaAlgorithm.DEFAULT.getDefaultKeySizeBits();
     }
 
     @Override

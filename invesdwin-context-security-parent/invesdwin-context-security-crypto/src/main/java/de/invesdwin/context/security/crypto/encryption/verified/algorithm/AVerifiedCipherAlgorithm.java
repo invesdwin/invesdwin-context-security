@@ -53,8 +53,8 @@ public abstract class AVerifiedCipherAlgorithm implements ICipherAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return getCipherAlgorithm().getDefaultKeySize();
+    public int getDefaultKeySizeBits() {
+        return getCipherAlgorithm().getDefaultKeySizeBits();
     }
 
     @Override

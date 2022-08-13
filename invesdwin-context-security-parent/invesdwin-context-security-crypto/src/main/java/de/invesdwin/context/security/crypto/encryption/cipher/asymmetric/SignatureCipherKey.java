@@ -25,17 +25,17 @@ public class SignatureCipherKey extends AsymmetricCipherKey {
     }
 
     public SignatureCipherKey(final IAsymmetricCipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
-            final int derivedKeyLength) {
-        super(algorithm, derivedKeyProvider, derivedKeyLength);
+            final int derivedKeySizeBits) {
+        super(algorithm, derivedKeyProvider, derivedKeySizeBits);
     }
 
     public SignatureCipherKey(final IAsymmetricCipherAlgorithm algorithm, final byte[] publicKey,
-            final byte[] privateKey, final int keySize) {
-        super(algorithm, publicKey, privateKey, keySize);
+            final byte[] privateKey, final int keySizeBits) {
+        super(algorithm, publicKey, privateKey, keySizeBits);
     }
 
-    public SignatureCipherKey(final IAsymmetricCipherAlgorithm algorithm, final KeyPair keyPair, final int keySize) {
-        super(algorithm, keyPair, keySize);
+    public SignatureCipherKey(final IAsymmetricCipherAlgorithm algorithm, final KeyPair keyPair, final int keySizeBits) {
+        super(algorithm, keyPair, keySizeBits);
     }
 
     protected SignatureCipherKey(final SignatureCipherKey asymmetricKey) {
@@ -43,8 +43,8 @@ public class SignatureCipherKey extends AsymmetricCipherKey {
     }
 
     public SignatureCipherKey(final IAsymmetricCipherAlgorithm algorithm, final PublicKey publicKey,
-            final PrivateKey privateKey, final int keySize) {
-        super(algorithm, publicKey, privateKey, keySize);
+            final PrivateKey privateKey, final int keySizeBits) {
+        super(algorithm, publicKey, privateKey, keySizeBits);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class SignatureCipherKey extends AsymmetricCipherKey {
     @Override
     public IKey fromBuffer(final IByteBuffer buffer) {
         int position = 0;
-        final int keySize = buffer.getInt(position);
+        final int keySizeBits = buffer.getInt(position);
         position += Integer.BYTES;
         final int publicKeySize = buffer.getInt(position);
         position += Integer.BYTES;
@@ -70,7 +70,7 @@ public class SignatureCipherKey extends AsymmetricCipherKey {
         final byte[] privateKeyBytes = ByteBuffers.allocateByteArray(buffer.remaining(position));
         buffer.getBytes(position, privateKeyBytes);
         position += privateKeyBytes.length;
-        return new SignatureCipherKey(getAlgorithm(), publicKeyBytes, privateKeyBytes, keySize);
+        return new SignatureCipherKey(getAlgorithm(), publicKeyBytes, privateKeyBytes, keySizeBits);
     }
 
     @Override
@@ -78,10 +78,10 @@ public class SignatureCipherKey extends AsymmetricCipherKey {
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
             final KeyPairGenerator generator = KeyPairGenerator.getInstance(getAlgorithm().getKeyAlgorithm());
-            final int lengthBits = getKeySize() * Byte.SIZE;
+            final int lengthBits = getKeySizeBits();
             generator.initialize(lengthBits, random);
             final KeyPair keyPair = generator.generateKeyPair();
-            return new SignatureCipherKey(getAlgorithm(), keyPair, getKeySize());
+            return new SignatureCipherKey(getAlgorithm(), keyPair, getKeySizeBits());
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } finally {

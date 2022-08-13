@@ -12,21 +12,21 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
 public enum GmacAlgorithm implements IHashAlgorithm {
-    GMAC_AES_128("GmacAES128", AesKeySize._128.getBytes()),
-    GMAC_AES_196("GmacAES196", AesKeySize._196.getBytes()),
-    GMAC_AES_256("GmacAES256", AesKeySize._256.getBytes());
+    GMAC_AES_128("GmacAES128", AesKeySize._128.getBits()),
+    GMAC_AES_196("GmacAES196", AesKeySize._196.getBits()),
+    GMAC_AES_256("GmacAES256", AesKeySize._256.getBits());
 
     public static final GmacAlgorithm DEFAULT = GMAC_AES_256;
 
     private static final AesAlgorithm REFERENCE = AesAlgorithm.AES_GCM_NoPadding;
     private final String algorithm;
     private final HashObjectPool hashPool;
-    private final int keySize;
+    private final int keySizeBits;
 
-    GmacAlgorithm(final String algorithm, final int keySize) {
+    GmacAlgorithm(final String algorithm, final int keySizeBits) {
         this.algorithm = algorithm;
         this.hashPool = new HashObjectPool(this);
-        this.keySize = keySize;
+        this.keySizeBits = keySizeBits;
     }
 
     @Override
@@ -45,8 +45,8 @@ public enum GmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return keySize;
+    public int getDefaultKeySizeBits() {
+        return keySizeBits;
     }
 
     @Override

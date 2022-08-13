@@ -43,53 +43,57 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
     }
 
     @Override
-    public byte[] newDerivedKey(final byte[] info, final int length) {
-        return derivationFactory.expand(key, info, length);
+    public byte[] newDerivedKey(final byte[] info, final int sizeBits) {
+        int sizeBytes = sizeBits / Byte.SIZE;
+        if (sizeBits % Byte.SIZE != 0) {
+            //add a bit more entropy for a random seed
+            sizeBytes++;
+        }
+        return derivationFactory.expand(key, info, sizeBytes);
     }
 
     @Override
     public SymmetricCipherKey newDerivedKey(final ISymmetricCipherAlgorithm algorithm, final byte[] info,
-            final int length) {
-        return new SymmetricCipherKey(algorithm, newDerivedKey(info, length), new CipherDerivedIV(algorithm, this));
+            final int sizeBits) {
+        return new SymmetricCipherKey(algorithm, newDerivedKey(info, sizeBits), new CipherDerivedIV(algorithm, this));
     }
 
     @Override
-    public HashKey newDerivedKey(final IHashAlgorithm algorithm, final byte[] info, final int length) {
-        return new HashKey(algorithm, newDerivedKey(info, length));
+    public HashKey newDerivedKey(final IHashAlgorithm algorithm, final byte[] info, final int sizeBits) {
+        return new HashKey(algorithm, newDerivedKey(info, sizeBits));
     }
 
     @Override
     public AsymmetricCipherKey newDerivedKey(final IAsymmetricCipherAlgorithm algorithm, final byte[] info,
-            final int length) {
+            final int sizeBits) {
         try {
             final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm.getKeyAlgorithm());
             //we need to use a pseudorandom generator in order to be able to seed it
             final java.security.SecureRandom random = java.security.SecureRandom.getInstance("SHA1PRNG");
             //we need a deterministic pseudorandom seed
-            final byte[] seed = newDerivedKey(info, length);
+            final byte[] seed = newDerivedKey(info, sizeBits);
             random.setSeed(seed);
-            final int lengthBits = length * Byte.SIZE;
-            generator.initialize(lengthBits, random);
+            final int sizeBitsBits = sizeBits * Byte.SIZE;
+            generator.initialize(sizeBitsBits, random);
             final KeyPair keyPair = generator.generateKeyPair();
-            return new AsymmetricCipherKey(algorithm, keyPair, length);
+            return new AsymmetricCipherKey(algorithm, keyPair, sizeBits);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public SignatureKey newDerivedKey(final ISignatureAlgorithm algorithm, final byte[] info, final int length) {
+    public SignatureKey newDerivedKey(final ISignatureAlgorithm algorithm, final byte[] info, final int sizeBits) {
         try {
             final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm.getKeyAlgorithm());
             //we need to use a pseudorandom generator in order to be able to seed it
             final java.security.SecureRandom random = java.security.SecureRandom.getInstance("SHA1PRNG");
             //we need a deterministic pseudorandom seed
-            final byte[] seed = newDerivedKey(info, length);
+            final byte[] seed = newDerivedKey(info, sizeBits);
             random.setSeed(seed);
-            final int lengthBits = length * Byte.SIZE;
-            generator.initialize(lengthBits, random);
+            generator.initialize(sizeBits, random);
             final KeyPair keyPair = generator.generateKeyPair();
-            return new SignatureKey(algorithm, keyPair, length);
+            return new SignatureKey(algorithm, keyPair, sizeBits);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

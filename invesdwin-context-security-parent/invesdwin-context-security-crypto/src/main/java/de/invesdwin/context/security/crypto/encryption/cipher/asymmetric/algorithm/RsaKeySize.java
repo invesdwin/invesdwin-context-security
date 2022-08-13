@@ -4,9 +4,9 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable
 public enum RsaKeySize {
-    _1024(128),
-    _2048(256),
-    _4096(512);
+    _1024(1024),
+    _2048(2048),
+    _4096(4096);
 
     /**
      * Intel instructions support up to 4096 key length:
@@ -14,16 +14,14 @@ public enum RsaKeySize {
      */
     public static final RsaKeySize DEFAULT = _4096;
 
-    private int bytes;
     private int bits;
 
-    RsaKeySize(final int bytes) {
-        this.bytes = bytes;
-        this.bits = bytes * Byte.SIZE;
+    RsaKeySize(final int bits) {
+        this.bits = bits;
     }
 
     public int getBytes() {
-        return bytes;
+        return bits * Byte.SIZE;
     }
 
     public int getBits() {

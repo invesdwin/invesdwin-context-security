@@ -70,8 +70,8 @@ public enum EcdsaAlgorithm implements ISignatureAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return EcdsaKeySize.DEFAULT.getBytes();
+    public int getDefaultKeySizeBits() {
+        return EcdsaKeySize.DEFAULT.getBits();
     }
 
     @Override

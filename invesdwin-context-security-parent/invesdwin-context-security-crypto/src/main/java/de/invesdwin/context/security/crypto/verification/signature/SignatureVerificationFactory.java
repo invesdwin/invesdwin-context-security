@@ -26,13 +26,13 @@ public class SignatureVerificationFactory implements IVerificationFactory {
     private final ISignatureAlgorithm algorithm;
     private final SignatureKey key;
 
-    public SignatureVerificationFactory(final byte[] publicKey, final byte[] privateKey, final int keySize) {
-        this(ISignatureAlgorithm.DEFAULT, publicKey, privateKey, keySize);
+    public SignatureVerificationFactory(final byte[] publicKey, final byte[] privateKey, final int keySizeBits) {
+        this(ISignatureAlgorithm.DEFAULT, publicKey, privateKey, keySizeBits);
     }
 
     public SignatureVerificationFactory(final ISignatureAlgorithm algorithm, final byte[] publicKey,
-            final byte[] privateKey, final int keySize) {
-        this(new SignatureKey(algorithm, publicKey, privateKey, keySize));
+            final byte[] privateKey, final int keySizeBits) {
+        this(new SignatureKey(algorithm, publicKey, privateKey, keySizeBits));
     }
 
     public SignatureVerificationFactory(final IDerivedKeyProvider derivedKeyProvider) {
@@ -45,8 +45,8 @@ public class SignatureVerificationFactory implements IVerificationFactory {
     }
 
     public SignatureVerificationFactory(final ISignatureAlgorithm algorithm,
-            final IDerivedKeyProvider derivedKeyProvider, final int derivedKeySize) {
-        this(new SignatureKey(algorithm, derivedKeyProvider, derivedKeySize));
+            final IDerivedKeyProvider derivedKeyProvider, final int derivedKeySizeBits) {
+        this(new SignatureKey(algorithm, derivedKeyProvider, derivedKeySizeBits));
     }
 
     public SignatureVerificationFactory(final SignatureKey key) {

@@ -6,10 +6,15 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.ChaCha20Algorithm;
+import de.invesdwin.util.collections.Arrays;
 
 public interface ISymmetricCipherAlgorithm extends ICipherAlgorithm {
 
     ISymmetricCipherAlgorithm DEFAULT = AesAlgorithm.DEFAULT;
+
+    ISymmetricCipherAlgorithm[] VALUES = Arrays.concat(ISymmetricCipherAlgorithm.class, AesAlgorithm.values(),
+            ChaCha20Algorithm.values());
 
     int getIvSize();
 

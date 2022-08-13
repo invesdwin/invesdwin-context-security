@@ -21,17 +21,17 @@ public class SymmetricCipherKey implements ICipherKey {
 
     private final ISymmetricCipherAlgorithm algorithm;
     private final Key key;
-    private final int keySize;
+    private final int keySizeBytes;
     private final ICipherIV cipherIV;
 
     public SymmetricCipherKey(final ISymmetricCipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider, algorithm.getDefaultKeySize());
+        this(algorithm, derivedKeyProvider, algorithm.getDefaultKeySizeBits());
     }
 
     public SymmetricCipherKey(final ISymmetricCipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
-            final int derivedKeySize) {
+            final int derivedKeySizeBits) {
         this(derivedKeyProvider.newDerivedKey(algorithm,
-                ("cipher-symmetric-key-" + algorithm.getAlgorithm()).getBytes(), derivedKeySize));
+                ("cipher-symmetric-key-" + algorithm.getAlgorithm()).getBytes(), derivedKeySizeBits));
     }
 
     public SymmetricCipherKey(final ISymmetricCipherAlgorithm algorithm, final byte[] derivedKey,
@@ -46,14 +46,14 @@ public class SymmetricCipherKey implements ICipherKey {
     private SymmetricCipherKey(final SymmetricCipherKey symmetricKey) {
         this.algorithm = symmetricKey.algorithm;
         this.key = symmetricKey.key;
-        this.keySize = symmetricKey.keySize;
+        this.keySizeBytes = symmetricKey.keySizeBytes;
         this.cipherIV = symmetricKey.cipherIV;
     }
 
     public SymmetricCipherKey(final ISymmetricCipherAlgorithm algorithm, final Key key, final ICipherIV cipherIV) {
         this.algorithm = algorithm;
         this.key = key;
-        this.keySize = key.getEncoded().length;
+        this.keySizeBytes = key.getEncoded().length;
         this.cipherIV = cipherIV;
     }
 
@@ -82,13 +82,13 @@ public class SymmetricCipherKey implements ICipherKey {
     }
 
     @Override
-    public int getKeySize() {
-        return keySize;
+    public int getKeySizeBits() {
+        return keySizeBytes * Byte.SIZE;
     }
 
     @Override
     public int getKeyBlockSize() {
-        return keySize + Integer.BYTES + cipherIV.getIvBlockSize();
+        return keySizeBytes + Integer.BYTES + cipherIV.getIvBlockSize();
     }
 
     public static Key wrapKey(final String keyAlgorithm, final byte[] key) {
@@ -128,7 +128,7 @@ public class SymmetricCipherKey implements ICipherKey {
 
     @Override
     public IKey newRandomInstance() {
-        final byte[] randomKey = ByteBuffers.allocateByteArray(keySize);
+        final byte[] randomKey = ByteBuffers.allocateByteArray(keySizeBytes);
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
             random.nextBytes(randomKey);

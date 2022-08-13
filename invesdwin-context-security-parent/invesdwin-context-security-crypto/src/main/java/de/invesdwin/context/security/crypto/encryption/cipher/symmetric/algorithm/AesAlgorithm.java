@@ -110,14 +110,14 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
 
     private final String algorithm;
     private final int ivSize;
-    private final int signatureSize;
+    private final int hashSize;
     private final CipherObjectPool cipherPool;
     private final MutableIvParameterSpecObjectPool ivParameterSpecPool;
 
-    AesAlgorithm(final String algorithm, final int ivSize, final int signatureSize) {
+    AesAlgorithm(final String algorithm, final int ivSize, final int hashSize) {
         this.algorithm = algorithm;
         this.ivSize = ivSize;
-        this.signatureSize = signatureSize;
+        this.hashSize = hashSize;
         this.cipherPool = new CipherObjectPool(this);
         this.ivParameterSpecPool = new MutableIvParameterSpecObjectPool(ivSize);
     }
@@ -128,8 +128,8 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return AesKeySize.DEFAULT.getBytes();
+    public int getDefaultKeySizeBits() {
+        return AesKeySize.DEFAULT.getBits();
     }
 
     @Override
@@ -149,7 +149,7 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
 
     @Override
     public int getHashSize() {
-        return signatureSize;
+        return hashSize;
     }
 
     @Override

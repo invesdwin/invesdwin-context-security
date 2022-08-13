@@ -7,7 +7,6 @@ import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.AsymmetricEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.DigestAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.HashAlgorithmType;
@@ -28,9 +27,9 @@ public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
 
     static {
         final List<AsymmetricCipherSignatureAlgorithm> values = new ArrayList<>();
-        for (final RsaAlgorithm rsaAlgorithm : RsaAlgorithm.values()) {
+        for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.VALUES) {
             for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
-                values.add(new AsymmetricCipherSignatureAlgorithm(hashAlgorithm, rsaAlgorithm));
+                values.add(new AsymmetricCipherSignatureAlgorithm(hashAlgorithm, asymmetricAlgorithm));
             }
         }
         VALUES = values.toArray(new AsymmetricCipherSignatureAlgorithm[0]);
@@ -43,7 +42,7 @@ public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
     public AsymmetricCipherSignatureAlgorithm(final IHashAlgorithm hashAlgorithm,
             final IAsymmetricCipherAlgorithm cipherAlgorithm) {
         this(hashAlgorithm, new AsymmetricEncryptionFactory(cipherAlgorithm, (byte[]) null, (byte[]) null,
-                cipherAlgorithm.getDefaultKeySize()));
+                cipherAlgorithm.getDefaultKeySizeBits()));
     }
 
     public AsymmetricCipherSignatureAlgorithm(final IHashAlgorithm hashAlgorithm,
@@ -64,8 +63,8 @@ public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return asymmetricEncryptionFactory.getKey().getKeySize();
+    public int getDefaultKeySizeBits() {
+        return asymmetricEncryptionFactory.getKey().getKeySizeBits();
     }
 
     @Override

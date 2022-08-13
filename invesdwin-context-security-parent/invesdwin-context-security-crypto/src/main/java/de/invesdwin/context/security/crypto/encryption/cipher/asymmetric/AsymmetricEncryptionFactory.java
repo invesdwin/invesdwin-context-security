@@ -25,13 +25,13 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
     private final IAsymmetricCipherAlgorithm algorithm;
     private final AsymmetricCipherKey key;
 
-    public AsymmetricEncryptionFactory(final byte[] publicKey, final byte[] privateKey, final int keySize) {
-        this(IAsymmetricCipherAlgorithm.DEFAULT, publicKey, privateKey, keySize);
+    public AsymmetricEncryptionFactory(final byte[] publicKey, final byte[] privateKey, final int keySizeBits) {
+        this(IAsymmetricCipherAlgorithm.DEFAULT, publicKey, privateKey, keySizeBits);
     }
 
     public AsymmetricEncryptionFactory(final IAsymmetricCipherAlgorithm algorithm, final byte[] publicKey,
-            final byte[] privateKey, final int keySize) {
-        this(new AsymmetricCipherKey(algorithm, publicKey, privateKey, keySize));
+            final byte[] privateKey, final int keySizeBits) {
+        this(new AsymmetricCipherKey(algorithm, publicKey, privateKey, keySizeBits));
     }
 
     public AsymmetricEncryptionFactory(final IDerivedKeyProvider derivedKeyProvider) {
@@ -44,8 +44,8 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
     }
 
     public AsymmetricEncryptionFactory(final IAsymmetricCipherAlgorithm algorithm,
-            final IDerivedKeyProvider derivedKeyProvider, final int derivedKeySize) {
-        this(new AsymmetricCipherKey(algorithm, derivedKeyProvider, derivedKeySize));
+            final IDerivedKeyProvider derivedKeyProvider, final int derivedKeySizeBits) {
+        this(new AsymmetricCipherKey(algorithm, derivedKeyProvider, derivedKeySizeBits));
     }
 
     public AsymmetricEncryptionFactory(final AsymmetricCipherKey key) {

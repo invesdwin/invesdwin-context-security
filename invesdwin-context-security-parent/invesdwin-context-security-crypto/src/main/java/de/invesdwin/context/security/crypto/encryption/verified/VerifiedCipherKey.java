@@ -21,8 +21,8 @@ public class VerifiedCipherKey implements IKey {
     }
 
     @Override
-    public int getKeySize() {
-        return encryptionKey.getKeySize();
+    public int getKeySizeBits() {
+        return encryptionKey.getKeySizeBits();
     }
 
     @Override

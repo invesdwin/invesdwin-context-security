@@ -42,8 +42,8 @@ public enum RsaAlgorithm implements IAsymmetricCipherAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return delegate.getDefaultKeySize();
+    public int getDefaultKeySizeBits() {
+        return delegate.getDefaultKeySizeBits();
     }
 
     @Override

@@ -12,9 +12,9 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 public class DisabledHashKey implements IHashKey {
 
     public static final DisabledHashKey INSTANCE = new DisabledHashKey();
-    
+
     @Override
-    public int getKeySize() {
+    public int getKeySizeBits() {
         return 0;
     }
 

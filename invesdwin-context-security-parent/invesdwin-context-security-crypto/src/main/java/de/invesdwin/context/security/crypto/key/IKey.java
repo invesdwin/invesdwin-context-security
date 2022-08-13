@@ -8,7 +8,7 @@ public interface IKey {
     /**
      * This is the number of bytes of the key (e.g. 128/256 for AES or 4096 for RSA)
      */
-    int getKeySize();
+    int getKeySizeBits();
 
     /**
      * This is the size in bytes for this key instance. This combines the primary key with e.g. a secondary key or IV.

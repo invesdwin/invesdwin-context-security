@@ -51,8 +51,8 @@ public enum KmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return getHashSize();
+    public int getDefaultKeySizeBits() {
+        return getHashSize() * Byte.SIZE;
     }
 
     @Override

@@ -58,8 +58,8 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     }
 
     public SymmetricEncryptionFactory(final ISymmetricCipherAlgorithm algorithm,
-            final IDerivedKeyProvider derivedKeyProvider, final int derivedKeyLength) {
-        this(algorithm, new SymmetricCipherKey(algorithm, derivedKeyProvider, derivedKeyLength));
+            final IDerivedKeyProvider derivedKeyProvider, final int derivedKeySizeBits) {
+        this(algorithm, new SymmetricCipherKey(algorithm, derivedKeyProvider, derivedKeySizeBits));
     }
 
     public SymmetricEncryptionFactory(final ISymmetricCipherAlgorithm algorithm, final byte[] key,

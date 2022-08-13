@@ -42,7 +42,7 @@ public class CipherDerivedIV implements ICipherIV {
     public CipherDerivedIV(final ISymmetricCipherAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
             final AtomicLong ivCounter) {
         this(algorithm, derivedKeyProvider.newDerivedKey(("cipher-symmetric-iv-" + algorithm.getAlgorithm()).getBytes(),
-                algorithm.getIvSize()), ivCounter);
+                algorithm.getIvSize() * Byte.SIZE), ivCounter);
     }
 
     public CipherDerivedIV(final ISymmetricCipherAlgorithm algorithm, final byte[] derivedIV) {

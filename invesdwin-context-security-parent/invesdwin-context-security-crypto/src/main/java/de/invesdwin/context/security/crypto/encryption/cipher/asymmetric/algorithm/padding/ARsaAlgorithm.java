@@ -40,8 +40,8 @@ public abstract class ARsaAlgorithm implements IAsymmetricCipherAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return RsaKeySize.DEFAULT.getBytes();
+    public int getDefaultKeySizeBits() {
+        return RsaKeySize.DEFAULT.getBits();
     }
 
     @Override

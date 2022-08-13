@@ -18,9 +18,9 @@ import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @Immutable
 public enum CmacAlgorithm implements IHashAlgorithm {
-    CMAC_AES_128("CmacAES128", AesKeySize._128.getBytes()),
-    CMAC_AES_196("CmacAES196", AesKeySize._196.getBytes()),
-    CMAC_AES_256("CmacAES256", AesKeySize._256.getBytes());
+    CMAC_AES_128("CmacAES128", AesKeySize._128.getBits()),
+    CMAC_AES_196("CmacAES196", AesKeySize._196.getBits()),
+    CMAC_AES_256("CmacAES256", AesKeySize._256.getBits());
 
     public static final CmacAlgorithm DEFAULT = CMAC_AES_256;
 
@@ -28,12 +28,12 @@ public enum CmacAlgorithm implements IHashAlgorithm {
     private static final AesAlgorithm REFERENCE = AesAlgorithm.AES_CBC_NoPadding;
     private final String algorithm;
     private final HashObjectPool hashPool;
-    private int keySize;
+    private int keySizeBits;
 
-    CmacAlgorithm(final String algorithm, final int keySize) {
+    CmacAlgorithm(final String algorithm, final int keySizeBits) {
         this.algorithm = algorithm;
         this.hashPool = new HashObjectPool(this);
-        this.keySize = keySize;
+        this.keySizeBits = keySizeBits;
     }
 
     @Override
@@ -57,8 +57,8 @@ public enum CmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public int getDefaultKeySize() {
-        return keySize;
+    public int getDefaultKeySizeBits() {
+        return keySizeBits;
     }
 
     @Override

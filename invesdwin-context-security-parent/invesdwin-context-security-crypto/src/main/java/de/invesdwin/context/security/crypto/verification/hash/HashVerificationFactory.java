@@ -37,8 +37,8 @@ public class HashVerificationFactory implements IVerificationFactory {
     }
 
     public HashVerificationFactory(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,
-            final int derivedKeySize) {
-        this(new HashKey(algorithm, derivedKeyProvider, derivedKeySize));
+            final int derivedKeySizeBits) {
+        this(new HashKey(algorithm, derivedKeyProvider, derivedKeySizeBits));
     }
 
     public HashVerificationFactory(final HashKey key) {
