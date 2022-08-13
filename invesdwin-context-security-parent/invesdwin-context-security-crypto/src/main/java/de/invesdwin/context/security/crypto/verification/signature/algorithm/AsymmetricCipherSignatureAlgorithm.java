@@ -1,10 +1,15 @@
 package de.invesdwin.context.security.crypto.verification.signature.algorithm;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.AsymmetricEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.DigestAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.HashAlgorithmType;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
@@ -16,7 +21,20 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
 
     public static final AsymmetricCipherSignatureAlgorithm DEFAULT = new AsymmetricCipherSignatureAlgorithm(
-            IHashAlgorithm.DEFAULT, IAsymmetricCipherAlgorithm.DEFAULT);
+            //no need to use HMAC_SHA_256, since RSA already provides the integrity and authentication in addition to the non-repudiation
+            DigestAlgorithm.SHA_256, IAsymmetricCipherAlgorithm.DEFAULT);
+
+    public static final AsymmetricCipherSignatureAlgorithm[] VALUES;
+
+    static {
+        final List<AsymmetricCipherSignatureAlgorithm> values = new ArrayList<>();
+        for (final RsaAlgorithm rsaAlgorithm : RsaAlgorithm.values()) {
+            for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.VALUES) {
+                values.add(new AsymmetricCipherSignatureAlgorithm(hashAlgorithm, rsaAlgorithm));
+            }
+        }
+        VALUES = values.toArray(new AsymmetricCipherSignatureAlgorithm[0]);
+    }
 
     private final IHashAlgorithm hashAlgorithm;
     private final AsymmetricEncryptionFactory asymmetricEncryptionFactory;
@@ -46,7 +64,7 @@ public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
     }
 
     @Override
-    public int getKeySize() {
+    public int getDefaultKeySize() {
         return asymmetricEncryptionFactory.getKey().getKeySize();
     }
 

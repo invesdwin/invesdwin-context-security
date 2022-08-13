@@ -52,7 +52,7 @@ public class HmacDigestAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public int getKeySize() {
+    public int getDefaultKeySize() {
         return getHashSize();
     }
 

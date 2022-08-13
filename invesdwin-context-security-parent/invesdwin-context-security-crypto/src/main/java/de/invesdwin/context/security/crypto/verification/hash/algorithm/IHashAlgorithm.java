@@ -20,7 +20,7 @@ public interface IHashAlgorithm extends IHashFactory {
 
     String getAlgorithm();
 
-    int getKeySize();
+    int getDefaultKeySize();
 
     int getHashSize();
 

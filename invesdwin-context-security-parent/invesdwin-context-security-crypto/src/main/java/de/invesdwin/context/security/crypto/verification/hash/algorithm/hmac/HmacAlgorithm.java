@@ -111,7 +111,7 @@ public enum HmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public int getKeySize() {
+    public int getDefaultKeySize() {
         return delegate.getHashSize();
     }
 

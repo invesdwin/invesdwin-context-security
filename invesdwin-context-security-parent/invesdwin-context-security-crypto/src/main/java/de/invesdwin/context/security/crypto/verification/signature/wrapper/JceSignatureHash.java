@@ -20,15 +20,19 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 public class JceSignatureHash implements IHash {
 
     private final Signature signature;
+    private final int hashSize;
+    private final boolean dynamicHashSize;
     private HashMode prevMode;
     private IKey prevKey;
 
-    public JceSignatureHash(final String algorithm) {
-        this(getJceSignatureInstance(algorithm));
+    public JceSignatureHash(final String algorithm, final int hashSize) {
+        this(getJceSignatureInstance(algorithm), hashSize);
     }
 
-    public JceSignatureHash(final Signature signature) {
+    public JceSignatureHash(final Signature signature, final int hashSize) {
         this.signature = signature;
+        this.hashSize = hashSize;
+        this.dynamicHashSize = hashSize <= IHashAlgorithm.DYNAMIC_HASH_SIZE;
     }
 
     public static Signature getJceSignatureInstance(final String algorithm) {
@@ -46,12 +50,12 @@ public class JceSignatureHash implements IHash {
 
     @Override
     public boolean isDynamicHashSize() {
-        return true;
+        return dynamicHashSize;
     }
 
     @Override
     public int getHashSize() {
-        return IHashAlgorithm.DYNAMIC_HASH_SIZE;
+        return hashSize;
     }
 
     @Override

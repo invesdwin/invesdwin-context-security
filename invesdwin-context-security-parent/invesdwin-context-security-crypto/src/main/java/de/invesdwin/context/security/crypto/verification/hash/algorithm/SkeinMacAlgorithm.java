@@ -69,7 +69,7 @@ public enum SkeinMacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public int getKeySize() {
+    public int getDefaultKeySize() {
         return getHashSize();
     }
 

@@ -21,7 +21,7 @@ public class HashKey implements IHashKey {
     private final int keySize;
 
     public HashKey(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider, algorithm.getKeySize());
+        this(algorithm, derivedKeyProvider, algorithm.getDefaultKeySize());
     }
 
     public HashKey(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,

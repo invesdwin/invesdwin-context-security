@@ -31,7 +31,7 @@ public class SignatureKey implements ISignatureKey {
     private final int publicKeyBlockSize;
 
     public SignatureKey(final ISignatureAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {
-        this(algorithm, derivedKeyProvider, algorithm.getKeySize());
+        this(algorithm, derivedKeyProvider, algorithm.getDefaultKeySize());
     }
 
     public SignatureKey(final ISignatureAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider,

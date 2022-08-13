@@ -45,7 +45,7 @@ public enum GmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public int getKeySize() {
+    public int getDefaultKeySize() {
         return keySize;
     }
 

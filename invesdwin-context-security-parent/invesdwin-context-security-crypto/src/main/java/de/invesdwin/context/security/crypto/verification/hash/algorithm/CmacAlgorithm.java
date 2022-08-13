@@ -57,7 +57,7 @@ public enum CmacAlgorithm implements IHashAlgorithm {
     }
 
     @Override
-    public int getKeySize() {
+    public int getDefaultKeySize() {
         return keySize;
     }
 
