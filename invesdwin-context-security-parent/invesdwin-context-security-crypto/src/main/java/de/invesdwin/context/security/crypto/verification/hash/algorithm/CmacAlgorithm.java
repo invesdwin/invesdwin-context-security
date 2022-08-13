@@ -19,7 +19,7 @@ import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 @Immutable
 public enum CmacAlgorithm implements IHashAlgorithm {
     CMAC_AES_128("CmacAES128", AesKeySize._128.getBits()),
-    CMAC_AES_196("CmacAES196", AesKeySize._196.getBits()),
+    CMAC_AES_192("CmacAES192", AesKeySize._192.getBits()),
     CMAC_AES_256("CmacAES256", AesKeySize._256.getBits());
 
     public static final CmacAlgorithm DEFAULT = CMAC_AES_256;

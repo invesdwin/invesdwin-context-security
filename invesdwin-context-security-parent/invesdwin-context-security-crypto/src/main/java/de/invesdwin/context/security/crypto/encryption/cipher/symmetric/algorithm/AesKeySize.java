@@ -5,7 +5,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public enum AesKeySize {
     _128(128),
-    _196(196),
+    _192(192),
     _256(256);
 
     public static final AesKeySize BLOCK_SIZE = AesKeySize._128;

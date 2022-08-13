@@ -13,7 +13,7 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 @Immutable
 public enum GmacAlgorithm implements IHashAlgorithm {
     GMAC_AES_128("GmacAES128", AesKeySize._128.getBits()),
-    GMAC_AES_196("GmacAES196", AesKeySize._196.getBits()),
+    GMAC_AES_192("GmacAES192", AesKeySize._192.getBits()),
     GMAC_AES_256("GmacAES256", AesKeySize._256.getBits());
 
     public static final GmacAlgorithm DEFAULT = GMAC_AES_256;
