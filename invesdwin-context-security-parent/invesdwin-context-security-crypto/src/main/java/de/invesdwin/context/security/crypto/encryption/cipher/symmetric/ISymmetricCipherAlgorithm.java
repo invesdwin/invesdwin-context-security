@@ -13,8 +13,7 @@ public interface ISymmetricCipherAlgorithm extends ICipherAlgorithm {
     ISymmetricCipherAlgorithm DEFAULT = AesAlgorithm.DEFAULT;
 
     static ISymmetricCipherAlgorithm[] values() {
-        return Arrays.concat(ISymmetricCipherAlgorithm.class,
-                AesAlgorithm.values()/* System.out.println("TODO") , ChaCha20Algorithm.values() */);
+        return Arrays.concat(ISymmetricCipherAlgorithm.class, AesAlgorithm.values());
     }
 
     int getIvSize();
