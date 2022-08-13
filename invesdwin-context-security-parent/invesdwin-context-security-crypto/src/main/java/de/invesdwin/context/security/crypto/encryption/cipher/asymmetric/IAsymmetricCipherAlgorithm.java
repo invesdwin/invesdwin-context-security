@@ -11,8 +11,7 @@ public interface IAsymmetricCipherAlgorithm extends ICipherAlgorithm {
     IAsymmetricCipherAlgorithm DEFAULT = RsaAlgorithm.DEFAULT;
 
     static IAsymmetricCipherAlgorithm[] values() {
-        return Arrays.concat(IAsymmetricCipherAlgorithm.class,
-                RsaAlgorithm.values()/* System.out.println("TODO") , EciesAlgorithm.values() */);
+        return Arrays.concat(IAsymmetricCipherAlgorithm.class, RsaAlgorithm.values());
     }
 
     AlgorithmParameterSpec getParam();
