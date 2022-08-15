@@ -212,6 +212,7 @@ public class SymmetricCipherHash implements IHash {
         cipherIV.getIV(signature, iv);
         cipher.init(CipherMode.Encrypt, prevSymmetricKey, cipherIV.wrapParam(iv));
         data.clean();
+        data.initLu();
         update(input);
         final byte[] calculatedSignature;
         try {
@@ -220,9 +221,8 @@ public class SymmetricCipherHash implements IHash {
             throw new RuntimeException(e);
         }
         final int macIndex = cipherIV.getIvBlockSize();
-        final boolean verified = ByteBuffers.constantTimeEquals(signature.sliceFrom(macIndex), calculatedSignature,
-                macIndex, signature.remaining(macIndex));
-        return verified;
+        return ByteBuffers.constantTimeEquals(signature.sliceFrom(macIndex), calculatedSignature, macIndex,
+                signature.remaining(macIndex));
     }
 
     private static final class Data {
