@@ -14,7 +14,6 @@ import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
 import de.invesdwin.context.security.crypto.verification.hash.wrapper.SymmetricCipherHash;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
-import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @Immutable
 public enum CmacAlgorithm implements IHashAlgorithm {
@@ -65,7 +64,7 @@ public enum CmacAlgorithm implements IHashAlgorithm {
     public IHash newHash() {
         try {
             /*
-             * Cmac does not require an IV, so we use 0 bytes:
+             * Cmac does not require an IV, so we use a byte array of 0's:
              * https://crypto.stackexchange.com/questions/99508/is-cmac-secure-without-iv-and-the-same-key-authenticate-
              * only
              * 
@@ -78,7 +77,7 @@ public enum CmacAlgorithm implements IHashAlgorithm {
              */
             return new SymmetricCipherHash(
                     new JceCipher(Cipher.getInstance(REFERENCE.getAlgorithm()), REFERENCE.getHashSize()),
-                    new CipherPresharedIV(REFERENCE, ByteBuffers.allocateByteArray(REFERENCE.getIvSize())));
+                    new CipherPresharedIV(REFERENCE, new byte[REFERENCE.getIvSize()]));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new RuntimeException(e);
         }
