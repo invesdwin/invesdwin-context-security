@@ -112,7 +112,7 @@ public class DecryptingVerifiedCipher implements ICipher {
     public int doFinal(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
         if (inputBufferPosition == 0) {
             //skip buffer
-            final int written = doFinal(ByteBuffers.wrap(inBuffer), ByteBuffers.wrap(outBuffer));
+            final int written = doFinal(ByteBuffers.wrapSlice(inBuffer), ByteBuffers.wrapSlice(outBuffer));
             ByteBuffers.position(inBuffer, inBuffer.limit());
             ByteBuffers.position(outBuffer, outBuffer.position() + written);
             return written;

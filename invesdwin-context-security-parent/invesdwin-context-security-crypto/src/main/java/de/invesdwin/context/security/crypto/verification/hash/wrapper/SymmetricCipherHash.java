@@ -156,7 +156,7 @@ public class SymmetricCipherHash implements IHash {
     @Override
     public void update(final java.nio.ByteBuffer input) {
         final int finalPosition = input.limit();
-        update(ByteBuffers.wrap(input));
+        update(ByteBuffers.wrapSlice(input));
         ByteBuffers.position(input, finalPosition);
     }
 
@@ -178,7 +178,6 @@ public class SymmetricCipherHash implements IHash {
         ivBlock.getBytes(0, out, outOff, cipherIV.getIvBlockSize());
         final int macIndex = outOff + cipherIV.getIvBlockSize();
         data.doFinal(out, macIndex);
-        reset();
         return data.hashSize;
     }
 
@@ -213,7 +212,6 @@ public class SymmetricCipherHash implements IHash {
         cipherIV.getIV(signature, iv);
         cipher.init(CipherMode.Encrypt, prevSymmetricKey, cipherIV.wrapParam(iv));
         data.clean();
-        data.initLu();
         update(input);
         final byte[] calculatedSignature;
         try {
@@ -224,7 +222,6 @@ public class SymmetricCipherHash implements IHash {
         final int macIndex = cipherIV.getIvBlockSize();
         final boolean verified = ByteBuffers.constantTimeEquals(signature.sliceFrom(macIndex), calculatedSignature,
                 macIndex, signature.remaining(macIndex));
-        reset();
         return verified;
     }
 
