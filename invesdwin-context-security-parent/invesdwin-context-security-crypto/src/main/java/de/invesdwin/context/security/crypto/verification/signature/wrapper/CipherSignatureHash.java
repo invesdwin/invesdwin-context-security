@@ -59,7 +59,8 @@ public class CipherSignatureHash implements IHash {
     @Override
     public void init(final HashMode mode, final IKey key) {
         final SignatureKey cKey = (SignatureKey) key;
-        hash.init(mode, hashKey);
+        //always create the hash via sign so that we can verify it ourselves after decryption
+        hash.init(HashMode.Sign, hashKey);
         encryptionFactory.init(mode.getCipherMode(), cipher, new SignatureCipherKey(encryptionFactory.getAlgorithm(),
                 cKey.getVerifyKey(), cKey.getSignKey(), cKey.getKeySizeBits()), null);
     }
