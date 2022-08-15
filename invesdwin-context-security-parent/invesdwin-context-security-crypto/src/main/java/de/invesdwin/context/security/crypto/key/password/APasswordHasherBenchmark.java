@@ -18,7 +18,7 @@ public abstract class APasswordHasherBenchmark<E extends IPasswordHasher> {
     private static final byte[] PASSWORD = "abcDEF123@~# xyz+-*/=456spqr".getBytes();
     private static final byte[] SALT;
     private static final int BENCHMARK_ROUNDS = 20;
-    private static final int LENGTH = 16;
+    private static final int LENGTH = 32;
     private static final int MAX_TRIES = 10;
 
     private final Log log = new Log(this);
