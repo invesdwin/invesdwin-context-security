@@ -63,6 +63,9 @@ public class CipherSignatureHash implements IHash {
         hash.init(HashMode.Sign, hashKey);
         encryptionFactory.init(mode.getCipherMode(), cipher, new SignatureCipherKey(encryptionFactory.getAlgorithm(),
                 cKey.getVerifyKey(), cKey.getSignKey(), cKey.getKeySizeBits()), null);
+
+        prevMode = mode;
+        prevKey = key;
     }
 
     @Override
