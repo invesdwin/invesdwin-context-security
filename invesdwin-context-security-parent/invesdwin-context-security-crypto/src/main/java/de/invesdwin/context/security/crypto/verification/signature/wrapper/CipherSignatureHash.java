@@ -7,8 +7,10 @@ import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.Asymmet
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.SignatureCipherKey;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.DisabledHashKey;
+import de.invesdwin.context.security.crypto.verification.hash.HashKey;
 import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.context.security.crypto.verification.hash.IHashKey;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.signature.SignatureKey;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
@@ -17,6 +19,7 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 @NotThreadSafe
 public class CipherSignatureHash implements IHash {
 
+    private final IHashKey hashKey;
     private final IHash hash;
     private final AsymmetricEncryptionFactory encryptionFactory;
     private final ICipher cipher;
@@ -25,15 +28,22 @@ public class CipherSignatureHash implements IHash {
     private HashMode prevMode;
     private IKey prevKey;
 
-    public CipherSignatureHash(final IHash hash, final AsymmetricEncryptionFactory encryptionFactory) {
-        this.hash = hash;
+    public CipherSignatureHash(final IHashAlgorithm hashAlgorithm,
+            final AsymmetricEncryptionFactory encryptionFactory) {
+        if (hashAlgorithm.getType().isAuthentication()) {
+            //just use a zero key so that the hash algorithm is satisfied, real key is the asymmetric encryption key
+            this.hashKey = new HashKey(hashAlgorithm, new byte[hashAlgorithm.getDefaultKeySizeBits() / Byte.SIZE]);
+        } else {
+            this.hashKey = DisabledHashKey.INSTANCE;
+        }
+        this.hash = hashAlgorithm.newHash();
         this.encryptionFactory = encryptionFactory;
         this.cipher = encryptionFactory.getAlgorithm().newCipher();
     }
 
     @Override
     public String getAlgorithm() {
-        return hash.getAlgorithm() + "with" + cipher.getAlgorithm();
+        return hash.getAlgorithm() + " with " + cipher.getAlgorithm();
     }
 
     @Override
@@ -49,7 +59,7 @@ public class CipherSignatureHash implements IHash {
     @Override
     public void init(final HashMode mode, final IKey key) {
         final SignatureKey cKey = (SignatureKey) key;
-        hash.init(mode, DisabledHashKey.INSTANCE);
+        hash.init(mode, hashKey);
         encryptionFactory.init(mode.getCipherMode(), cipher, new SignatureCipherKey(encryptionFactory.getAlgorithm(),
                 cKey.getVerifyKey(), cKey.getSignKey(), cKey.getKeySizeBits()), null);
     }
@@ -133,15 +143,17 @@ public class CipherSignatureHash implements IHash {
     @Override
     public boolean verify(final byte[] input, final byte[] signature) {
         update(input);
-        final byte[] calculatedSignature = doFinal();
-        return ByteBuffers.constantTimeEquals(signature, calculatedSignature);
+        final byte[] calculatedSignature = hash.doFinal();
+        final int decryptedSize = cipher.doFinal(ByteBuffers.wrap(signature), encryptedHashBuffer);
+        return ByteBuffers.constantTimeEquals(encryptedHashBuffer.sliceTo(decryptedSize), calculatedSignature);
     }
 
     @Override
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
         update(input);
-        final byte[] calculatedSignature = doFinal();
-        return ByteBuffers.constantTimeEquals(signature, calculatedSignature);
+        final byte[] calculatedSignature = hash.doFinal();
+        final int decryptedSize = cipher.doFinal(signature, encryptedHashBuffer);
+        return ByteBuffers.constantTimeEquals(encryptedHashBuffer.sliceTo(decryptedSize), calculatedSignature);
     }
 
 }

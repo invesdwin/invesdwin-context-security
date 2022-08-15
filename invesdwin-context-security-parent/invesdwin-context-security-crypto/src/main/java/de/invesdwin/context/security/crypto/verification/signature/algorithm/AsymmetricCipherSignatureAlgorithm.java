@@ -87,7 +87,7 @@ public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
 
     @Override
     public IHash newHash() {
-        return new LazyDelegateHash(new CipherSignatureHash(hashAlgorithm.newHash(), asymmetricEncryptionFactory));
+        return new LazyDelegateHash(new CipherSignatureHash(hashAlgorithm, asymmetricEncryptionFactory));
     }
 
 }
