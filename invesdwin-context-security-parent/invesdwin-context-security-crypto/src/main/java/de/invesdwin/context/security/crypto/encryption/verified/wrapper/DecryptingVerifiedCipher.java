@@ -296,7 +296,7 @@ public class DecryptingVerifiedCipher implements ICipher {
     private int getInputBufferLimit() {
         if (getHash().isDynamicHashSize()) {
             final int hashSize = inputBuffer.getInt(inputBufferPosition - Integer.BYTES);
-            return inputBufferPosition - hashSize;
+            return inputBufferPosition - hashSize - Integer.BYTES;
         } else {
             return inputBufferPosition - getHash().getHashSize();
         }
