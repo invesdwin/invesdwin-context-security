@@ -156,7 +156,7 @@ public class SymmetricCipherHash implements IHash {
     @Override
     public void update(final java.nio.ByteBuffer input) {
         final int finalPosition = input.limit();
-        update(ByteBuffers.wrapSlice(input));
+        update(ByteBuffers.wrapRelative(input));
         ByteBuffers.position(input, finalPosition);
     }
 
