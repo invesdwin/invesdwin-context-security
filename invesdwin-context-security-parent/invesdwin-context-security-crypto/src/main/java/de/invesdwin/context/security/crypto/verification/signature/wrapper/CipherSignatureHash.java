@@ -146,18 +146,16 @@ public class CipherSignatureHash implements IHash {
 
     @Override
     public boolean verify(final byte[] input, final byte[] signature) {
-        update(input);
-        final byte[] calculatedSignature = hash.doFinal();
         final int decryptedSize = cipher.doFinal(ByteBuffers.wrap(signature), encryptedHashBuffer);
-        return ByteBuffers.constantTimeEquals(encryptedHashBuffer.sliceTo(decryptedSize), calculatedSignature);
+        final IByteBuffer decryptedSignature = encryptedHashBuffer.sliceTo(decryptedSize);
+        return hash.verify(ByteBuffers.wrap(input), decryptedSignature);
     }
 
     @Override
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
-        update(input);
-        final byte[] calculatedSignature = hash.doFinal();
         final int decryptedSize = cipher.doFinal(signature, encryptedHashBuffer);
-        return ByteBuffers.constantTimeEquals(encryptedHashBuffer.sliceTo(decryptedSize), calculatedSignature);
+        final IByteBuffer decryptedSignature = encryptedHashBuffer.sliceTo(decryptedSize);
+        return hash.verify(input, decryptedSignature);
     }
 
 }
