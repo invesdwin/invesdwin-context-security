@@ -16,7 +16,6 @@ import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorit
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactoryTest;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
@@ -53,10 +52,6 @@ public class HashVerificationFactoryTest extends ATest {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
         for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
@@ -103,10 +98,6 @@ public class HashVerificationFactoryTest extends ATest {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
         for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
@@ -163,10 +154,6 @@ public class HashVerificationFactoryTest extends ATest {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
         for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
@@ -242,10 +229,6 @@ public class HashVerificationFactoryTest extends ATest {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
         for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);

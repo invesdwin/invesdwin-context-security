@@ -104,6 +104,7 @@ public class SymmetricCipherHashAad implements IHash {
             throw new RuntimeException(e);
         }
         assert written == hashSize : "written [" + written + "] != hashSize [" + hashSize + "]";
+        reset();
         return buffer.asByteArray(0, written);
     }
 
@@ -120,6 +121,7 @@ public class SymmetricCipherHashAad implements IHash {
         }
         final byte[] hash = doFinal();
         System.arraycopy(hash, 0, output, offset, hashSize);
+        reset();
         return hashSize;
     }
 
@@ -173,6 +175,7 @@ public class SymmetricCipherHashAad implements IHash {
             throw new RuntimeException(e);
         }
         final int macIndex = cipherIV.getIvBlockSize();
+        reset();
         return ByteBuffers.constantTimeEquals(signature.sliceFrom(macIndex), calculatedSignature);
     }
 

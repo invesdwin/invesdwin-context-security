@@ -3,6 +3,7 @@ package de.invesdwin.context.security.crypto.verification.signature;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -11,12 +12,9 @@ import org.junit.jupiter.api.Test;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
-import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.AsymmetricEncryptionFactoryTest;
-import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeySize;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactoryTest;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
@@ -52,10 +50,13 @@ public class SignatureVerificationFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
+        final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
+        int symmetricAlgorithmIndex = 0;
+        int ivIndex = 0;
+        for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
+            final ISymmetricCipherAlgorithm algorithm = symmetricAlgorithms[symmetricAlgorithmIndex++];
+            if (symmetricAlgorithmIndex >= symmetricAlgorithms.length) {
+                symmetricAlgorithmIndex = 0;
             }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
@@ -64,18 +65,20 @@ public class SignatureVerificationFactoryTest extends ATest {
             final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
-            for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
-                final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
-                for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
-                    log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
-                    final SignatureVerificationFactory verificationFactory = new SignatureVerificationFactory(
-                            hashAlgorithm, derivedKeyProvider);
-                    final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory,
-                            verificationFactory);
-                    testEncryptionAndDecryption(factory, "1234567890");
-                    testEncryptionAndDecryption(factory, "0987654321");
-                }
+            final List<ICipherIV> ivs = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
+            final ICipherIV iv = ivs.get(ivIndex++);
+            if (ivIndex >= ivs.size()) {
+                ivIndex = 0;
             }
+
+            final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
+            log.info("%s with %s and %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm(),
+                    iv.getClass().getSimpleName());
+            final SignatureVerificationFactory verificationFactory = new SignatureVerificationFactory(hashAlgorithm,
+                    derivedKeyProvider);
+            final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory, verificationFactory);
+            testEncryptionAndDecryption(factory, "1234567890");
+            testEncryptionAndDecryption(factory, "0987654321");
         }
     }
 
@@ -95,17 +98,20 @@ public class SignatureVerificationFactoryTest extends ATest {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
-            final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
+            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
             random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
+                    .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
+        final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
+        int symmetricAlgorithmIndex = 0;
+        int ivIndex = 0;
+        for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
+            final ISymmetricCipherAlgorithm algorithm = symmetricAlgorithms[symmetricAlgorithmIndex++];
+            if (symmetricAlgorithmIndex >= symmetricAlgorithms.length) {
+                symmetricAlgorithmIndex = 0;
             }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
@@ -114,18 +120,20 @@ public class SignatureVerificationFactoryTest extends ATest {
             final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
-            for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
-                final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
-                for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
-                    log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
-                    final SignatureVerificationFactory verificationFactory = new SignatureVerificationFactory(
-                            hashAlgorithm, derivedKeyProvider);
-                    final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory,
-                            verificationFactory);
-                    testCipher(factory, "1234567890", "0987654321");
-                    testCipher(factory, "0987654321", "1234567890");
-                }
+            final List<ICipherIV> ivs = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
+            final ICipherIV iv = ivs.get(ivIndex++);
+            if (ivIndex >= ivs.size()) {
+                ivIndex = 0;
             }
+
+            final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
+            log.info("%s with %s and %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm(),
+                    iv.getClass().getSimpleName());
+            final SignatureVerificationFactory verificationFactory = new SignatureVerificationFactory(hashAlgorithm,
+                    derivedKeyProvider);
+            final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory, verificationFactory);
+            testCipher(factory, "1234567890", "0987654321");
+            testCipher(factory, "0987654321", "1234567890");
         }
     }
 
@@ -162,10 +170,13 @@ public class SignatureVerificationFactoryTest extends ATest {
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
+        final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
+        int symmetricAlgorithmIndex = 0;
+        int ivIndex = 0;
+        for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
+            final ISymmetricCipherAlgorithm algorithm = symmetricAlgorithms[symmetricAlgorithmIndex++];
+            if (symmetricAlgorithmIndex >= symmetricAlgorithms.length) {
+                symmetricAlgorithmIndex = 0;
             }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
@@ -174,21 +185,23 @@ public class SignatureVerificationFactoryTest extends ATest {
             final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
-            for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
-                final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
-                for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
-                    log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
-                    final SignatureVerificationFactory verificationFactory = new SignatureVerificationFactory(
-                            hashAlgorithm, derivedKeyProvider);
-                    final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory,
-                            verificationFactory);
-                    try {
-                        testCipherStream(factory, "1234567890", "0987654321");
-                        testCipherStream(factory, "0987654321", "1234567890");
-                    } catch (final IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+            final List<ICipherIV> ivs = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
+            final ICipherIV iv = ivs.get(ivIndex++);
+            if (ivIndex >= ivs.size()) {
+                ivIndex = 0;
+            }
+
+            final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
+            log.info("%s with %s and %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm(),
+                    iv.getClass().getSimpleName());
+            final SignatureVerificationFactory verificationFactory = new SignatureVerificationFactory(hashAlgorithm,
+                    derivedKeyProvider);
+            final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory, verificationFactory);
+            try {
+                testCipherStream(factory, "1234567890", "0987654321");
+                testCipherStream(factory, "0987654321", "1234567890");
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }
@@ -235,16 +248,19 @@ public class SignatureVerificationFactoryTest extends ATest {
         final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
         try {
             final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
-            //            random.nextBytes(key);
+            random.nextBytes(key);
             derivedKeyProvider = DerivedKeyProvider
                     .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         } finally {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
-        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
+        final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
+        int symmetricAlgorithmIndex = 0;
+        int ivIndex = 0;
+        for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
+            final ISymmetricCipherAlgorithm algorithm = symmetricAlgorithms[symmetricAlgorithmIndex++];
+            if (symmetricAlgorithmIndex >= symmetricAlgorithms.length) {
+                symmetricAlgorithmIndex = 0;
             }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
@@ -253,21 +269,23 @@ public class SignatureVerificationFactoryTest extends ATest {
             final CipherPresharedIV presharedIV = new CipherPresharedIV(algorithm,
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
-            for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
-                final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
-                for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
-                    log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
-                    final SignatureVerificationFactory verificationFactory = new SignatureVerificationFactory(
-                            hashAlgorithm, derivedKeyProvider);
-                    final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory,
-                            verificationFactory);
-                    try {
-                        testStreamingCipherStream(factory, "1234567890", "0987654321");
-                        testStreamingCipherStream(factory, "0987654321", "1234567890");
-                    } catch (final IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+            final List<ICipherIV> ivs = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
+            final ICipherIV iv = ivs.get(ivIndex++);
+            if (ivIndex >= ivs.size()) {
+                ivIndex = 0;
+            }
+
+            final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, key, iv);
+            log.info("%s with %s and %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm(),
+                    iv.getClass().getSimpleName());
+            final SignatureVerificationFactory verificationFactory = new SignatureVerificationFactory(hashAlgorithm,
+                    derivedKeyProvider);
+            final VerifiedEncryptionFactory factory = new VerifiedEncryptionFactory(cipherFactory, verificationFactory);
+            try {
+                testStreamingCipherStream(factory, "1234567890", "0987654321");
+                testStreamingCipherStream(factory, "0987654321", "1234567890");
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }

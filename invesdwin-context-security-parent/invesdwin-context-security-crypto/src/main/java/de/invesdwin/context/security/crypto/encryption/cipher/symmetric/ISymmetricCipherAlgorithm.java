@@ -12,8 +12,10 @@ public interface ISymmetricCipherAlgorithm extends ICipherAlgorithm {
 
     ISymmetricCipherAlgorithm DEFAULT = AesAlgorithm.DEFAULT;
 
+    @SuppressWarnings("deprecation")
     static ISymmetricCipherAlgorithm[] values() {
-        return Arrays.concat(ISymmetricCipherAlgorithm.class, AesAlgorithm.values());
+        return Arrays.concat(ISymmetricCipherAlgorithm.class,
+                Arrays.remove(AesAlgorithm.values(), AesAlgorithm.AES_CBC_NoPadding.ordinal()));
     }
 
     int getIvSize();

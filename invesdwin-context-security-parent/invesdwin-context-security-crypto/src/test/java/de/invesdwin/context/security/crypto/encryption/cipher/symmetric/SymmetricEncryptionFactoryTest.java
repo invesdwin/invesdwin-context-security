@@ -50,10 +50,6 @@ public class SymmetricEncryptionFactoryTest extends ATest {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
         for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
@@ -93,10 +89,6 @@ public class SymmetricEncryptionFactoryTest extends ATest {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
         for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
@@ -146,10 +138,6 @@ public class SymmetricEncryptionFactoryTest extends ATest {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
         for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
@@ -218,10 +206,6 @@ public class SymmetricEncryptionFactoryTest extends ATest {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
         for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
             final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     algorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(algorithm, derivedKeyProvider);
@@ -283,10 +267,6 @@ public class SymmetricEncryptionFactoryTest extends ATest {
             CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
         for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
-            if (algorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires different padding
-                continue;
-            }
             if (algorithm == AesAlgorithm.AES_GCM_NoPadding) {
                 //requires no padding
                 continue;
