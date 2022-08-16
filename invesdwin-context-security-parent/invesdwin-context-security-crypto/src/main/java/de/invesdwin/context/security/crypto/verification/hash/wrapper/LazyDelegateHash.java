@@ -106,8 +106,8 @@ public class LazyDelegateHash implements IHash {
     public void reset() {
         if (needsReset) {
             delegate.reset();
+            needsReset = false;
         }
-        needsReset = false;
     }
 
     @Override

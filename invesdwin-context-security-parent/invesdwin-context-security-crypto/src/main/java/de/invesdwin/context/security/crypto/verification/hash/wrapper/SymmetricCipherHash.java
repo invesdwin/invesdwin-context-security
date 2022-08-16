@@ -120,7 +120,6 @@ public class SymmetricCipherHash implements IHash {
             this.prevSymmetricKey = new SymmetricCipherKey(cipherIV.getAlgorithm(), cKey.getKey(mode), cipherIV);
         }
         reset();
-        data.initLu();
     }
 
     @Override
@@ -190,7 +189,7 @@ public class SymmetricCipherHash implements IHash {
         if (data == null || data.blockSize != blockSize) {
             data = new Data(cipher, blockSize, cipherIV.getIvBlockSize());
         }
-        data.clean();
+        data.init();
     }
 
     @Override
@@ -211,8 +210,7 @@ public class SymmetricCipherHash implements IHash {
     public boolean verify(final IByteBuffer input, final IByteBuffer signature) {
         cipherIV.getIV(signature, iv);
         cipher.init(CipherMode.Encrypt, prevSymmetricKey, cipherIV.wrapParam(iv));
-        data.clean();
-        data.initLu();
+        data.init();
         update(input);
         final byte[] calculatedSignature;
         try {
@@ -256,13 +254,6 @@ public class SymmetricCipherHash implements IHash {
             this.lu2 = new byte[blockSize];
         }
 
-        private void initLu() {
-            //initializes the L, Lu, Lu2 numbers
-            cipher.update(zeroes, 0, zeroes.length, l, 0);
-            doubleLu(l, lu1);
-            doubleLu(lu1, lu2);
-        }
-
         private void doubleLu(final byte[] in, final byte[] ret) {
             final int carry = shiftLeft(in, ret);
 
@@ -275,9 +266,14 @@ public class SymmetricCipherHash implements IHash {
             ret[in.length - 1] ^= poly[3] & mask;
         }
 
-        private void clean() {
+        private void init() {
             buf.clear(Bytes.ZERO);
             bufOff = 0;
+
+            //initializes the L, Lu, Lu2 numbers
+            cipher.update(zeroes, 0, zeroes.length, l, 0);
+            doubleLu(l, lu1);
+            doubleLu(lu1, lu2);
         }
 
         private void update(final byte in) {
@@ -368,9 +364,11 @@ public class SymmetricCipherHash implements IHash {
                 buf.putByte(i, b);
             }
 
-            cipher.update(buf, mac);
+            cipher.doFinal(buf, mac);
 
             mac.getBytes(0, out, outOff, blockSize);
+
+            init();
 
             return blockSize;
         }

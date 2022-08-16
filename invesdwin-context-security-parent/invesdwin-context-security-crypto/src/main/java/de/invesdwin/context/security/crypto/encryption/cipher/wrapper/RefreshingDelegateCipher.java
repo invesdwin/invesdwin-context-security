@@ -23,6 +23,10 @@ public class RefreshingDelegateCipher implements ICipher {
     private final ICipherFactory factory;
     private ICipher delegate;
 
+    public RefreshingDelegateCipher(final ICipherAlgorithm algorithm) {
+        this(algorithm, algorithm);
+    }
+
     public RefreshingDelegateCipher(final ICipherAlgorithm algorithm, final ICipherFactory factory) {
         this.algorithm = algorithm;
         this.factory = factory;

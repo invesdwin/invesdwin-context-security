@@ -69,7 +69,7 @@ public class EncryptingVerifiedCipher implements ICipher {
     public int update(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
         final int positionBefore = outBuffer.position();
         final int length = getDelegate().update(inBuffer, outBuffer);
-        getHash().update(ByteBuffers.slice(outBuffer, positionBefore, length));
+        getHash().update(ByteBuffers.wrap(outBuffer, positionBefore, length));
         /*
          * we need to force StreamingCipherOutputStream to call doFinal in the same intervals as
          * StreamingCipherInputStream, thus use the settings of DecryptingVerifiedCipher. Smaller chunks will make sure
@@ -105,7 +105,7 @@ public class EncryptingVerifiedCipher implements ICipher {
     public int doFinal(final java.nio.ByteBuffer inBuffer, final java.nio.ByteBuffer outBuffer) {
         final int positionBefore = outBuffer.position();
         final int written = getDelegate().doFinal(inBuffer, outBuffer);
-        getHash().update(ByteBuffers.slice(outBuffer, positionBefore, written));
+        getHash().update(ByteBuffers.wrap(outBuffer, positionBefore, written));
         final byte[] signature = getHash().doFinal();
         outBuffer.put(signature);
         return written + signature.length;
