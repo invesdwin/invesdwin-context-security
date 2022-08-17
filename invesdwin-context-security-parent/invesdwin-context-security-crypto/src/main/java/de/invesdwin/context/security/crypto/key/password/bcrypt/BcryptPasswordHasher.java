@@ -59,11 +59,11 @@ public class BcryptPasswordHasher implements IPasswordHasher {
             return hashed;
         }
         //make sure we generate the desired number of bytes for key derivation
-        final byte[] extracted = HkdfDerivationFactory.INSTANCE.extract(salt, hashed);
+        final byte[] extracted = HkdfDerivationFactory.DEFAULT.extract(salt, hashed);
         if (extracted.length == length) {
             return extracted;
         }
-        final byte[] expanded = HkdfDerivationFactory.INSTANCE.expand(extracted, Bytes.EMPTY_ARRAY, length);
+        final byte[] expanded = HkdfDerivationFactory.DEFAULT.expand(extracted, Bytes.EMPTY_ARRAY, length);
         return expanded;
     }
 

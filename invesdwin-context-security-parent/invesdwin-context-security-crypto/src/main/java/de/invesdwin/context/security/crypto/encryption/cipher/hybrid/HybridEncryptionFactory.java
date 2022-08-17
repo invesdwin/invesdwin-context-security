@@ -44,6 +44,9 @@ import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
  * 
  * HybridEncryptionFactory instances can be nested arbitrarily. Though when does it make sense to combine more than two
  * encryption algorithms? The transmitted keys are only as secure as the outer most secret key.
+ * 
+ * If possible a handshake algorithm like ECDH should be preferred that does not require sending secrets in any form
+ * over the wire. An implementation is provided in e.g. EcdhHandshakeChannel.
  */
 @Immutable
 public class HybridEncryptionFactory implements IEncryptionFactory {

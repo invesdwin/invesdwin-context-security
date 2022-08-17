@@ -17,7 +17,7 @@ import de.invesdwin.util.math.Integers;
 @Immutable
 public class HkdfDerivationFactory implements IDerivationFactory {
 
-    public static final HkdfDerivationFactory INSTANCE = new HkdfDerivationFactory();
+    public static final HkdfDerivationFactory DEFAULT = new HkdfDerivationFactory();
 
     private final byte[] pepper;
     private final IHashAlgorithm algorithm;

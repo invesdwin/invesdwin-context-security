@@ -1,17 +1,14 @@
 package de.invesdwin.context.security.crypto.verification.signature;
 
-import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.AsymmetricCipherKey;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
@@ -134,19 +131,11 @@ public class SignatureKey implements ISignatureKey {
     }
 
     public static PrivateKey wrapPrivateKey(final String keyAlgorithm, final byte[] privateKey) {
-        try {
-            return KeyFactory.getInstance(keyAlgorithm).generatePrivate(new PKCS8EncodedKeySpec(privateKey));
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        return AsymmetricCipherKey.wrapPrivateKey(keyAlgorithm, privateKey);
     }
 
     public static PublicKey wrapPublicKey(final String keyAlgorithm, final byte[] publicKey) {
-        try {
-            return KeyFactory.getInstance(keyAlgorithm).generatePublic(new X509EncodedKeySpec(publicKey));
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        return AsymmetricCipherKey.wrapPublicKey(keyAlgorithm, publicKey);
     }
 
     @Override

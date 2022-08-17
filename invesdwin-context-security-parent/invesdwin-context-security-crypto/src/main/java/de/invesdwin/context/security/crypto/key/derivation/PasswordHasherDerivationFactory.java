@@ -32,7 +32,7 @@ public class PasswordHasherDerivationFactory implements IDerivationFactory {
 
     @Override
     public int getExtractLength() {
-        return HkdfDerivationFactory.INSTANCE.getExtractLength();
+        return HkdfDerivationFactory.DEFAULT.getExtractLength();
     }
 
     @Override

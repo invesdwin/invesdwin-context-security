@@ -14,7 +14,6 @@ import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.IHashKey;
-import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -267,7 +266,7 @@ public class SymmetricCipherHash implements IHash {
         }
 
         private void init() {
-            buf.clear(Bytes.ZERO);
+            buf.clear();
             bufOff = 0;
 
             //initializes the L, Lu, Lu2 numbers
