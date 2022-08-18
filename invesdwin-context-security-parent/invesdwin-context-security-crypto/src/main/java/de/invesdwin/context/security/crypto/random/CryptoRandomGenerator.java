@@ -3,29 +3,39 @@ package de.invesdwin.context.security.crypto.random;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
 import de.invesdwin.context.security.crypto.CryptoProperties;
-import de.invesdwin.norva.beanpath.BeanPathReflections;
 import de.invesdwin.util.error.Throwables;
 import de.invesdwin.util.math.random.IRandomGenerator;
 
 @NotThreadSafe
 public class CryptoRandomGenerator extends java.security.SecureRandom implements IRandomGenerator {
 
+    private static final MethodHandle SUPER_RESEED_METHOD_HANDLE = newSuperReseedMethodHandle();
     private static final MethodHandle RESEED_METHOD_HANDLE = newReseedMethodHandle();
 
     private long lastReseedNanos = System.nanoTime();
 
     public CryptoRandomGenerator() {}
 
+    private static MethodHandle newSuperReseedMethodHandle() {
+        try {
+            final Lookup lookup = MethodHandles.lookup();
+            return lookup.findSpecial(java.security.SecureRandom.class, "reseed", MethodType.methodType(void.class),
+                    CryptoRandomGenerator.class);
+        } catch (final Exception e) {
+            return null;
+        }
+    }
+
     private static MethodHandle newReseedMethodHandle() {
         try {
             final Method reseed = java.security.SecureRandom.class.getDeclaredMethod("reseed");
             final Lookup lookup = MethodHandles.lookup();
-            BeanPathReflections.makeAccessible(reseed);
             return lookup.unreflect(reseed);
         } catch (final Exception e) {
             return null;
@@ -104,6 +114,18 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
         if (CryptoProperties.RESEED_INTERVAL.isLessThanOrEqualToNanos(currentNanos - lastReseedNanos)) {
             reseed();
             lastReseedNanos = currentNanos;
+        }
+    }
+
+    public static void reseed(final CryptoRandomGenerator random) {
+        if (SUPER_RESEED_METHOD_HANDLE != null) {
+            try {
+                SUPER_RESEED_METHOD_HANDLE.invoke(random);
+            } catch (final Throwable e) {
+                throw Throwables.propagate(e);
+            }
+        } else {
+            random.setSeed(System.currentTimeMillis() + System.identityHashCode(random));
         }
     }
 
