@@ -8,6 +8,9 @@ import de.invesdwin.util.concurrent.reference.IReference;
 import de.invesdwin.util.lang.Closeables;
 import de.invesdwin.util.lang.finalizer.AFinalizer;
 
+/**
+ * Consider using JavaCryptoRandomDetector as a safe alternative to instantiate this.
+ */
 @Immutable
 public class CommonsCryptoRandomGeneratorAdapter extends CryptoRandomGenerator implements Closeable {
 
