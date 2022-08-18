@@ -9,8 +9,8 @@ public class StrongRandomGenerator extends CryptoRandomGenerator {
 
     private final java.security.SecureRandom delegate;
 
-    public StrongRandomGenerator(final java.security.SecureRandom delegate) {
-        super(delegate.getAlgorithm());
+    public StrongRandomGenerator(final java.security.SecureRandom delegate, final boolean reseedSupported) {
+        super(reseedSupported);
         this.delegate = delegate;
     }
 

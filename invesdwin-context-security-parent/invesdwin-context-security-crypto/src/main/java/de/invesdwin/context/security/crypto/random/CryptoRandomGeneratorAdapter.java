@@ -7,6 +7,11 @@ public class CryptoRandomGeneratorAdapter extends CryptoRandomGenerator {
 
     private final java.security.SecureRandom delegate;
 
+    public CryptoRandomGeneratorAdapter(final java.security.SecureRandom delegate, final boolean reseedSupported) {
+        super(reseedSupported);
+        this.delegate = delegate;
+    }
+
     public CryptoRandomGeneratorAdapter(final java.security.SecureRandom delegate) {
         super(delegate.getAlgorithm());
         this.delegate = delegate;

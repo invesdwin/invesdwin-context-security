@@ -4,6 +4,7 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import io.netty.util.concurrent.FastThreadLocal;
 
 /**
@@ -30,7 +31,8 @@ import io.netty.util.concurrent.FastThreadLocal;
 public final class StrongRandomGenerators {
 
     private static final String DRBG = "DRBG";
-    private static boolean tryDrbg = newTryDrbg();
+    private static final boolean DRBG_AVAILABLE = newDrbgAvailable();
+    private static final boolean RESEED_SUPPORTED = newReseedSupported();
 
     private static final FastThreadLocal<StrongRandomGenerator> THREAD_LOCAL = new FastThreadLocal<StrongRandomGenerator>() {
         @Override
@@ -41,10 +43,15 @@ public final class StrongRandomGenerators {
 
     private StrongRandomGenerators() {}
 
-    private static boolean newTryDrbg() {
+    private static boolean newReseedSupported() {
+        final java.security.SecureRandom instance = newSecureRandom();
+        return CryptoRandomGenerator.newReseedSupported(instance);
+    }
+
+    private static boolean newDrbgAvailable() {
         try {
-            java.security.SecureRandom.getInstance(DRBG);
-            return true;
+            final java.security.SecureRandom drbg = java.security.SecureRandom.getInstance(DRBG);
+            return drbg != null;
         } catch (final NoSuchAlgorithmException e) {
             return false;
         }
@@ -57,17 +64,21 @@ public final class StrongRandomGenerators {
     }
 
     public static StrongRandomGenerator newStrongRandom() {
+        return new StrongRandomGenerator(newSecureRandom(), RESEED_SUPPORTED);
+    }
+
+    private static java.security.SecureRandom newSecureRandom() {
         try {
-            if (tryDrbg) {
+            if (DRBG_AVAILABLE) {
                 /*
                  * Using DRBG should not be as slow as using /dev/random, since it reads entropy only during reseeds and
                  * otherwise uses a hash digest to come up with new random values.
                  * 
                  * This should be helpful in shared hosting environments.
                  */
-                return new StrongRandomGenerator(java.security.SecureRandom.getInstance(DRBG));
+                return java.security.SecureRandom.getInstance(DRBG);
             } else {
-                return new StrongRandomGenerator(java.security.SecureRandom.getInstanceStrong());
+                return java.security.SecureRandom.getInstanceStrong();
             }
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);

@@ -17,16 +17,17 @@ import de.invesdwin.util.math.random.IRandomGenerator;
 @NotThreadSafe
 public class CryptoRandomGenerator extends java.security.SecureRandom implements IRandomGenerator {
 
-    private static final long RESEED_UNSUPPORTED_NANOS = Long.MIN_VALUE;
     private static final MethodHandle SUPER_RESEED_METHOD_HANDLE = newSuperReseedMethodHandle();
     private static final MethodHandle RESEED_METHOD_HANDLE = newReseedMethodHandle();
 
     private static final Set<String> RESEED_UNSUPPORTED_ALGORITHM = ILockCollectionFactory.getInstance(true)
             .newConcurrentSet();
+    private static final boolean DEFAULT_RESEED_SUPPORTED = newDefaultReseedSupported();
+    private static final long RESEED_UNSUPPORTED_NANOS = Long.MIN_VALUE;
 
     private long lastReseedNanos;
 
-    protected CryptoRandomGenerator(final String algorithm) {
+    public CryptoRandomGenerator(final String algorithm) {
         if (!RESEED_UNSUPPORTED_ALGORITHM.contains(algorithm)) {
             lastReseedNanos = System.nanoTime();
         } else {
@@ -34,8 +35,16 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
         }
     }
 
+    public CryptoRandomGenerator(final boolean reseedSupported) {
+        if (!reseedSupported) {
+            lastReseedNanos = System.nanoTime();
+        } else {
+            lastReseedNanos = RESEED_UNSUPPORTED_NANOS;
+        }
+    }
+
     public CryptoRandomGenerator() {
-        if (!RESEED_UNSUPPORTED_ALGORITHM.contains(getAlgorithm())) {
+        if (DEFAULT_RESEED_SUPPORTED) {
             lastReseedNanos = System.nanoTime();
         } else {
             lastReseedNanos = RESEED_UNSUPPORTED_NANOS;
@@ -59,6 +68,21 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
             return lookup.unreflect(reseed);
         } catch (final Exception e) {
             return null;
+        }
+    }
+
+    private static boolean newDefaultReseedSupported() {
+        final java.security.SecureRandom defaultInstance = new java.security.SecureRandom();
+        return newReseedSupported(defaultInstance);
+    }
+
+    public static boolean newReseedSupported(final java.security.SecureRandom instance) {
+        try {
+            reseed(instance);
+            return true;
+        } catch (final UnsupportedOperationException e) {
+            RESEED_UNSUPPORTED_ALGORITHM.add(instance.getAlgorithm());
+            return false;
         }
     }
 
