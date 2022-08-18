@@ -8,9 +8,11 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 public interface IHashAlgorithm extends IHashFactory {
 
-    IHashAlgorithm DEFAULT = HmacAlgorithm.DEFAULT;
-
     int DYNAMIC_HASH_SIZE = -1;
+
+    static IHashAlgorithm getDefault() {
+        return HmacAlgorithm.DEFAULT;
+    }
 
     static IHashAlgorithm[] values() {
         return Arrays.concat(IHashAlgorithm.class, ChecksumAlgorithm.values(), DigestAlgorithm.values(),

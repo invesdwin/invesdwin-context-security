@@ -26,17 +26,17 @@ public class SignatureVerificationFactory implements IVerificationFactory {
     private final ISignatureAlgorithm algorithm;
     private final SignatureKey key;
 
-    public SignatureVerificationFactory(final byte[] publicKey, final byte[] privateKey, final int keySizeBits) {
-        this(ISignatureAlgorithm.DEFAULT, publicKey, privateKey, keySizeBits);
+    public SignatureVerificationFactory(final byte[] verifyKey, final byte[] signKey, final int keySizeBits) {
+        this(ISignatureAlgorithm.getDefault(), verifyKey, signKey, keySizeBits);
     }
 
-    public SignatureVerificationFactory(final ISignatureAlgorithm algorithm, final byte[] publicKey,
-            final byte[] privateKey, final int keySizeBits) {
-        this(new SignatureKey(algorithm, publicKey, privateKey, keySizeBits));
+    public SignatureVerificationFactory(final ISignatureAlgorithm algorithm, final byte[] verifyKey,
+            final byte[] signKey, final int keySizeBits) {
+        this(new SignatureKey(algorithm, verifyKey, signKey, keySizeBits));
     }
 
     public SignatureVerificationFactory(final IDerivedKeyProvider derivedKeyProvider) {
-        this(ISignatureAlgorithm.DEFAULT, derivedKeyProvider);
+        this(ISignatureAlgorithm.getDefault(), derivedKeyProvider);
     }
 
     public SignatureVerificationFactory(final ISignatureAlgorithm algorithm,

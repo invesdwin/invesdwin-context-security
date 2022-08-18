@@ -18,6 +18,7 @@ import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -68,16 +69,8 @@ public class AsymmetricCipherKey implements ICipherKey {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
         this.keySizeBits = keySizeBits;
-        if (privateKey != null) {
-            this.privateKeyBlockSize = privateKey.getEncoded().length;
-        } else {
-            this.privateKeyBlockSize = 0;
-        }
-        if (publicKey != null) {
-            this.publicKeyBlockSize = publicKey.getEncoded().length;
-        } else {
-            this.publicKeyBlockSize = 0;
-        }
+        this.privateKeyBlockSize = unwrapKey(privateKey).length;
+        this.publicKeyBlockSize = unwrapKey(publicKey).length;
     }
 
     @Override
@@ -114,8 +107,8 @@ public class AsymmetricCipherKey implements ICipherKey {
          * bidirectional communication (if desired). Though ideally the inverse direction should use a different session
          * key anyhow (which HybridEncryptionFactory makes sure of).
          */
-        final byte[] publicKeyBytes = publicKey.getEncoded();
-        final byte[] privateKeyBytes = privateKey.getEncoded();
+        final byte[] publicKeyBytes = unwrapKey(publicKey);
+        final byte[] privateKeyBytes = unwrapKey(privateKey);
         int position = 0;
         buffer.putInt(position, keySizeBits);
         position += Integer.BYTES;
@@ -144,8 +137,16 @@ public class AsymmetricCipherKey implements ICipherKey {
         return new AsymmetricCipherKey(algorithm, publicKeyBytes, privateKeyBytes, keySizeBits);
     }
 
+    public static byte[] unwrapKey(final Key key) {
+        if (key == null) {
+            return Bytes.EMPTY_ARRAY;
+        } else {
+            return key.getEncoded();
+        }
+    }
+
     public static PrivateKey wrapPrivateKey(final String keyAlgorithm, final byte[] privateKey) {
-        if (privateKey == null) {
+        if (privateKey == null || privateKey.length == 0) {
             return null;
         }
         try {
@@ -156,7 +157,7 @@ public class AsymmetricCipherKey implements ICipherKey {
     }
 
     public static PublicKey wrapPublicKey(final String keyAlgorithm, final byte[] publicKey) {
-        if (publicKey == null) {
+        if (publicKey == null || publicKey.length == 0) {
             return null;
         }
         try {

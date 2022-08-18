@@ -2,7 +2,9 @@ package de.invesdwin.context.security.crypto.key.derivation;
 
 public interface IDerivationFactory {
 
-    IDerivationFactory DEFAULT = HkdfDerivationFactory.DEFAULT;
+    static IDerivationFactory getDefault() {
+        return HkdfDerivationFactory.DEFAULT;
+    }
 
     byte[] getPepper();
 

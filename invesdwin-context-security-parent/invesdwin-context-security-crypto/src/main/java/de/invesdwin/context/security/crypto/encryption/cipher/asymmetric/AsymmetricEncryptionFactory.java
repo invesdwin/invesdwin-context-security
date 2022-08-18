@@ -26,7 +26,7 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
     private final AsymmetricCipherKey key;
 
     public AsymmetricEncryptionFactory(final byte[] publicKey, final byte[] privateKey, final int keySizeBits) {
-        this(IAsymmetricCipherAlgorithm.DEFAULT, publicKey, privateKey, keySizeBits);
+        this(IAsymmetricCipherAlgorithm.getDefault(), publicKey, privateKey, keySizeBits);
     }
 
     public AsymmetricEncryptionFactory(final IAsymmetricCipherAlgorithm algorithm, final byte[] publicKey,
@@ -35,7 +35,7 @@ public class AsymmetricEncryptionFactory implements IEncryptionFactory {
     }
 
     public AsymmetricEncryptionFactory(final IDerivedKeyProvider derivedKeyProvider) {
-        this(IAsymmetricCipherAlgorithm.DEFAULT, derivedKeyProvider);
+        this(IAsymmetricCipherAlgorithm.getDefault(), derivedKeyProvider);
     }
 
     public AsymmetricEncryptionFactory(final IAsymmetricCipherAlgorithm algorithm,

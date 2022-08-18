@@ -99,15 +99,15 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
     }
 
     public static DerivedKeyProvider fromPassword(final byte[] salt, final String password) {
-        return fromPassword(salt, password, IDerivationFactory.DEFAULT, IPasswordHasher.INSTANCE);
+        return fromPassword(salt, password, IDerivationFactory.getDefault(), IPasswordHasher.INSTANCE);
     }
 
     public static DerivedKeyProvider fromPassword(final byte[] salt, final byte[] password) {
-        return fromPassword(salt, password, IDerivationFactory.DEFAULT, IPasswordHasher.INSTANCE);
+        return fromPassword(salt, password, IDerivationFactory.getDefault(), IPasswordHasher.INSTANCE);
     }
 
     public static DerivedKeyProvider fromRandom(final byte[] salt, final byte[] random) {
-        return fromRandom(salt, random, IDerivationFactory.DEFAULT);
+        return fromRandom(salt, random, IDerivationFactory.getDefault());
     }
 
     public static DerivedKeyProvider fromPassword(final byte[] salt, final String password,

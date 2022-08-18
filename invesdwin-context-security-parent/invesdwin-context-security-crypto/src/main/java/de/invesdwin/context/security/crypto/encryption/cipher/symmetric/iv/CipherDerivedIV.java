@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import de.invesdwin.context.ContextProperties;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
@@ -125,24 +124,18 @@ public class CipherDerivedIV implements ICipherIV {
     }
 
     public static AtomicLong newRandomIvCounter() {
-        if (ContextProperties.IS_TEST_ENVIRONMENT) {
-            //make debugging easier by using 0 counter always during testing
-            return new AtomicLong();
-        } else {
-            final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-            try {
-                /*
-                 * start at a random counter, so it does not matter when the classes are initialized, the counter will
-                 * not be predictably at 0. So that an attacker does not know how long the communication chnanel has
-                 * been established.
-                 * 
-                 * We anyway either send the IV or the counter over the wire so there is no secret in the counter
-                 * itself.
-                 */
-                return new AtomicLong(random.nextLong());
-            } finally {
-                CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-            }
+        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+        try {
+            /*
+             * start at a random counter, so it does not matter when the classes are initialized, the counter will not
+             * be predictably at 0. So that an attacker does not know how long the communication chnanel has been
+             * established.
+             * 
+             * We anyway either send the IV or the counter over the wire so there is no secret in the counter itself.
+             */
+            return new AtomicLong(random.nextLong());
+        } finally {
+            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
     }
 

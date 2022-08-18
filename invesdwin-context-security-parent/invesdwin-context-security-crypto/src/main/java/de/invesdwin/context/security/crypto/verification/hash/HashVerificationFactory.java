@@ -25,11 +25,11 @@ public class HashVerificationFactory implements IVerificationFactory {
     private final HashKey key;
 
     public HashVerificationFactory(final byte[] key) {
-        this(new HashKey(IHashAlgorithm.DEFAULT, key));
+        this(new HashKey(IHashAlgorithm.getDefault(), key));
     }
 
     public HashVerificationFactory(final IDerivedKeyProvider derivedKeyProvider) {
-        this(IHashAlgorithm.DEFAULT, derivedKeyProvider);
+        this(IHashAlgorithm.getDefault(), derivedKeyProvider);
     }
 
     public HashVerificationFactory(final IHashAlgorithm algorithm, final IDerivedKeyProvider derivedKeyProvider) {

@@ -21,7 +21,7 @@ public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
 
     public static final AsymmetricCipherSignatureAlgorithm DEFAULT = new AsymmetricCipherSignatureAlgorithm(
             //no need to use HMAC_SHA_256, since RSA already provides the integrity and authentication in addition to the non-repudiation
-            DigestAlgorithm.SHA_256, IAsymmetricCipherAlgorithm.DEFAULT);
+            DigestAlgorithm.SHA_256, IAsymmetricCipherAlgorithm.getDefault());
 
     private final IHashAlgorithm hashAlgorithm;
     private final AsymmetricEncryptionFactory asymmetricEncryptionFactory;

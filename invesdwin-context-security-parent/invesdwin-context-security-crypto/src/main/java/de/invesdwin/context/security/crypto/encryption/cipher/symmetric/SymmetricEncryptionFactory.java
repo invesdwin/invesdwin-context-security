@@ -44,12 +44,12 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     private final SymmetricCipherKey key;
 
     public SymmetricEncryptionFactory(final byte[] derivedKey, final byte[] derivedIV) {
-        this(ISymmetricCipherAlgorithm.DEFAULT, derivedKey,
-                new CipherDerivedIV(ISymmetricCipherAlgorithm.DEFAULT, derivedIV));
+        this(ISymmetricCipherAlgorithm.getDefault(), derivedKey,
+                new CipherDerivedIV(ISymmetricCipherAlgorithm.getDefault(), derivedIV));
     }
 
     public SymmetricEncryptionFactory(final IDerivedKeyProvider derivedKeyProvider) {
-        this(ISymmetricCipherAlgorithm.DEFAULT, derivedKeyProvider);
+        this(ISymmetricCipherAlgorithm.getDefault(), derivedKeyProvider);
     }
 
     public SymmetricEncryptionFactory(final ISymmetricCipherAlgorithm algorithm,

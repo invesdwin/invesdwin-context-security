@@ -10,7 +10,9 @@ import de.invesdwin.util.collections.Arrays;
 
 public interface ISymmetricCipherAlgorithm extends ICipherAlgorithm {
 
-    ISymmetricCipherAlgorithm DEFAULT = AesAlgorithm.DEFAULT;
+    static ISymmetricCipherAlgorithm getDefault() {
+        return AesAlgorithm.DEFAULT;
+    }
 
     @SuppressWarnings("deprecation")
     static ISymmetricCipherAlgorithm[] values() {

@@ -5,7 +5,9 @@ import de.invesdwin.util.collections.Arrays;
 
 public interface ISignatureAlgorithm extends IHashAlgorithm {
 
-    ISignatureAlgorithm DEFAULT = EddsaAlgorithm.DEFAULT;
+    static ISignatureAlgorithm getDefault() {
+        return EddsaAlgorithm.DEFAULT;
+    }
 
     @SuppressWarnings("deprecation")
     static ISignatureAlgorithm[] values() {
