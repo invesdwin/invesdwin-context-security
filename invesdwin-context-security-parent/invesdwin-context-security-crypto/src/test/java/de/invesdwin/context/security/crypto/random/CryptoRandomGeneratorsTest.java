@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.apache.commons.crypto.random.CryptoRandomFactory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.amazon.corretto.crypto.provider.AmazonCorrettoCryptoProvider;
@@ -13,10 +14,10 @@ import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.time.Instant;
 import de.invesdwin.util.time.duration.Duration;
 
-// @Disabled("manual test")
+@Disabled("manual test")
 @NotThreadSafe
 public class CryptoRandomGeneratorsTest extends ATest {
-    private static final long ITERATIONS = 1000_000L;
+    private static final long ITERATIONS = 1_000_000L;
 
     //java 17
     //reuse instance
