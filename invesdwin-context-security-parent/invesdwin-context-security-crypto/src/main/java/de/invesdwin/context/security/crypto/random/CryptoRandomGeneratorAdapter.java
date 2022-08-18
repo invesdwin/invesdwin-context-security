@@ -8,7 +8,13 @@ public class CryptoRandomGeneratorAdapter extends CryptoRandomGenerator {
     private final java.security.SecureRandom delegate;
 
     public CryptoRandomGeneratorAdapter(final java.security.SecureRandom delegate) {
+        super(delegate.getAlgorithm());
         this.delegate = delegate;
+    }
+
+    @Override
+    public String getAlgorithm() {
+        return delegate.getAlgorithm();
     }
 
     @Override
@@ -96,7 +102,7 @@ public class CryptoRandomGeneratorAdapter extends CryptoRandomGenerator {
 
     @Override
     public void reseed() {
-        reseed(delegate);
+        reseedIfSupported(delegate);
     }
 
 }

@@ -10,12 +10,18 @@ public class StrongRandomGenerator extends CryptoRandomGenerator {
     private final java.security.SecureRandom delegate;
 
     public StrongRandomGenerator(final java.security.SecureRandom delegate) {
+        super(delegate.getAlgorithm());
         this.delegate = delegate;
     }
 
     @Override
     public String toString() {
         return delegate.toString();
+    }
+
+    @Override
+    public String getAlgorithm() {
+        return delegate.getAlgorithm();
     }
 
     @Override
@@ -98,7 +104,7 @@ public class StrongRandomGenerator extends CryptoRandomGenerator {
 
     @Override
     public void reseed() {
-        reseed(delegate);
+        reseedIfSupported(delegate);
     }
 
 }

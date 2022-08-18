@@ -9,7 +9,9 @@ import io.netty.util.concurrent.FastThreadLocal;
 @Immutable
 public final class CryptoRandomGenerators {
 
-    private static final String SHA1PRNG = "SHA1PRNG";
+    public static final String SHA1PRNG = "SHA1PRNG";
+    public static final String NATIVE_PRNG = "NativePRNG";
+
     private static final FastThreadLocal<CryptoRandomGenerator> THREAD_LOCAL = new FastThreadLocal<CryptoRandomGenerator>() {
         @Override
         protected CryptoRandomGenerator initialValue() {

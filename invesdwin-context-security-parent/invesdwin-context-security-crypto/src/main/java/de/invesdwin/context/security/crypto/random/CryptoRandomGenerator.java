@@ -5,22 +5,42 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
+import java.util.Set;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
 import de.invesdwin.context.security.crypto.CryptoProperties;
+import de.invesdwin.util.collections.factory.ILockCollectionFactory;
 import de.invesdwin.util.error.Throwables;
 import de.invesdwin.util.math.random.IRandomGenerator;
 
 @NotThreadSafe
 public class CryptoRandomGenerator extends java.security.SecureRandom implements IRandomGenerator {
 
+    private static final long RESEED_UNSUPPORTED_NANOS = Long.MIN_VALUE;
     private static final MethodHandle SUPER_RESEED_METHOD_HANDLE = newSuperReseedMethodHandle();
     private static final MethodHandle RESEED_METHOD_HANDLE = newReseedMethodHandle();
 
-    private long lastReseedNanos = System.nanoTime();
+    private static final Set<String> RESEED_UNSUPPORTED_ALGORITHM = ILockCollectionFactory.getInstance(true)
+            .newConcurrentSet();
 
-    public CryptoRandomGenerator() {}
+    private long lastReseedNanos;
+
+    protected CryptoRandomGenerator(final String algorithm) {
+        if (!RESEED_UNSUPPORTED_ALGORITHM.contains(algorithm)) {
+            lastReseedNanos = System.nanoTime();
+        } else {
+            lastReseedNanos = RESEED_UNSUPPORTED_NANOS;
+        }
+    }
+
+    public CryptoRandomGenerator() {
+        if (!RESEED_UNSUPPORTED_ALGORITHM.contains(getAlgorithm())) {
+            lastReseedNanos = System.nanoTime();
+        } else {
+            lastReseedNanos = RESEED_UNSUPPORTED_NANOS;
+        }
+    }
 
     private static MethodHandle newSuperReseedMethodHandle() {
         try {
@@ -106,10 +126,45 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
 
     @Override
     public void reseed() {
-        reseed(this);
+        reseedIfSupported();
+    }
+
+    protected void reseedIfSupported(final java.security.SecureRandom delegate) {
+        if (lastReseedNanos == RESEED_UNSUPPORTED_NANOS) {
+            return;
+        }
+        try {
+            reseed(delegate);
+        } catch (final UnsupportedOperationException e) {
+            /*
+             * no need to fallback to setSeed instead because e.g. NativePRNG gives the seed to the operating system
+             * which already includes the system time
+             */
+            RESEED_UNSUPPORTED_ALGORITHM.add(getAlgorithm());
+            lastReseedNanos = RESEED_UNSUPPORTED_NANOS;
+        }
+    }
+
+    protected void reseedIfSupported() {
+        if (lastReseedNanos == RESEED_UNSUPPORTED_NANOS) {
+            return;
+        }
+        try {
+            reseed(this);
+        } catch (final UnsupportedOperationException e) {
+            /*
+             * no need to fallback to setSeed instead because e.g. NativePRNG gives the seed to the operating system
+             * which already includes the system time
+             */
+            RESEED_UNSUPPORTED_ALGORITHM.add(getAlgorithm());
+            lastReseedNanos = RESEED_UNSUPPORTED_NANOS;
+        }
     }
 
     public void maybeReseed() {
+        if (lastReseedNanos == RESEED_UNSUPPORTED_NANOS) {
+            return;
+        }
         final long currentNanos = System.nanoTime();
         if (CryptoProperties.RESEED_INTERVAL.isLessThanOrEqualToNanos(currentNanos - lastReseedNanos)) {
             reseed();

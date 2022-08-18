@@ -14,8 +14,14 @@ public class CryptoRandomGeneratorAdapterCommons extends CryptoRandomGenerator i
     private final CryptoRandomGeneratorFinalizer finalizer;
 
     public CryptoRandomGeneratorAdapterCommons(final org.apache.commons.crypto.random.CryptoRandom delegate) {
+        super(delegate.getClass().getSimpleName());
         this.finalizer = new CryptoRandomGeneratorFinalizer(delegate);
         finalizer.register(this);
+    }
+
+    @Override
+    public String getAlgorithm() {
+        return finalizer.random.getClass().getSimpleName();
     }
 
     @Override
