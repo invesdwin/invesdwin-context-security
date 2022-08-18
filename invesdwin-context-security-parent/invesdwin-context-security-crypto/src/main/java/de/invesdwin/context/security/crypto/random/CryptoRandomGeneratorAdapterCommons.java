@@ -62,6 +62,11 @@ public class CryptoRandomGeneratorAdapterCommons extends CryptoRandomGenerator i
     }
 
     @Override
+    public void reseed() {
+        finalizer.random.setSeed(System.currentTimeMillis() + System.identityHashCode(this));
+    }
+
+    @Override
     public void nextBytes(final byte[] bytes) {
         finalizer.random.nextBytes(bytes);
     }

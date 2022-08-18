@@ -12,8 +12,7 @@ public final class CryptoRandomGeneratorObjectPool extends AAgronaObjectPool<Cry
 
     public static final CryptoRandomGeneratorObjectPool INSTANCE = new CryptoRandomGeneratorObjectPool();
 
-    private CryptoRandomGeneratorObjectPool() {
-    }
+    private CryptoRandomGeneratorObjectPool() {}
 
     @Override
     protected CryptoRandomGenerator newObject() {
@@ -21,9 +20,15 @@ public final class CryptoRandomGeneratorObjectPool extends AAgronaObjectPool<Cry
     }
 
     @Override
+    public CryptoRandomGenerator borrowObject() {
+        final CryptoRandomGenerator random = super.borrowObject();
+        random.maybeReseed();
+        return random;
+    }
+
+    @Override
     public void invalidateObject(final CryptoRandomGenerator element) {
-        //noop, newCryptoRandom uses non Closeable instance
-        //        Closeables.closeQuietly(element);
+        //noop
     }
 
     @Override

@@ -17,11 +17,12 @@ public final class CryptoRandomGenerators {
         }
     };
 
-    private CryptoRandomGenerators() {
-    }
+    private CryptoRandomGenerators() {}
 
     public static CryptoRandomGenerator getThreadLocalCryptoRandom() {
-        return THREAD_LOCAL.get();
+        final CryptoRandomGenerator instance = THREAD_LOCAL.get();
+        instance.maybeReseed();
+        return instance;
     }
 
     public static CryptoRandomGenerator newCryptoRandom(final byte[] seed) {
@@ -46,6 +47,9 @@ public final class CryptoRandomGenerators {
         }
     }
 
+    /**
+     * Should use NativePRNG per default.
+     */
     public static CryptoRandomGenerator newCryptoRandom() {
         return new CryptoRandomGenerator();
     }

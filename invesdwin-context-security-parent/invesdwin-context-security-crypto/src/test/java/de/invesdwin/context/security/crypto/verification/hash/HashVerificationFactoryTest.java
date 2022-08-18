@@ -224,7 +224,8 @@ public class HashVerificationFactoryTest extends ATest {
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
-                final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, cipherKey, iv);
+                final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, cipherKey,
+                        iv);
                 for (final IHashAlgorithm hashAlgorithm : IHashAlgorithm.values()) {
                     log.info("%s with %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm());
                     final HashVerificationFactory verificationFactory = new HashVerificationFactory(hashAlgorithm,

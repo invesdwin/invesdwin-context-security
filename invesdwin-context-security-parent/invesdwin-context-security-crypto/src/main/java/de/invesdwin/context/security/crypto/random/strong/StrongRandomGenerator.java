@@ -1,13 +1,15 @@
-package de.invesdwin.context.security.crypto.random;
+package de.invesdwin.context.security.crypto.random.strong;
 
-import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.NotThreadSafe;
 
-@Immutable
-public class CryptoRandomGeneratorAdapter extends CryptoRandomGenerator {
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
+
+@NotThreadSafe
+public class StrongRandomGenerator extends CryptoRandomGenerator {
 
     private final java.security.SecureRandom delegate;
 
-    public CryptoRandomGeneratorAdapter(final java.security.SecureRandom delegate) {
+    public StrongRandomGenerator(final java.security.SecureRandom delegate) {
         this.delegate = delegate;
     }
 

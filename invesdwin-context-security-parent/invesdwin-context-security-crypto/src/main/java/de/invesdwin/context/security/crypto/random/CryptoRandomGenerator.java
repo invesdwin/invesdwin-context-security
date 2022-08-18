@@ -1,13 +1,35 @@
 package de.invesdwin.context.security.crypto.random;
 
-import javax.annotation.concurrent.Immutable;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Method;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
+import de.invesdwin.context.security.crypto.CryptoProperties;
+import de.invesdwin.norva.beanpath.BeanPathReflections;
+import de.invesdwin.util.error.Throwables;
 import de.invesdwin.util.math.random.IRandomGenerator;
 
-@Immutable
+@NotThreadSafe
 public class CryptoRandomGenerator extends java.security.SecureRandom implements IRandomGenerator {
 
-    public CryptoRandomGenerator() {
+    private static final MethodHandle RESEED_METHOD_HANDLE = newReseedMethodHandle();
+
+    private long lastReseedNanos = System.nanoTime();
+
+    public CryptoRandomGenerator() {}
+
+    private static MethodHandle newReseedMethodHandle() {
+        try {
+            final Method reseed = java.security.SecureRandom.class.getDeclaredMethod("reseed");
+            final Lookup lookup = MethodHandles.lookup();
+            BeanPathReflections.makeAccessible(reseed);
+            return lookup.unreflect(reseed);
+        } catch (final Exception e) {
+            return null;
+        }
     }
 
     @Override
@@ -70,6 +92,34 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
     @Override
     public double nextExponential() {
         return IRandomGenerator.super.nextExponential();
+    }
+
+    @Override
+    public void reseed() {
+        reseed(this);
+    }
+
+    public void maybeReseed() {
+        final long currentNanos = System.nanoTime();
+        if (CryptoProperties.RESEED_INTERVAL.isLessThanOrEqualToNanos(currentNanos - lastReseedNanos)) {
+            reseed();
+            lastReseedNanos = currentNanos;
+        }
+    }
+
+    /**
+     * A version of reseed that is backwards compatible to java 8.
+     */
+    public static void reseed(final java.security.SecureRandom random) {
+        if (RESEED_METHOD_HANDLE != null) {
+            try {
+                RESEED_METHOD_HANDLE.invoke(random);
+            } catch (final Throwable e) {
+                throw Throwables.propagate(e);
+            }
+        } else {
+            random.setSeed(System.currentTimeMillis() + System.identityHashCode(random));
+        }
     }
 
 }
