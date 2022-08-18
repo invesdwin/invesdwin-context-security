@@ -16,6 +16,11 @@ import de.invesdwin.context.security.crypto.verification.hash.wrapper.LazyDelega
 import de.invesdwin.context.security.crypto.verification.signature.wrapper.CipherSignatureHash;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
+/**
+ * This is the classical way of using a cipher for signatures (normally with RSA). Though one should prefer to use an
+ * actual Signature implementation for that (e.g. RsaSignatureAlgorithm) or directly a better algorithm like ECDSA or
+ * EdDSA (e.g. Ed25519)
+ */
 @Immutable
 public class AsymmetricCipherSignatureAlgorithm implements ISignatureAlgorithm {
 
