@@ -8,7 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -92,13 +92,9 @@ public class HashKey implements IHashKey {
     @Override
     public IKey newRandomInstance() {
         final byte[] randomKey = ByteBuffers.allocateByteArray(keySizeBits);
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            random.nextBytes(randomKey);
-            return new HashKey(algorithm, randomKey);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        random.nextBytes(randomKey);
+        return new HashKey(algorithm, randomKey);
     }
 
     @SuppressWarnings("unchecked")

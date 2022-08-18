@@ -12,7 +12,7 @@ import javax.annotation.concurrent.Immutable;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -34,7 +34,8 @@ public class SignatureCipherKey extends AsymmetricCipherKey {
         super(algorithm, publicKey, privateKey, keySizeBits);
     }
 
-    public SignatureCipherKey(final IAsymmetricCipherAlgorithm algorithm, final KeyPair keyPair, final int keySizeBits) {
+    public SignatureCipherKey(final IAsymmetricCipherAlgorithm algorithm, final KeyPair keyPair,
+            final int keySizeBits) {
         super(algorithm, keyPair, keySizeBits);
     }
 
@@ -75,7 +76,7 @@ public class SignatureCipherKey extends AsymmetricCipherKey {
 
     @Override
     public IKey newRandomInstance() {
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
         try {
             final KeyPairGenerator generator = KeyPairGenerator.getInstance(getAlgorithm().getKeyAlgorithm());
             final int lengthBits = getKeySizeBits();
@@ -84,8 +85,6 @@ public class SignatureCipherKey extends AsymmetricCipherKey {
             return new SignatureCipherKey(getAlgorithm(), keyPair, getKeySizeBits());
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
     }
 

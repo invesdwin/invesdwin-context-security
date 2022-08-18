@@ -11,7 +11,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvPara
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.util.streams.InputStreams;
 import de.invesdwin.util.streams.OutputStreams;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
@@ -115,28 +115,19 @@ public class CipherDerivedIV implements ICipherIV {
     }
 
     public static void randomizeIV(final byte[] initIV) {
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            random.nextBytes(initIV);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        random.nextBytes(initIV);
     }
 
     public static AtomicLong newRandomIvCounter() {
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            /*
-             * start at a random counter, so it does not matter when the classes are initialized, the counter will not
-             * be predictably at 0. So that an attacker does not know how long the communication chnanel has been
-             * established.
-             * 
-             * We anyway either send the IV or the counter over the wire so there is no secret in the counter itself.
-             */
-            return new AtomicLong(random.nextLong());
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        /*
+         * start at a random counter, so it does not matter when the classes are initialized, the counter will not be
+         * predictably at 0. So that an attacker does not know how long the communication chnanel has been established.
+         * 
+         * We anyway either send the IV or the counter over the wire so there is no secret in the counter itself.
+         */
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        return new AtomicLong(random.nextLong());
     }
 
     public static void calculateIV(final byte[] initIV, final long pCounter, final byte[] iv) {

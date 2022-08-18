@@ -20,14 +20,10 @@ public class CryptoRandomBytesKeyGenerator implements BytesKeyGenerator {
 
     @Override
     public byte[] generateKey() {
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            final byte[] key = new byte[keyLength];
-            random.nextBytes(key);
-            return key;
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] key = new byte[keyLength];
+        random.nextBytes(key);
+        return key;
     }
 
 }

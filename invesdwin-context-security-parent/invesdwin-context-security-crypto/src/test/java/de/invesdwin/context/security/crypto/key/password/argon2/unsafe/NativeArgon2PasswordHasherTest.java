@@ -12,7 +12,7 @@ import de.invesdwin.context.security.crypto.key.password.argon2.Argon2PasswordHa
 import de.invesdwin.context.security.crypto.key.password.argon2.IArgon2PasswordHasher;
 import de.invesdwin.context.security.crypto.key.password.argon2.jvm.Argon2PasswordHasher;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.concurrent.Executors;
 import de.invesdwin.util.lang.Objects;
@@ -75,13 +75,9 @@ public class NativeArgon2PasswordHasherTest {
         final int length = 64;
         final byte[] salt = new byte[length];
         final byte[] password = new byte[length];
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            random.nextBytes(salt);
-            random.nextBytes(password);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        random.nextBytes(salt);
+        random.nextBytes(password);
         byte[] prevResult = null;
         final int maxParallelisation = Executors.getCpuThreadPoolCount();
         for (int parallelisation = 1; parallelisation <= maxParallelisation; parallelisation++) {

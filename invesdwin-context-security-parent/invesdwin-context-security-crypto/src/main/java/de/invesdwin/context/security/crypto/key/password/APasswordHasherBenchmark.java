@@ -4,7 +4,7 @@ import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.log.Log;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.util.time.Instant;
 import de.invesdwin.util.time.date.FTimeUnit;
 import de.invesdwin.util.time.duration.Duration;
@@ -24,14 +24,10 @@ public abstract class APasswordHasherBenchmark<E extends IPasswordHasher> {
     private final Log log = new Log(this);
 
     static {
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            final byte[] salt = new byte[64];
-            random.nextBytes(salt);
-            SALT = salt;
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] salt = new byte[64];
+        random.nextBytes(salt);
+        SALT = salt;
     }
 
     public abstract E getDefaultInstance();

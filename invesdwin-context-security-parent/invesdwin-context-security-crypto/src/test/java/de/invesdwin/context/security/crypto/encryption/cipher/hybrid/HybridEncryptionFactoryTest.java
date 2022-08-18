@@ -18,7 +18,6 @@ import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorit
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactory;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.SymmetricEncryptionFactoryTest;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherCountedIV;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
@@ -27,7 +26,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.Ciphe
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICipherIV;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.collections.Arrays;
@@ -43,21 +42,13 @@ public class HybridEncryptionFactoryTest extends ATest {
     @Test
     public void testEncryptionAndDecryption() {
         final DerivedKeyProvider derivedKeyProvider;
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
-            random.nextBytes(key);
-            derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
+        random.nextBytes(key);
+        derivedKeyProvider = DerivedKeyProvider
+                .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         for (final ISymmetricCipherAlgorithm symmetricAlgorithm : ISymmetricCipherAlgorithm.values()) {
-            if (symmetricAlgorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
-            final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
+            final byte[] cipherKey = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     symmetricAlgorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(symmetricAlgorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(symmetricAlgorithm);
@@ -66,7 +57,7 @@ public class HybridEncryptionFactoryTest extends ATest {
             final CipherRandomIV randomIV = new CipherRandomIV(symmetricAlgorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
                 final SymmetricEncryptionFactory symmetricFactory = new SymmetricEncryptionFactory(symmetricAlgorithm,
-                        key, iv);
+                        cipherKey, iv);
                 for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
                     log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
                             iv.getClass().getSimpleName());
@@ -99,21 +90,14 @@ public class HybridEncryptionFactoryTest extends ATest {
     @Test
     public void testCipher() {
         final DerivedKeyProvider derivedKeyProvider;
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
-            random.nextBytes(key);
-            derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
-        final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(), AesKeySize.DEFAULT.getBits());
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
+        random.nextBytes(key);
+        derivedKeyProvider = DerivedKeyProvider
+                .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
+        final byte[] cipherKey = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
+                AesKeySize.DEFAULT.getBits());
         for (final ISymmetricCipherAlgorithm symmetricAlgorithm : ISymmetricCipherAlgorithm.values()) {
-            if (symmetricAlgorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
             final CipherDerivedIV derivedIV = new CipherDerivedIV(symmetricAlgorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(symmetricAlgorithm);
             final CipherPresharedIV presharedIV = new CipherPresharedIV(symmetricAlgorithm, derivedKeyProvider
@@ -121,7 +105,7 @@ public class HybridEncryptionFactoryTest extends ATest {
             final CipherRandomIV randomIV = new CipherRandomIV(symmetricAlgorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
                 final SymmetricEncryptionFactory symmetricFactory = new SymmetricEncryptionFactory(symmetricAlgorithm,
-                        key, iv);
+                        cipherKey, iv);
                 for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
                     log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
                             iv.getClass().getSimpleName());
@@ -164,21 +148,13 @@ public class HybridEncryptionFactoryTest extends ATest {
     @Test
     public void testCipherStream() {
         final DerivedKeyProvider derivedKeyProvider;
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
-            random.nextBytes(key);
-            derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
+        random.nextBytes(key);
+        derivedKeyProvider = DerivedKeyProvider
+                .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         for (final ISymmetricCipherAlgorithm symmetricAlgorithm : ISymmetricCipherAlgorithm.values()) {
-            if (symmetricAlgorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
-            final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
+            final byte[] cipherKey = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     symmetricAlgorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(symmetricAlgorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(symmetricAlgorithm);
@@ -187,7 +163,7 @@ public class HybridEncryptionFactoryTest extends ATest {
             final CipherRandomIV randomIV = new CipherRandomIV(symmetricAlgorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
                 final SymmetricEncryptionFactory symmetricFactory = new SymmetricEncryptionFactory(symmetricAlgorithm,
-                        key, iv);
+                        cipherKey, iv);
                 for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
                     log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
                             iv.getClass().getSimpleName());
@@ -248,21 +224,13 @@ public class HybridEncryptionFactoryTest extends ATest {
     @Test
     public void testStreamingCipherStream() {
         final DerivedKeyProvider derivedKeyProvider;
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
-            //            random.nextBytes(key);
-            derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
+        random.nextBytes(key);
+        derivedKeyProvider = DerivedKeyProvider
+                .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         for (final ISymmetricCipherAlgorithm symmetricAlgorithm : ISymmetricCipherAlgorithm.values()) {
-            if (symmetricAlgorithm == AesAlgorithm.AES_CBC_NoPadding) {
-                //requires padding
-                continue;
-            }
-            final byte[] key = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
+            final byte[] cipherKey = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
                     symmetricAlgorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(symmetricAlgorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(symmetricAlgorithm);
@@ -271,7 +239,7 @@ public class HybridEncryptionFactoryTest extends ATest {
             final CipherRandomIV randomIV = new CipherRandomIV(symmetricAlgorithm);
             for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
                 final SymmetricEncryptionFactory symmetricFactory = new SymmetricEncryptionFactory(symmetricAlgorithm,
-                        key, iv);
+                        cipherKey, iv);
                 for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
                     log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
                             iv.getClass().getSimpleName());

@@ -14,7 +14,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeySize;
 import de.invesdwin.context.security.crypto.key.DerivedKeyProvider;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.math.Bytes;
@@ -29,18 +29,14 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
     @Test
     public void testEncryptionAndDecryption() {
         final DerivedKeyProvider derivedKeyProvider;
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
-            random.nextBytes(key);
-            derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
+        random.nextBytes(key);
+        derivedKeyProvider = DerivedKeyProvider
+                .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.values()) {
-            final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
-            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
+            final AsymmetricCipherKey cipherKey = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
+            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(cipherKey);
             testEncryptionAndDecryption(factory, "1234567890");
             testEncryptionAndDecryption(factory, "0987654321");
         }
@@ -60,18 +56,14 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
     @Test
     public void testCipher() {
         final DerivedKeyProvider derivedKeyProvider;
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
-            random.nextBytes(key);
-            derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
+        random.nextBytes(key);
+        derivedKeyProvider = DerivedKeyProvider
+                .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.values()) {
-            final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
-            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
+            final AsymmetricCipherKey cipherKey = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
+            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(cipherKey);
             testCipher(factory, "1234567890", "0987654321");
             testCipher(factory, "0987654321", "1234567890");
         }
@@ -101,18 +93,14 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
     @Test
     public void testCipherStream() {
         final DerivedKeyProvider derivedKeyProvider;
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
-            random.nextBytes(key);
-            derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
+        random.nextBytes(key);
+        derivedKeyProvider = DerivedKeyProvider
+                .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.values()) {
-            final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
-            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
+            final AsymmetricCipherKey cipherKey = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
+            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(cipherKey);
             try {
                 testCipherStream(factory, "1234567890", "0987654321");
                 testCipherStream(factory, "0987654321", "1234567890");
@@ -161,18 +149,14 @@ public class AsymmetricEncryptionFactoryTest extends ATest {
     @Test
     public void testStreamingCipherStream() {
         final DerivedKeyProvider derivedKeyProvider;
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
-            //            random.nextBytes(key);
-            derivedKeyProvider = DerivedKeyProvider
-                    .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] key = ByteBuffers.allocateByteArray(RsaKeySize.DEFAULT.getBytes());
+        random.nextBytes(key);
+        derivedKeyProvider = DerivedKeyProvider
+                .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         for (final IAsymmetricCipherAlgorithm algorithm : IAsymmetricCipherAlgorithm.values()) {
-            final AsymmetricCipherKey key = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
-            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(key);
+            final AsymmetricCipherKey cipherKey = new AsymmetricCipherKey(algorithm, derivedKeyProvider);
+            final AsymmetricEncryptionFactory factory = new AsymmetricEncryptionFactory(cipherKey);
             try {
                 testStreamingCipherStream(factory, "1234567890", "0987654321");
                 testStreamingCipherStream(factory, "0987654321", "1234567890");

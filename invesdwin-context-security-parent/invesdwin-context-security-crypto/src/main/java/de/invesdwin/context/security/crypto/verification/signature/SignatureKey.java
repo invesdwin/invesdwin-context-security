@@ -13,7 +13,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.Asymmet
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.context.security.crypto.verification.signature.algorithm.ISignatureAlgorithm;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -145,7 +145,7 @@ public class SignatureKey implements ISignatureKey {
 
     @Override
     public IKey newRandomInstance() {
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
         try {
             final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm.getKeyAlgorithm());
             final int lengthBits = keySizeBits;
@@ -154,8 +154,6 @@ public class SignatureKey implements ISignatureKey {
             return new SignatureKey(algorithm, keyPair, keySizeBits);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
     }
 

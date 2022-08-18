@@ -12,7 +12,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.ICiph
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -129,12 +129,8 @@ public class SymmetricCipherKey implements ICipherKey {
     @Override
     public IKey newRandomInstance() {
         final byte[] randomKey = ByteBuffers.allocateByteArray(keySizeBytes);
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
-        try {
-            random.nextBytes(randomKey);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
-        }
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        random.nextBytes(randomKey);
         final ICipherIV randomCipherIV = cipherIV.newRandomInstance();
         return new SymmetricCipherKey(algorithm, randomKey, randomCipherIV);
     }

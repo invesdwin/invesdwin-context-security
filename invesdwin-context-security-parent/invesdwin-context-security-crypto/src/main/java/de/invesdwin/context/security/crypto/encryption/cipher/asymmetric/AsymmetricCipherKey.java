@@ -17,7 +17,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipherKey;
 import de.invesdwin.context.security.crypto.key.IDerivedKeyProvider;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorObjectPool;
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
@@ -169,7 +169,7 @@ public class AsymmetricCipherKey implements ICipherKey {
 
     @Override
     public IKey newRandomInstance() {
-        final CryptoRandomGenerator random = CryptoRandomGeneratorObjectPool.INSTANCE.borrowObject();
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
         try {
             final KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm.getKeyAlgorithm());
             final int lengthBits = keySizeBits;
@@ -178,8 +178,6 @@ public class AsymmetricCipherKey implements ICipherKey {
             return new AsymmetricCipherKey(algorithm, keyPair, keySizeBits);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
-        } finally {
-            CryptoRandomGeneratorObjectPool.INSTANCE.returnObject(random);
         }
     }
 

@@ -73,11 +73,10 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
             //we need a deterministic pseudorandom seed
             final byte[] seed = newDerivedKey(info, sizeBits);
             //we need to use a pseudorandom generator in order to be able to seed it
-            try (CryptoRandomGenerator random = CryptoRandomGenerators.newCryptoRandom(seed)) {
-                generator.initialize(sizeBits, random);
-                final KeyPair keyPair = generator.generateKeyPair();
-                return new AsymmetricCipherKey(algorithm, keyPair, sizeBits);
-            }
+            final CryptoRandomGenerator random = CryptoRandomGenerators.newCryptoRandom(seed);
+            generator.initialize(sizeBits, random);
+            final KeyPair keyPair = generator.generateKeyPair();
+            return new AsymmetricCipherKey(algorithm, keyPair, sizeBits);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -90,11 +89,10 @@ public class DerivedKeyProvider implements IDerivedKeyProvider {
             //we need a deterministic pseudorandom seed
             final byte[] seed = newDerivedKey(info, sizeBits);
             //we need to use a pseudorandom generator in order to be able to seed it
-            try (CryptoRandomGenerator random = CryptoRandomGenerators.newCryptoRandom(seed)) {
-                generator.initialize(sizeBits, random);
-                final KeyPair keyPair = generator.generateKeyPair();
-                return new SignatureKey(algorithm, keyPair, sizeBits);
-            }
+            final CryptoRandomGenerator random = CryptoRandomGenerators.newCryptoRandom(seed);
+            generator.initialize(sizeBits, random);
+            final KeyPair keyPair = generator.generateKeyPair();
+            return new SignatureKey(algorithm, keyPair, sizeBits);
         } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
