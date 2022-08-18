@@ -8,13 +8,13 @@ import de.invesdwin.context.security.crypto.key.password.argon2.jvm.Argon2Passwo
 @Immutable
 public final class NativeArgon2PasswordHasherFallback {
 
-    public static final IArgon2PasswordHasher INSTANCE;
+    public static final IArgon2PasswordHasher DEFAULT;
 
     static {
         if (NativeArgon2PasswordHasher.AVAILABLE) {
-            INSTANCE = NativeArgon2PasswordHasher.INSTANCE;
+            DEFAULT = NativeArgon2PasswordHasher.DEFAULT;
         } else {
-            INSTANCE = Argon2PasswordHasher.INSTANCE;
+            DEFAULT = Argon2PasswordHasher.DEFAULT;
         }
     }
 

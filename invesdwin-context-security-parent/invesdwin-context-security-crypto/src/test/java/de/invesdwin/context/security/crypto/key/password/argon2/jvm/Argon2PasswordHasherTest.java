@@ -33,7 +33,7 @@ public class Argon2PasswordHasherTest {
         final Argon2PasswordHasherBenchmarkMemory benchmarkFirst = new Argon2PasswordHasherBenchmarkMemory() {
             @Override
             public IArgon2PasswordHasher getDefaultInstance() {
-                return Argon2PasswordHasher.INSTANCE;
+                return Argon2PasswordHasher.DEFAULT;
             }
         };
         final PasswordHasherBenchmarkResult<IArgon2PasswordHasher> benchmarkWorkFactorResult = benchmarkFirst
@@ -54,7 +54,7 @@ public class Argon2PasswordHasherTest {
         final Argon2PasswordHasherBenchmarkIterations benchmarkFirst = new Argon2PasswordHasherBenchmarkIterations() {
             @Override
             public IArgon2PasswordHasher getDefaultInstance() {
-                return Argon2PasswordHasher.INSTANCE;
+                return Argon2PasswordHasher.DEFAULT;
             }
         };
         final PasswordHasherBenchmarkResult<IArgon2PasswordHasher> benchmarkWorkFactorResult = benchmarkFirst

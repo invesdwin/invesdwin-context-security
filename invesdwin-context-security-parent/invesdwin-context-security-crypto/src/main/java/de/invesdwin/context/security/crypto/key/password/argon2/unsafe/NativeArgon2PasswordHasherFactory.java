@@ -17,7 +17,7 @@ public final class NativeArgon2PasswordHasherFactory implements IArgon2PasswordH
 
     @Override
     public IArgon2PasswordHasher getInstance() {
-        return NativeArgon2PasswordHasher.INSTANCE;
+        return NativeArgon2PasswordHasher.DEFAULT;
     }
 
     @Override

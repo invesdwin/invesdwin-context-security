@@ -15,7 +15,7 @@ import de.invesdwin.util.lang.Objects;
 @Immutable
 public class Argon2PasswordHasher implements IArgon2PasswordHasher {
 
-    public static final Argon2PasswordHasher INSTANCE = new Argon2PasswordHasher();
+    public static final Argon2PasswordHasher DEFAULT = new Argon2PasswordHasher();
 
     private final byte[] pepper;
     private final Argon2Type type;

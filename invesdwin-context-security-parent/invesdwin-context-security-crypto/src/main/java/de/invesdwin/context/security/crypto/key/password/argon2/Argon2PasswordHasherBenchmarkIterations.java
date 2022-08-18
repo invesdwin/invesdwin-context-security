@@ -10,7 +10,7 @@ public class Argon2PasswordHasherBenchmarkIterations extends APasswordHasherBenc
 
     @Override
     public IArgon2PasswordHasher getDefaultInstance() {
-        return Argon2PasswordHasher.INSTANCE;
+        return Argon2PasswordHasher.DEFAULT;
     }
 
     @Override

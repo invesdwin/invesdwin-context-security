@@ -21,7 +21,9 @@ import de.invesdwin.context.security.crypto.key.password.argon2.IArgon2PasswordH
  */
 public interface IPasswordHasher {
 
-    IPasswordHasher INSTANCE = IArgon2PasswordHasher.INSTANCE;
+    static IPasswordHasher getDefault() {
+        return IArgon2PasswordHasher.getDefault();
+    }
 
     byte[] getPepper();
 

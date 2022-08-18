@@ -17,7 +17,7 @@ public final class Argon2PasswordHasherFactory implements IArgon2PasswordHasherF
 
     @Override
     public IArgon2PasswordHasher getInstance() {
-        return Argon2PasswordHasher.INSTANCE;
+        return Argon2PasswordHasher.DEFAULT;
     }
 
     @Override

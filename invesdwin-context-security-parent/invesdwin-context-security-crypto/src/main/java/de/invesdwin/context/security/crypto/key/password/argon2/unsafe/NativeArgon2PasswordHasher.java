@@ -15,7 +15,7 @@ import de.mkammerer.argon2.jna.Argon2Library;
 @Immutable
 public class NativeArgon2PasswordHasher implements IArgon2PasswordHasher {
 
-    public static final NativeArgon2PasswordHasher INSTANCE = new NativeArgon2PasswordHasher();
+    public static final NativeArgon2PasswordHasher DEFAULT = new NativeArgon2PasswordHasher();
 
     public static final boolean AVAILABLE;
 

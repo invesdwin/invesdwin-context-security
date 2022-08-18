@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import de.invesdwin.context.log.Log;
 import de.invesdwin.context.security.crypto.CryptoProperties;
-import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
 import de.invesdwin.context.security.crypto.key.password.PasswordHasherBenchmarkResult;
 import de.invesdwin.context.security.crypto.key.password.argon2.Argon2PasswordHasherBenchmarkIterations;
 import de.invesdwin.context.security.crypto.key.password.argon2.Argon2PasswordHasherBenchmarkMemory;
@@ -31,14 +30,11 @@ public class NativeArgon2PasswordHasherTest {
      */
     @Test
     public void testDuration() {
-        Assertions.checkNotNull(IArgon2PasswordHasher.INSTANCE);
-        Assertions.checkNotNull(IPasswordHasher.INSTANCE);
-
         final Duration maxDuration = new Duration(200, FTimeUnit.MILLISECONDS);
         final Argon2PasswordHasherBenchmarkMemory benchmarkFirst = new Argon2PasswordHasherBenchmarkMemory() {
             @Override
             public IArgon2PasswordHasher getDefaultInstance() {
-                return NativeArgon2PasswordHasher.INSTANCE;
+                return NativeArgon2PasswordHasher.DEFAULT;
             }
         };
         final PasswordHasherBenchmarkResult<IArgon2PasswordHasher> benchmarkWorkFactorResult = benchmarkFirst
@@ -59,7 +55,7 @@ public class NativeArgon2PasswordHasherTest {
         final Argon2PasswordHasherBenchmarkIterations benchmarkFirst = new Argon2PasswordHasherBenchmarkIterations() {
             @Override
             public IArgon2PasswordHasher getDefaultInstance() {
-                return NativeArgon2PasswordHasher.INSTANCE;
+                return NativeArgon2PasswordHasher.DEFAULT;
             }
         };
         final PasswordHasherBenchmarkResult<IArgon2PasswordHasher> benchmarkWorkFactorResult = benchmarkFirst

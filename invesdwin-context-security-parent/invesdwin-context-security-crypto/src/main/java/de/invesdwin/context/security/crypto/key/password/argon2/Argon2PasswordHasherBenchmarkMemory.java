@@ -9,7 +9,7 @@ public class Argon2PasswordHasherBenchmarkMemory extends APasswordHasherBenchmar
 
     @Override
     public IArgon2PasswordHasher getDefaultInstance() {
-        return IArgon2PasswordHasher.INSTANCE;
+        return IArgon2PasswordHasher.getDefault();
     }
 
     @Override

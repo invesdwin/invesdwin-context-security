@@ -11,8 +11,8 @@ import de.invesdwin.util.math.Bytes;
 @Immutable
 public class PasswordHasherDerivationFactory implements IDerivationFactory {
 
-    public static final PasswordHasherDerivationFactory INSTANCE = new PasswordHasherDerivationFactory(
-            IPasswordHasher.INSTANCE);
+    public static final PasswordHasherDerivationFactory DEFAULT = new PasswordHasherDerivationFactory(
+            IPasswordHasher.getDefault());
 
     private final IPasswordHasher passwordHasher;
 

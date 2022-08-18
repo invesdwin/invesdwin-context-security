@@ -27,7 +27,7 @@ public class NativeArgon2PasswordEncoder implements PasswordEncoder {
     private final IArgon2PasswordHasher argon2;
 
     private NativeArgon2PasswordEncoder() {
-        this(IArgon2PasswordHasher.INSTANCE);
+        this(IArgon2PasswordHasher.getDefault());
     }
 
     public NativeArgon2PasswordEncoder(final IArgon2PasswordHasher argon2) {

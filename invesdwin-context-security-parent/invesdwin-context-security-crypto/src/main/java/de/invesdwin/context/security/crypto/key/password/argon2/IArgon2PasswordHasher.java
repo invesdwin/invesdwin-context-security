@@ -29,7 +29,9 @@ public interface IArgon2PasswordHasher extends IPasswordHasher {
      */
     int DEFAULT_PARALLELISM = 4;
 
-    IArgon2PasswordHasher INSTANCE = NativeArgon2PasswordHasherFallback.INSTANCE;
+    static IArgon2PasswordHasher getDefault() {
+        return NativeArgon2PasswordHasherFallback.DEFAULT;
+    }
 
     @Override
     default String getAlgorithm() {

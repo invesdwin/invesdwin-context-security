@@ -2,7 +2,7 @@ package de.invesdwin.context.security.crypto.key.password.argon2;
 
 public interface IArgon2PasswordHasherFactory {
 
-    IArgon2PasswordHasherFactory INSTANCE = IArgon2PasswordHasher.INSTANCE.getFactory();
+    IArgon2PasswordHasherFactory INSTANCE = IArgon2PasswordHasher.getDefault().getFactory();
 
     IArgon2PasswordHasher getInstance();
 
