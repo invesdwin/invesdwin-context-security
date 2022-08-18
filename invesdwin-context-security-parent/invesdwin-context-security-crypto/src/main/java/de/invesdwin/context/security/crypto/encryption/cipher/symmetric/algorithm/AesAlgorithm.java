@@ -1,20 +1,16 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm;
 
-import java.io.IOException;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.Immutable;
 import javax.crypto.spec.GCMParameterSpec;
-
-import org.apache.commons.crypto.utils.Utils;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpecObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.CryptoCipher;
-import de.invesdwin.context.system.properties.SystemProperties;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipher;
 
 /**
  * https://stackoverflow.com/questions/1220751/how-to-choose-an-aes-encryption-mode-cbc-ecb-ctr-ocb-cfb
@@ -164,22 +160,7 @@ public enum AesAlgorithm implements ISymmetricCipherAlgorithm {
 
     @Override
     public ICipher newCipher() {
-        return newCryptoCipher();
-    }
-
-    protected ICipher newCryptoCipher() {
-        return newCryptoCipher(getAlgorithm(), getHashSize());
-    }
-
-    public static ICipher newCryptoCipher(final String algorithm, final int hashSize) {
-        //commons-crypto does not yet support openssl 3.0.0: https://issues.apache.org/jira/projects/CRYPTO/issues/CRYPTO-164
-        try {
-            final org.apache.commons.crypto.cipher.CryptoCipher cryptoCipher = Utils.getCipherInstance(algorithm,
-                    SystemProperties.SYSTEM_PROPERTIES);
-            return new CryptoCipher(cryptoCipher, hashSize);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+        return new JceCipher(JceCipher.getJceCipherInstance(algorithm), hashSize);
     }
 
 }

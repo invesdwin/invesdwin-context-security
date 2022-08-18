@@ -9,11 +9,11 @@ import de.invesdwin.util.lang.Closeables;
 import de.invesdwin.util.lang.finalizer.AFinalizer;
 
 @Immutable
-public class CryptoRandomGeneratorAdapterCommons extends CryptoRandomGenerator implements Closeable {
+public class CommonsCryptoRandomGeneratorAdapter extends CryptoRandomGenerator implements Closeable {
 
     private final CryptoRandomGeneratorFinalizer finalizer;
 
-    public CryptoRandomGeneratorAdapterCommons(final org.apache.commons.crypto.random.CryptoRandom delegate) {
+    public CommonsCryptoRandomGeneratorAdapter(final org.apache.commons.crypto.random.CryptoRandom delegate) {
         super(false);
         this.finalizer = new CryptoRandomGeneratorFinalizer(delegate);
         finalizer.register(this);

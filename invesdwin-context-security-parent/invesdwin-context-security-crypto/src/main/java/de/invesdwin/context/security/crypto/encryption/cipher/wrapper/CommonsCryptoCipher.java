@@ -1,5 +1,6 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.wrapper;
 
+import java.io.IOException;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -7,26 +8,43 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.ShortBufferException;
 
+import org.apache.commons.crypto.utils.Utils;
+
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipherKey;
 import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.context.system.properties.SystemProperties;
 import de.invesdwin.util.lang.Closeables;
 import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.EmptyByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
+/**
+ * commons-crypto does not yet support openssl 3.0.0: https://issues.apache.org/jira/projects/CRYPTO/issues/CRYPTO-164
+ *
+ * @author subes
+ *
+ */
 @NotThreadSafe
-public class CryptoCipher implements ICipher {
+public class CommonsCryptoCipher implements ICipher {
 
     private final byte[] oneByteBuf = new byte[1];
     private final org.apache.commons.crypto.cipher.CryptoCipher cipher;
     private final int hashSize;
 
-    public CryptoCipher(final org.apache.commons.crypto.cipher.CryptoCipher cipher, final int hashSize) {
+    public CommonsCryptoCipher(final org.apache.commons.crypto.cipher.CryptoCipher cipher, final int hashSize) {
         this.cipher = cipher;
         this.hashSize = hashSize;
+    }
+
+    public static org.apache.commons.crypto.cipher.CryptoCipher getCommonsCryptoCipherInstance(final String algorithm) {
+        try {
+            return Utils.getCipherInstance(algorithm, SystemProperties.SYSTEM_PROPERTIES);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

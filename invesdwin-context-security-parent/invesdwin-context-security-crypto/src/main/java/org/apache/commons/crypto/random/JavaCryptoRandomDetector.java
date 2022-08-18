@@ -6,7 +6,7 @@ import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorAdapter;
-import de.invesdwin.context.security.crypto.random.CryptoRandomGeneratorAdapterCommons;
+import de.invesdwin.context.security.crypto.random.CommonsCryptoRandomGeneratorAdapter;
 import de.invesdwin.context.system.properties.SystemProperties;
 
 /**
@@ -42,7 +42,7 @@ public final class JavaCryptoRandomDetector {
             if (JavaCryptoRandomDetector.isJavaCryptoRandom(cryptoRandom)) {
                 return newFallbackCryptoRandom();
             }
-            return new CryptoRandomGeneratorAdapterCommons(cryptoRandom);
+            return new CommonsCryptoRandomGeneratorAdapter(cryptoRandom);
         } catch (final GeneralSecurityException e) {
             throw new RuntimeException(e);
         }

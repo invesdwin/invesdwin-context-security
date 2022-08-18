@@ -2,12 +2,14 @@ package de.invesdwin.context.security.crypto.encryption.cipher.wrapper;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
@@ -25,6 +27,14 @@ public class JceCipher implements ICipher {
     public JceCipher(final Cipher cipher, final int hashSize) {
         this.cipher = cipher;
         this.hashSize = hashSize;
+    }
+
+    public static final Cipher getJceCipherInstance(final String algorithm) {
+        try {
+            return Cipher.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

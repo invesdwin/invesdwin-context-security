@@ -15,10 +15,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-crypto</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>de.mkammerer</groupId>
 			<artifactId>argon2-jvm</artifactId>
 		</dependency>
@@ -51,6 +47,11 @@
 			<groupId>org.conscrypt</groupId>
 			<artifactId>conscrypt-openjdk-uber</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-crypto</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

@@ -115,7 +115,7 @@ public class CryptoRandomGeneratorsTest extends ATest {
             public CryptoRandomGenerator call() throws Exception {
                 final org.apache.commons.crypto.random.CryptoRandom cryptoRandom = CryptoRandomFactory
                         .getCryptoRandom();
-                return new CryptoRandomGeneratorAdapterCommons(cryptoRandom);
+                return new CommonsCryptoRandomGeneratorAdapter(cryptoRandom);
             }
         });
         testRandomGenerator("Conscrypt", new Callable<CryptoRandomGenerator>() {

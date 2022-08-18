@@ -1,15 +1,12 @@
 package de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.padding;
 
-import java.security.NoSuchAlgorithmException;
-
 import javax.annotation.concurrent.Immutable;
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.algorithm.RsaKeySize;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.CipherObjectPool;
+import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.JceCipherWithKeyBlockSize;
 
 /**
@@ -46,11 +43,7 @@ public abstract class ARsaAlgorithm implements IAsymmetricCipherAlgorithm {
 
     @Override
     public ICipher newCipher() {
-        try {
-            return new JceCipherWithKeyBlockSize(Cipher.getInstance(getAlgorithm()), 0);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException(e);
-        }
+        return new JceCipherWithKeyBlockSize(JceCipher.getJceCipherInstance(getAlgorithm()), 0);
     }
 
     @Override
