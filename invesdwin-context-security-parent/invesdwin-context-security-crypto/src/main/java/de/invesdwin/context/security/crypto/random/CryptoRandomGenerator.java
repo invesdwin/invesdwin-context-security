@@ -4,6 +4,7 @@ import java.io.Closeable;
 
 import javax.annotation.concurrent.Immutable;
 
+import de.invesdwin.util.concurrent.reference.IReference;
 import de.invesdwin.util.lang.Closeables;
 import de.invesdwin.util.lang.finalizer.AFinalizer;
 import de.invesdwin.util.math.random.IRandomGenerator;
@@ -13,9 +14,19 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
 
     private final CryptoRandomGeneratorFinalizer finalizer;
 
+    public CryptoRandomGenerator(final java.security.SecureRandom delegate) {
+        this.finalizer = new CryptoRandomGeneratorFinalizer(delegate);
+        //no need to register finalizer because SecureRandom does not need to be closed
+    }
+
     public CryptoRandomGenerator(final org.apache.commons.crypto.random.CryptoRandom delegate) {
         this.finalizer = new CryptoRandomGeneratorFinalizer(delegate);
         finalizer.register(this);
+    }
+
+    @Override
+    public String toString() {
+        return finalizer.random.toString();
     }
 
     @Override
@@ -146,9 +157,14 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
         return IRandomGenerator.super.nextExponential();
     }
 
-    private static final class CryptoRandomGeneratorFinalizer extends AFinalizer {
+    private static final class CryptoRandomGeneratorFinalizer extends AFinalizer
+            implements IReference<java.util.Random> {
         private org.apache.commons.crypto.random.CryptoRandom cryptoRandom;
         private java.util.Random random;
+
+        private CryptoRandomGeneratorFinalizer(final java.security.SecureRandom secureRandom) {
+            this.random = secureRandom;
+        }
 
         private CryptoRandomGeneratorFinalizer(final org.apache.commons.crypto.random.CryptoRandom cryptoRandom) {
             this.cryptoRandom = cryptoRandom;
@@ -172,6 +188,11 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
         @Override
         public boolean isThreadLocal() {
             return false;
+        }
+
+        @Override
+        public java.util.Random get() {
+            return random;
         }
 
     }
