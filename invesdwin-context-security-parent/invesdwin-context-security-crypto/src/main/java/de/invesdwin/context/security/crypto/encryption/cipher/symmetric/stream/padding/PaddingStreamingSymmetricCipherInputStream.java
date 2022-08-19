@@ -6,8 +6,6 @@ import java.nio.channels.ReadableByteChannel;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.apache.commons.crypto.utils.Utils;
-
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
@@ -17,6 +15,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.S
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.CipherStreams;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.input.ICipherInput;
 import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 /**
@@ -138,7 +137,7 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
     @Override
     public long skip(final long pN) throws IOException {
         long n = pN;
-        Utils.checkArgument(n >= 0, "Negative skip length.");
+        Assertions.checkTrue(n >= 0, "Negative skip length.");
         checkStream();
 
         if (n == 0) {
@@ -220,7 +219,7 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
      *             if an I/O error occurs.
      */
     public void seek(final long position) throws IOException {
-        Utils.checkArgument(position >= 0, "Cannot seek to negative offset.");
+        Assertions.checkTrue(position >= 0, "Cannot seek to negative offset.");
         checkStream();
         /*
          * If data of target pos in the underlying stream has already been read and decrypted in outBuffer, we just need
@@ -294,7 +293,7 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
      */
     @Override
     protected void decrypt() throws IOException {
-        Utils.checkState(inBuffer.position() >= padding);
+        Assertions.checkTrue(inBuffer.position() >= padding);
         if (inBuffer.position() == padding) {
             // There is no real data in inBuffer.
             return;
@@ -325,10 +324,10 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
      *             if an I/O error occurs.
      */
     protected void decryptInPlace(final java.nio.ByteBuffer buf) throws IOException {
-        Utils.checkState(inBuffer.position() >= padding);
-        Utils.checkState(buf.isDirect());
-        Utils.checkState(buf.remaining() >= inBuffer.position());
-        Utils.checkState(padding == 0);
+        Assertions.checkTrue(inBuffer.position() >= padding);
+        Assertions.checkTrue(buf.isDirect());
+        Assertions.checkTrue(buf.remaining() >= inBuffer.position());
+        Assertions.checkTrue(padding == 0);
 
         if (inBuffer.position() == padding) {
             // There is no real data in inBuffer.

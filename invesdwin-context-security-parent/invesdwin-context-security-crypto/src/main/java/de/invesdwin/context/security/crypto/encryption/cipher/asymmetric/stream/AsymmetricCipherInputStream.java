@@ -7,8 +7,6 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.apache.commons.crypto.utils.Utils;
-
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
@@ -179,7 +177,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
      */
     @Override
     public long skip(final long n) throws IOException {
-        Utils.checkArgument(n >= 0, "Negative skip length.");
+        Assertions.checkTrue(n >= 0, "Negative skip length.");
         checkStream();
 
         if (n == 0) {

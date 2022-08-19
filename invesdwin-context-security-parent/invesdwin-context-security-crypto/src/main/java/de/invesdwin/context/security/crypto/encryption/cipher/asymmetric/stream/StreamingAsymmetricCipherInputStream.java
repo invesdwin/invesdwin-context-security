@@ -6,14 +6,13 @@ import java.nio.channels.ReadableByteChannel;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.apache.commons.crypto.utils.Utils;
-
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.CipherStreams;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.input.ICipherInput;
 import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @NotThreadSafe
@@ -98,7 +97,7 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
     @Override
     public long skip(final long pN) throws IOException {
         long n = pN;
-        Utils.checkArgument(n >= 0, "Negative skip length.");
+        Assertions.checkTrue(n >= 0, "Negative skip length.");
         checkStream();
 
         if (n == 0) {
@@ -180,7 +179,7 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
      *             if an I/O error occurs.
      */
     public void seek(final long position) throws IOException {
-        Utils.checkArgument(position >= 0, "Cannot seek to negative offset.");
+        Assertions.checkTrue(position >= 0, "Cannot seek to negative offset.");
         checkStream();
         /*
          * If data of target pos in the underlying stream has already been read and decrypted in outBuffer, we just need
@@ -277,8 +276,8 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
      *             if an I/O error occurs.
      */
     protected void decryptInPlace(final java.nio.ByteBuffer buf) throws IOException {
-        Utils.checkState(buf.isDirect());
-        Utils.checkState(buf.remaining() >= inBuffer.position());
+        Assertions.checkTrue(buf.isDirect());
+        Assertions.checkTrue(buf.remaining() >= inBuffer.position());
 
         if (inBuffer.position() == 0) {
             // There is no real data in inBuffer.

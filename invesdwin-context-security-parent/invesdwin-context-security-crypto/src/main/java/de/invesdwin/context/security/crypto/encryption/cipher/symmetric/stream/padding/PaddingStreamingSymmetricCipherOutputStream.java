@@ -6,8 +6,6 @@ import java.nio.channels.WritableByteChannel;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.apache.commons.crypto.utils.Utils;
-
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
@@ -17,6 +15,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.S
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.CipherStreams;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.output.ICipherOutput;
 import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.util.assertions.Assertions;
 
 /**
  * <p>
@@ -152,7 +151,7 @@ public class PaddingStreamingSymmetricCipherOutputStream extends SymmetricCipher
      */
     @Override
     protected void encrypt() throws IOException {
-        Utils.checkState(inBuffer.position() >= padding);
+        Assertions.checkTrue(inBuffer.position() >= padding);
         if (inBuffer.position() == padding) {
             // There is no real data in the inBuffer.
             return;

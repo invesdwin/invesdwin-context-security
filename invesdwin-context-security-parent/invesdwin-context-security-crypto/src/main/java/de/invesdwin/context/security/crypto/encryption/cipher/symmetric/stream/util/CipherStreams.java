@@ -8,7 +8,6 @@ import java.nio.channels.WritableByteChannel;
 import javax.annotation.concurrent.Immutable;
 
 import org.agrona.BufferUtil;
-import org.apache.commons.crypto.utils.Utils;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.input.ChannelCipherInput;
@@ -17,6 +16,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.u
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.output.ChannelCipherOutput;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.output.ICipherOutput;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.output.StreamCipherOutput;
+import de.invesdwin.util.assertions.Assertions;
 
 @Immutable
 public final class CipherStreams {
@@ -67,7 +67,7 @@ public final class CipherStreams {
      * @return the remaining buffer size.
      */
     public static int checkBufferSize(final ICipher cipher, final int bufferSize) {
-        Utils.checkArgument(bufferSize >= MIN_BUFFER_SIZE, "Minimum value of buffer size is " + MIN_BUFFER_SIZE + ".");
+        Assertions.checkTrue(bufferSize >= MIN_BUFFER_SIZE, "Minimum value of buffer size is " + MIN_BUFFER_SIZE + ".");
         final int blockSize = cipher.getBlockSize();
         if (blockSize == 0) {
             return bufferSize;
