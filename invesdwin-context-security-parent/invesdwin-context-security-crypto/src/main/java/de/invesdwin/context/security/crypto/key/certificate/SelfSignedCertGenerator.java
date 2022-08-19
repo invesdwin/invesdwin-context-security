@@ -28,6 +28,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
+import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.util.time.date.FDate;
 import de.invesdwin.util.time.date.FTimeUnit;
 import de.invesdwin.util.time.range.TimeRange;
@@ -48,8 +49,7 @@ public final class SelfSignedCertGenerator {
      */
     public static final int MAX_BROWSER_VALIDITY_DAYS = 397;
 
-    private SelfSignedCertGenerator() {
-    }
+    private SelfSignedCertGenerator() {}
 
     /**
      * If someone wants to use the certificate outside of its range, he can just manipulate his system clock or ignore
@@ -94,7 +94,9 @@ public final class SelfSignedCertGenerator {
      */
     public static X509Certificate generate(final KeyPair keyPair, final String hashAlgorithm, final String cn,
             final TimeRange validity) throws OperatorCreationException, CertificateException, CertIOException {
-        final ContentSigner contentSigner = new JcaContentSignerBuilder(hashAlgorithm).build(keyPair.getPrivate());
+        final ContentSigner contentSigner = new JcaContentSignerBuilder(hashAlgorithm)
+                .setSecureRandom(CryptoRandomGenerators.getThreadLocalCryptoRandom())
+                .build(keyPair.getPrivate());
         final X500Name x500Name = new X500Name("CN=" + cn);
         final X509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(x500Name,
                 BigInteger.valueOf(validity.getFrom().millisValue()), validity.getFrom().dateValue(),
