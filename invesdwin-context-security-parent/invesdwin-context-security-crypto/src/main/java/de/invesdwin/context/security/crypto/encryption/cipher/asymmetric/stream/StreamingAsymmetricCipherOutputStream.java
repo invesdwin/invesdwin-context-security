@@ -6,12 +6,11 @@ import java.nio.channels.WritableByteChannel;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.apache.commons.crypto.stream.output.Output;
-
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.CipherStreams;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.CipherStreams;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.output.ICipherOutput;
 import de.invesdwin.context.security.crypto.key.IKey;
 
 @NotThreadSafe
@@ -38,12 +37,12 @@ public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutpu
 
     public StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final OutputStream out,
             final ICipher cipher, final IKey key) throws IOException {
-        this(algorithm, out, cipher, CipherStreams.getDefaultBufferSize(), key, 0);
+        this(algorithm, out, cipher, CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key, 0);
     }
 
     public StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
             final WritableByteChannel channel, final ICipher cipher, final IKey key) throws IOException {
-        this(algorithm, channel, cipher, CipherStreams.getDefaultBufferSize(), key, 0);
+        this(algorithm, channel, cipher, CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key, 0);
     }
 
     protected StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final OutputStream out,
@@ -57,19 +56,20 @@ public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutpu
         this(algorithm, channel, cipher, bufferSize, key, 0);
     }
 
-    protected StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final Output output,
-            final ICipher cipher, final int bufferSize, final IKey key) throws IOException {
+    protected StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
+            final ICipherOutput output, final ICipher cipher, final int bufferSize, final IKey key) throws IOException {
         this(algorithm, output, cipher, bufferSize, key, 0);
     }
 
     public StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
             final OutputStream outputStream, final IKey key, final long streamOffset) throws IOException {
-        this(algorithm, outputStream, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key, streamOffset);
+        this(algorithm, outputStream, algorithm.newCipher(), CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key,
+                streamOffset);
     }
 
     public StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
             final WritableByteChannel channel, final IKey key, final long streamOffset) throws IOException {
-        this(algorithm, channel, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key, streamOffset);
+        this(algorithm, channel, algorithm.newCipher(), CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key, streamOffset);
     }
 
     protected StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
@@ -84,8 +84,9 @@ public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutpu
         this(algorithm, CipherStreams.wrapOutput(channel), cipher, bufferSize, key, streamOffset);
     }
 
-    protected StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm, final Output output,
-            final ICipher cipher, final int bufferSize, final IKey key, final long streamOffset) throws IOException {
+    protected StreamingAsymmetricCipherOutputStream(final IAsymmetricCipherAlgorithm algorithm,
+            final ICipherOutput output, final ICipher cipher, final int bufferSize, final IKey key,
+            final long streamOffset) throws IOException {
         super(algorithm, output, cipher, bufferSize, key);
 
         this.streamOffset = streamOffset;

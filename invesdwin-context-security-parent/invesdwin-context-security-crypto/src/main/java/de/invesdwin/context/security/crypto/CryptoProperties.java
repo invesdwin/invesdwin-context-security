@@ -9,6 +9,11 @@ import de.invesdwin.util.time.duration.Duration;
 @Immutable
 public final class CryptoProperties {
 
+    /**
+     * StartTLS is susceptible to Man-in-the-Middle-Attacks: https://de.wikipedia.org/wiki/STARTTLS
+     */
+    public static final boolean DEFAULT_START_TLS_ENABLED = false;
+
     public static final byte[] DEFAULT_PEPPER;
     public static final Duration RESEED_INTERVAL;
 

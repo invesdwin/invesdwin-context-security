@@ -7,14 +7,13 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.apache.commons.crypto.stream.CtrCryptoInputStream;
-import org.apache.commons.crypto.stream.input.Input;
 import org.apache.commons.crypto.utils.Utils;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymmetricCipherAlgorithm;
-import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.CipherStreams;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.CipherStreams;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.input.ICipherInput;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
@@ -32,7 +31,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
     protected final AlgorithmParameterSpec params;
 
     /** The input data. */
-    protected Input input;
+    protected ICipherInput input;
 
     /**
      * Input data buffer. The data starts at inBuffer.position() and ends at to inBuffer.limit().
@@ -58,22 +57,22 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
 
     public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final InputStream inputStream,
             final IKey key) throws IOException {
-        this(algorithm, inputStream, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key);
+        this(algorithm, inputStream, algorithm.newCipher(), CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key);
     }
 
     public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final InputStream inputStream,
             final ICipher cipher, final IKey key) throws IOException {
-        this(algorithm, inputStream, cipher, CipherStreams.getDefaultBufferSize(), key);
+        this(algorithm, inputStream, cipher, CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key);
     }
 
     public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
             final ICipher cipher, final IKey key) throws IOException {
-        this(algorithm, channel, cipher, CipherStreams.getDefaultBufferSize(), key);
+        this(algorithm, channel, cipher, CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key);
     }
 
     public AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final ReadableByteChannel channel,
             final IKey key) throws IOException {
-        this(algorithm, channel, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key);
+        this(algorithm, channel, algorithm.newCipher(), CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key);
     }
 
     protected AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final InputStream inputStream,
@@ -86,7 +85,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
         this(algorithm, CipherStreams.wrapInput(channel), cipher, bufferSize, key);
     }
 
-    protected AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final Input input,
+    protected AsymmetricCipherInputStream(final IAsymmetricCipherAlgorithm algorithm, final ICipherInput input,
             final ICipher cipher, final int bufferSize, final IKey key) throws IOException {
         this.algorithm = algorithm;
         this.input = input;
@@ -251,11 +250,6 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
         closed = true;
     }
 
-    /**
-     * Overrides the {@link InputStream#markSupported()}.
-     *
-     * @return false,the {@link CtrCryptoInputStream} don't support the mark method.
-     */
     @Override
     public boolean markSupported() {
         return false;
@@ -353,7 +347,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
      *
      * @return the input.
      */
-    protected Input getInput() {
+    protected ICipherInput getInput() {
         return input;
     }
 

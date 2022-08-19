@@ -6,13 +6,13 @@ import java.nio.channels.WritableByteChannel;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.apache.commons.crypto.stream.output.Output;
-
 import de.invesdwin.context.security.crypto.encryption.cipher.CipherMode;
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvParameterSpec;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.iv.CipherDerivedIV;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.CipherStreams;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.output.ICipherOutput;
 import de.invesdwin.context.security.crypto.key.IKey;
 
 /**
@@ -68,13 +68,13 @@ public class StreamingSymmetricCipherOutputStream extends SymmetricCipherOutputS
 
     public StreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final OutputStream out,
             final ICipher cipher, final IKey key, final byte[] iv) throws IOException {
-        this(algorithm, out, cipher, CipherStreams.getDefaultBufferSize(), key, iv, 0);
+        this(algorithm, out, cipher, CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key, iv, 0);
     }
 
     public StreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
             final WritableByteChannel channel, final ICipher cipher, final IKey key, final byte[] iv)
             throws IOException {
-        this(algorithm, channel, cipher, CipherStreams.getDefaultBufferSize(), key, iv, 0);
+        this(algorithm, channel, cipher, CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key, iv, 0);
     }
 
     protected StreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final OutputStream out,
@@ -88,22 +88,24 @@ public class StreamingSymmetricCipherOutputStream extends SymmetricCipherOutputS
         this(algorithm, channel, cipher, bufferSize, key, iv, 0);
     }
 
-    protected StreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final Output output,
-            final ICipher cipher, final int bufferSize, final IKey key, final byte[] iv) throws IOException {
+    protected StreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
+            final ICipherOutput output, final ICipher cipher, final int bufferSize, final IKey key, final byte[] iv)
+            throws IOException {
         this(algorithm, output, cipher, bufferSize, key, iv, 0);
     }
 
     public StreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
             final OutputStream outputStream, final IKey key, final byte[] iv, final long streamOffset)
             throws IOException {
-        this(algorithm, outputStream, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key, iv,
+        this(algorithm, outputStream, algorithm.newCipher(), CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key, iv,
                 streamOffset);
     }
 
     public StreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
             final WritableByteChannel channel, final IKey key, final byte[] iv, final long streamOffset)
             throws IOException {
-        this(algorithm, channel, algorithm.newCipher(), CipherStreams.getDefaultBufferSize(), key, iv, streamOffset);
+        this(algorithm, channel, algorithm.newCipher(), CipherStreams.DEFAULT_STREAM_BUFFER_SIZE, key, iv,
+                streamOffset);
     }
 
     protected StreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
@@ -118,9 +120,9 @@ public class StreamingSymmetricCipherOutputStream extends SymmetricCipherOutputS
         this(algorithm, CipherStreams.wrapOutput(channel), cipher, bufferSize, key, iv, streamOffset);
     }
 
-    protected StreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm, final Output output,
-            final ICipher cipher, final int bufferSize, final IKey key, final byte[] iv, final long streamOffset)
-            throws IOException {
+    protected StreamingSymmetricCipherOutputStream(final ISymmetricCipherAlgorithm algorithm,
+            final ICipherOutput output, final ICipher cipher, final int bufferSize, final IKey key, final byte[] iv,
+            final long streamOffset) throws IOException {
         super(algorithm, output, cipher, bufferSize, key, iv);
 
         this.streamOffset = streamOffset;
