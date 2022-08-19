@@ -49,7 +49,7 @@ public enum EcdsaAlgorithm implements ISignatureAlgorithm {
     SHA384withECNR("SHA384withECNR"),
     SHA512withECNR("SHA512withECNR");
 
-    public static final EcdsaAlgorithm DEFAULT = SHA256withECDDSA;
+    public static final EcdsaAlgorithm DEFAULT = SHA256withECDSA;
 
     private final String algorithm;
     private final HashObjectPool hashPool;
