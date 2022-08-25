@@ -1,5 +1,6 @@
 package de.invesdwin.context.security.crypto.key.password.argon2;
 
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
 import de.invesdwin.context.security.crypto.key.password.argon2.unsafe.NativeArgon2PasswordHasherFallback;
 
@@ -36,6 +37,11 @@ public interface IArgon2PasswordHasher extends IPasswordHasher {
     @Override
     default String getAlgorithm() {
         return "Argon2";
+    }
+
+    @Override
+    default int getDefaultHashLength() {
+        return AesKeySize._256.getBytes();
     }
 
     Argon2Type getType();

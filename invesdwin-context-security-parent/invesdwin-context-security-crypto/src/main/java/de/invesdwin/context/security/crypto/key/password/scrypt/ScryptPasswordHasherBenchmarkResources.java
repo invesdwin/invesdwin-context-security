@@ -9,7 +9,7 @@ public class ScryptPasswordHasherBenchmarkResources extends APasswordHasherBench
 
     @Override
     public ScryptPasswordHasher getDefaultInstance() {
-        return ScryptPasswordHasher.INSTANCE;
+        return ScryptPasswordHasher.DEFAULT;
     }
 
     @Override

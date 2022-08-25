@@ -18,7 +18,7 @@ public class FastScryptFunction extends ScryptFunction {
     public static final int DEFAULT_RESOURCES = 1 << 14;
     public static final int DEFAULT_PARALLELIZATION = 1;
 
-    public static final FastScryptFunction INSTANCE = new FastScryptFunction(DEFAULT_WORK_FACTOR, DEFAULT_RESOURCES,
+    public static final FastScryptFunction DEFAULT = new FastScryptFunction(DEFAULT_WORK_FACTOR, DEFAULT_RESOURCES,
             DEFAULT_PARALLELIZATION);
 
     private static final Pbkdf2PasswordHasher PBKDF2_HMAC_SHA256_SINGLE_ITERATION_NO_PEPPER = new Pbkdf2PasswordHasher(

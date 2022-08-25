@@ -9,7 +9,7 @@ public class Pbkdf2PasswordHasherBenchmarkIterations extends APasswordHasherBenc
 
     @Override
     public Pbkdf2PasswordHasher getDefaultInstance() {
-        return Pbkdf2PasswordHasher.INSTANCE;
+        return Pbkdf2PasswordHasher.DEFAULT;
     }
 
     @Override

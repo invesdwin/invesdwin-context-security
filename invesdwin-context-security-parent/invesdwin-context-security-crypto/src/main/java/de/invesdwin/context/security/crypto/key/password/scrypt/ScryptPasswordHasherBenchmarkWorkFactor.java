@@ -9,7 +9,7 @@ public class ScryptPasswordHasherBenchmarkWorkFactor extends APasswordHasherBenc
 
     @Override
     public ScryptPasswordHasher getDefaultInstance() {
-        return ScryptPasswordHasher.INSTANCE;
+        return ScryptPasswordHasher.DEFAULT;
     }
 
     @Override

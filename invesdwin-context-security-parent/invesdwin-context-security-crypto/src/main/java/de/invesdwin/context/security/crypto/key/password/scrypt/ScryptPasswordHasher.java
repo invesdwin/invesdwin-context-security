@@ -3,6 +3,7 @@ package de.invesdwin.context.security.crypto.key.password.scrypt;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.CryptoProperties;
+import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
 import de.invesdwin.util.lang.Objects;
 import de.invesdwin.util.math.Bytes;
@@ -10,7 +11,7 @@ import de.invesdwin.util.math.Bytes;
 @Immutable
 public class ScryptPasswordHasher implements IPasswordHasher {
 
-    public static final ScryptPasswordHasher INSTANCE = new ScryptPasswordHasher();
+    public static final ScryptPasswordHasher DEFAULT = new ScryptPasswordHasher();
 
     private final byte[] pepper;
     private final FastScryptFunction scrypt;
@@ -20,7 +21,7 @@ public class ScryptPasswordHasher implements IPasswordHasher {
     }
 
     public ScryptPasswordHasher(final byte[] pepper) {
-        this(pepper, FastScryptFunction.INSTANCE);
+        this(pepper, FastScryptFunction.DEFAULT);
     }
 
     public ScryptPasswordHasher(final byte[] pepper, final FastScryptFunction scrypt) {
@@ -40,6 +41,11 @@ public class ScryptPasswordHasher implements IPasswordHasher {
 
     public FastScryptFunction getScrypt() {
         return scrypt;
+    }
+
+    @Override
+    public int getDefaultHashLength() {
+        return AesKeySize._256.getBytes();
     }
 
     @Override

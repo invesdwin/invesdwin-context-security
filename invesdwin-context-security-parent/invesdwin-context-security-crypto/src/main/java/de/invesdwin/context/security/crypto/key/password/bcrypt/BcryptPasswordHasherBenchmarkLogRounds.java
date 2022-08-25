@@ -9,7 +9,7 @@ public class BcryptPasswordHasherBenchmarkLogRounds extends APasswordHasherBench
 
     @Override
     public BcryptPasswordHasher getDefaultInstance() {
-        return BcryptPasswordHasher.INSTANCE;
+        return BcryptPasswordHasher.DEFAULT;
     }
 
     @Override

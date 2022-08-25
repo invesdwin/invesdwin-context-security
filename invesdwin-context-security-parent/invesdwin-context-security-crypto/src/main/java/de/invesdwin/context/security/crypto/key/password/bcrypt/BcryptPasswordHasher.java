@@ -4,6 +4,7 @@ import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.CryptoProperties;
 import de.invesdwin.context.security.crypto.key.derivation.HkdfDerivationFactory;
+import de.invesdwin.context.security.crypto.key.derivation.IDerivationFactory;
 import de.invesdwin.context.security.crypto.key.password.IPasswordHasher;
 import de.invesdwin.util.lang.Objects;
 import de.invesdwin.util.math.Bytes;
@@ -16,7 +17,7 @@ public class BcryptPasswordHasher implements IPasswordHasher {
 
     public static final int BCRYPT_HASH_LENGTH = 24;
 
-    public static final BcryptPasswordHasher INSTANCE = new BcryptPasswordHasher();
+    public static final BcryptPasswordHasher DEFAULT = new BcryptPasswordHasher();
 
     private final RawBcryptFunction bcrypt;
     private final byte[] pepper;
@@ -26,7 +27,7 @@ public class BcryptPasswordHasher implements IPasswordHasher {
     }
 
     public BcryptPasswordHasher(final byte[] pepper) {
-        this(pepper, RawBcryptFunction.INSTANCE);
+        this(pepper, RawBcryptFunction.DEFAULT);
     }
 
     public BcryptPasswordHasher(final byte[] pepper, final RawBcryptFunction bcrypt) {
@@ -49,6 +50,11 @@ public class BcryptPasswordHasher implements IPasswordHasher {
     }
 
     @Override
+    public int getDefaultHashLength() {
+        return BCRYPT_HASH_LENGTH;
+    }
+
+    @Override
     public byte[] hash(final byte[] salt, final byte[] password, final int length) {
         final byte[] hashed = bcrypt.cryptRaw(password, Bytes.concat(salt, pepper));
 
@@ -59,12 +65,17 @@ public class BcryptPasswordHasher implements IPasswordHasher {
             return hashed;
         }
         //make sure we generate the desired number of bytes for key derivation
-        final byte[] extracted = HkdfDerivationFactory.DEFAULT.extract(salt, hashed);
+        final IDerivationFactory derivationFactory = getDerivationFactory();
+        final byte[] extracted = derivationFactory.extract(salt, hashed);
         if (extracted.length == length) {
             return extracted;
         }
-        final byte[] expanded = HkdfDerivationFactory.DEFAULT.expand(extracted, Bytes.EMPTY_ARRAY, length);
+        final byte[] expanded = derivationFactory.expand(extracted, Bytes.EMPTY_ARRAY, length);
         return expanded;
+    }
+
+    protected IDerivationFactory getDerivationFactory() {
+        return HkdfDerivationFactory.DEFAULT;
     }
 
     @Override

@@ -29,6 +29,8 @@ public interface IPasswordHasher {
 
     String getAlgorithm();
 
+    int getDefaultHashLength();
+
     byte[] hash(byte[] salt, byte[] password, int length);
 
 }

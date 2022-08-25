@@ -20,7 +20,7 @@ public class RawBcryptFunction extends BcryptFunction {
     public static final int DEFAULT_BCRYPT_LOG_ROUNDS = 12;
     public static final int BCRYPT_SALT_LENGTH = 16;
 
-    public static final RawBcryptFunction INSTANCE = new RawBcryptFunction();
+    public static final RawBcryptFunction DEFAULT = new RawBcryptFunction();
 
     private final boolean addNullTerminator;
     private final boolean sign;
