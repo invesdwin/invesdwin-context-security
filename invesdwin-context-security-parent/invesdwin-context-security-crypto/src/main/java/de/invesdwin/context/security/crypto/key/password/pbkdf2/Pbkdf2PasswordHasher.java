@@ -27,7 +27,7 @@ public class Pbkdf2PasswordHasher implements IPasswordHasher {
      * About 200ms on an I9-9900k
      */
     public static final int DEFAULT_ITERATIONS = 200_000;
-    public static final IHashAlgorithm DEFAULT_HASH_ALGORITHM = HmacAlgorithm.DEFAULT;
+    public static final IHashAlgorithm DEFAULT_HASH_ALGORITHM = HmacAlgorithm.HMAC_SHA_512;
     public static final Pbkdf2PasswordHasher DEFAULT = new Pbkdf2PasswordHasher();
 
     private final int iterations;
