@@ -14,14 +14,15 @@ public final class CryptoProperties {
      */
     public static final boolean DEFAULT_START_TLS_ENABLED = false;
 
+    public static final String DEFAULT_PEPPER_STR;
     public static final byte[] DEFAULT_PEPPER;
     public static final Duration RESEED_INTERVAL;
 
     static {
         final SystemProperties systemProperties = new SystemProperties(CryptoProperties.class);
-        DEFAULT_PEPPER = systemProperties
-                .getStringWithSecurityWarning("DEFAULT_PEPPER", IProperties.INVESDWIN_DEFAULT_PASSWORD)
-                .getBytes();
+        DEFAULT_PEPPER_STR = systemProperties.getStringWithSecurityWarning("DEFAULT_PEPPER",
+                IProperties.INVESDWIN_DEFAULT_PASSWORD);
+        DEFAULT_PEPPER = DEFAULT_PEPPER_STR.getBytes();
         RESEED_INTERVAL = systemProperties.getDuration("RESEED_INTERVAL");
     }
 
