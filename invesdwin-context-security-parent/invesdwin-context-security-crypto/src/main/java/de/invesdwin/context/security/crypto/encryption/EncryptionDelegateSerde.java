@@ -40,19 +40,19 @@ public class EncryptionDelegateSerde<E> implements ISerde<E> {
     }
 
     @Override
-    public E fromBuffer(final IByteBuffer buffer, final int length) {
-        if (length == 0) {
+    public E fromBuffer(final IByteBuffer buffer) {
+        if (buffer.capacity() == 0) {
             return null;
         }
         if (encryptionFactory == DisabledEncryptionFactory.INSTANCE) {
             //we can save a copy here
-            return delegate.fromBuffer(buffer, length);
+            return delegate.fromBuffer(buffer);
         } else {
             final IByteBuffer decryptedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
             final ICipher cipher = encryptionFactory.getCipherPool().borrowObject();
             try {
                 final int decryptedLength = encryptionFactory.encrypt(buffer, decryptedBuffer, cipher, key);
-                final E copied = delegate.fromBuffer(decryptedBuffer, decryptedLength);
+                final E copied = delegate.fromBuffer(decryptedBuffer.sliceTo(decryptedLength));
                 //                decryptedBuffer.clear(Bytes.ZERO, 0, decryptedLength);
                 return copied;
             } finally {

@@ -39,19 +39,18 @@ public class VerificationDelegateSerde<E> implements ISerde<E> {
     }
 
     @Override
-    public E fromBuffer(final IByteBuffer buffer, final int length) {
-        if (length == 0) {
+    public E fromBuffer(final IByteBuffer buffer) {
+        if (buffer.capacity() == 0) {
             return null;
         }
         if (verificationFactory == DisabledVerificationFactory.INSTANCE) {
             //we can save a copy here
-            return delegate.fromBuffer(buffer, length);
+            return delegate.fromBuffer(buffer);
         } else {
             final IHash hash = verificationFactory.getHashPool().borrowObject();
             try {
-                final IByteBuffer verifiedBuffer = verificationFactory.verifyAndSlice(buffer.sliceTo(length), hash,
-                        key);
-                return delegate.fromBuffer(verifiedBuffer, verifiedBuffer.capacity());
+                final IByteBuffer verifiedBuffer = verificationFactory.verifyAndSlice(buffer, hash, key);
+                return delegate.fromBuffer(verifiedBuffer);
             } finally {
                 verificationFactory.getHashPool().returnObject(hash);
             }
