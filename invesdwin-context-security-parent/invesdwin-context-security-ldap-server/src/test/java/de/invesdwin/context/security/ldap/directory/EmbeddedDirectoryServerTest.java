@@ -24,8 +24,8 @@ import de.invesdwin.context.security.ldap.directory.server.DirectoryServer;
 import de.invesdwin.context.security.ldap.directory.server.test.DirectoryServerTest;
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
-import de.invesdwin.util.lang.Strings;
 import de.invesdwin.util.lang.UUIDs;
+import de.invesdwin.util.lang.string.Strings;
 
 @NotThreadSafe
 @DirectoryServerTest

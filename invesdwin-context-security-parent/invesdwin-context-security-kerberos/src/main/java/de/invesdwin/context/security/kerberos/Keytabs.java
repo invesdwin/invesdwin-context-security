@@ -20,7 +20,7 @@ import org.apache.directory.shared.kerberos.components.EncryptionKey;
 import de.invesdwin.context.ContextProperties;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.lang.Files;
-import de.invesdwin.util.lang.UniqueNameGenerator;
+import de.invesdwin.util.lang.string.UniqueNameGenerator;
 
 @NotThreadSafe
 public final class Keytabs {

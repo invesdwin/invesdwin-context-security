@@ -3,8 +3,8 @@ package de.invesdwin.context.security.crypto.key.password;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.util.lang.Objects;
-import de.invesdwin.util.lang.Strings;
 import de.invesdwin.util.lang.ToStringHelper;
+import de.invesdwin.util.lang.string.Strings;
 import de.invesdwin.util.time.duration.Duration;
 
 @Immutable

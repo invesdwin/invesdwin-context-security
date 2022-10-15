@@ -28,8 +28,8 @@ import org.apache.directory.server.ldap.handlers.sasl.plain.PlainMechanismHandle
 import de.invesdwin.context.security.kerberos.KerberosProperties;
 import de.invesdwin.context.security.ldap.LdapProperties;
 import de.invesdwin.util.assertions.Assertions;
-import de.invesdwin.util.lang.Strings;
 import de.invesdwin.util.lang.reflection.Reflections;
+import de.invesdwin.util.lang.string.Strings;
 
 /**
  * https://github.com/kwart/kerberos-using-apacheds/blob/master/src/main/java/org/jboss/test/kerberos/KerberosSetup.java

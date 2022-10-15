@@ -13,7 +13,7 @@ import org.opensaml.util.resource.Resource;
 import org.opensaml.util.resource.ResourceException;
 
 import de.invesdwin.context.integration.retry.Retry;
-import de.invesdwin.util.lang.Strings;
+import de.invesdwin.util.lang.string.Strings;
 
 @NotThreadSafe
 public class DelegateOpenSamlResource implements Resource {
