@@ -1,12 +1,3 @@
-pipeline {
-  agent any
-  stages {
-    stage('Build and test') {
-      steps{
-        withMaven {
-          sh 'mvn clean install -f invesdwin-context-security-parent/pom.xml -T4'
-        }  
-      }
-    }
-  }
-}
+@Library('global-shared-library') _
+
+buildTestDeploy(pomFolderPath: "invesdwin-context-security-parent")
