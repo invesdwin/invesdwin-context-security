@@ -7,11 +7,9 @@ import java.util.Map;
 
 import javax.annotation.concurrent.ThreadSafe;
 
-import org.apache.http.client.HttpClient;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.kerberos.client.KerberosRestTemplate;
 
-import de.invesdwin.context.security.kerberos.internal.HttpClientHacks;
 import de.invesdwin.util.lang.uri.URIs;
 
 @ThreadSafe
@@ -32,9 +30,8 @@ public class ProxyEnabledKerberosRestTemplate extends KerberosRestTemplate {
         super(keyTabLocation.getAbsolutePath(), userPrincipal, createLoginOptions());
         final Proxy systemProxy = URIs.getSystemProxy();
         if (systemProxy != null) {
-            final HttpComponentsClientHttpRequestFactory requestFactory = (HttpComponentsClientHttpRequestFactory) getRequestFactory();
-            final HttpClient httpClient = requestFactory.getHttpClient();
-            HttpClientHacks.injectProxy(httpClient, systemProxy);
+            final SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory) getRequestFactory();
+            requestFactory.setProxy(systemProxy);
         }
     }
 

@@ -1,7 +1,6 @@
 package de.invesdwin.context.security.web;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.RememberMeAuthenticationToken;
@@ -12,6 +11,8 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.savedrequest.ExtendedHttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @NotThreadSafe
 public final class SpringSecuritySessionAttributes {
@@ -43,8 +44,9 @@ public final class SpringSecuritySessionAttributes {
     }
 
     public static void updateSpringSecurityContext(final HttpServletRequest request) {
-        request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                SecurityContextHolder.getContext());
+        request.getSession()
+                .setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                        SecurityContextHolder.getContext());
     }
 
     public static void setAuthentication(final Authentication authentication) {

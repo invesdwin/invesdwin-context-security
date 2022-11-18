@@ -1,7 +1,7 @@
 package de.invesdwin.context.security.ldap.test;
 
 import javax.annotation.concurrent.ThreadSafe;
-import javax.inject.Named;
+import jakarta.inject.Named;
 import javax.naming.ldap.LdapName;
 
 import org.springframework.data.ldap.repository.support.QuerydslLdapQuery;

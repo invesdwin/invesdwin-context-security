@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.security.auth.Subject;
 import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.login.LoginContext;

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.annotation.concurrent.Immutable;
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.jasig.cas.client.validation.Assertion;
 import org.springframework.security.cas.userdetails.AbstractCasAssertionUserDetailsService;

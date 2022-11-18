@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.concurrent.ThreadSafe;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import javax.naming.Name;
 import javax.naming.ldap.LdapName;
 
@@ -134,7 +134,7 @@ public abstract class ALdapDao<E> implements LdapRepository<E>, InitializingBean
     }
 
     @Override
-    public Iterable<E> findAll(final LdapQuery ldapQuery) {
+    public List<E> findAll(final LdapQuery ldapQuery) {
         return delegate.findAll(ldapQuery);
     }
 

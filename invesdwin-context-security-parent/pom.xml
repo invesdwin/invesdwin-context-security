@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>de.invesdwin</groupId>
@@ -42,13 +40,13 @@
 		<version.apacheds>2.0.0.AM26</version.apacheds>
 		<version.spring-security-kerberos>1.0.1.RELEASE</version.spring-security-kerberos>
 		<version.spring-security-saml>1.0.10.RELEASE</version.spring-security-saml>
-		<version.spring-ws-security>3.0.8.RELEASE</version.spring-ws-security>
+		<version.spring-ws-security>4.0.0-M3</version.spring-ws-security>
 		<version.not-going-to-be-commons-ssl>0.3.20</version.not-going-to-be-commons-ssl>
 
 		<version.commons-crypto>1.1.0</version.commons-crypto>
 		<version.argon2-jvm>2.11</version.argon2-jvm>
 		<version.password4j>1.6.0</version.password4j>
-		
+
 		<version.AmazonCorrettoCryptoProvider>1.6.1</version.AmazonCorrettoCryptoProvider>
 		<version.wildfly-openssl>2.2.1.Final</version.wildfly-openssl>
 	</properties>
@@ -290,6 +288,10 @@
 					<exclusion>
 						<groupId>javax.xml.ws</groupId>
 						<artifactId>jaxws-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>

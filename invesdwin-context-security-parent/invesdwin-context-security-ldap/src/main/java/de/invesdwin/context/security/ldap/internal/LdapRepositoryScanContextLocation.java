@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.concurrent.ThreadSafe;
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.io.FileSystemResource;
