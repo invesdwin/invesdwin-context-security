@@ -3,7 +3,9 @@ package de.invesdwin.context.security.crypto.verification.signature;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -30,6 +32,7 @@ import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.collections.Arrays;
 import de.invesdwin.util.math.Bytes;
+import de.invesdwin.util.math.Integers;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
@@ -37,6 +40,8 @@ import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 
 @NotThreadSafe
 public class SignatureVerificationFactoryTest extends ATest {
+
+    private static final int HASH_ALGORITHM_COUNT = Integers.min(50, ISymmetricCipherAlgorithm.values().length);
 
     @Test
     public void testEncryptionAndDecryption() {
@@ -48,8 +53,13 @@ public class SignatureVerificationFactoryTest extends ATest {
                 .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
         int symmetricAlgorithmIndex = 0;
-        int ivIndex = 0;
-        for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
+        final ISignatureAlgorithm[] signatureAlgorithms = ISignatureAlgorithm.values();
+        final Set<Integer> signatureAlgorithmIndexes = new HashSet<>();
+        while (signatureAlgorithmIndexes.size() < HASH_ALGORITHM_COUNT) {
+            signatureAlgorithmIndexes.add(random.nextInt(signatureAlgorithms.length));
+        }
+        for (final Integer signatureAlgorithmIndex : signatureAlgorithmIndexes) {
+            final ISignatureAlgorithm hashAlgorithm = signatureAlgorithms[signatureAlgorithmIndex];
             final ISymmetricCipherAlgorithm algorithm = symmetricAlgorithms[symmetricAlgorithmIndex++];
             if (symmetricAlgorithmIndex >= symmetricAlgorithms.length) {
                 symmetricAlgorithmIndex = 0;
@@ -62,10 +72,7 @@ public class SignatureVerificationFactoryTest extends ATest {
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             final List<ICipherIV> ivs = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
-            final ICipherIV iv = ivs.get(ivIndex++);
-            if (ivIndex >= ivs.size()) {
-                ivIndex = 0;
-            }
+            final ICipherIV iv = ivs.get(random.nextInt(ivs.size()));
 
             final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, cipherKey, iv);
             log.info("%s with %s and %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm(),
@@ -99,8 +106,13 @@ public class SignatureVerificationFactoryTest extends ATest {
                 .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
         int symmetricAlgorithmIndex = 0;
-        int ivIndex = 0;
-        for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
+        final ISignatureAlgorithm[] signatureAlgorithms = ISignatureAlgorithm.values();
+        final Set<Integer> signatureAlgorithmIndexes = new HashSet<>();
+        while (signatureAlgorithmIndexes.size() < HASH_ALGORITHM_COUNT) {
+            signatureAlgorithmIndexes.add(random.nextInt(signatureAlgorithms.length));
+        }
+        for (final Integer signatureAlgorithmIndex : signatureAlgorithmIndexes) {
+            final ISignatureAlgorithm hashAlgorithm = signatureAlgorithms[signatureAlgorithmIndex];
             final ISymmetricCipherAlgorithm algorithm = symmetricAlgorithms[symmetricAlgorithmIndex++];
             if (symmetricAlgorithmIndex >= symmetricAlgorithms.length) {
                 symmetricAlgorithmIndex = 0;
@@ -113,10 +125,7 @@ public class SignatureVerificationFactoryTest extends ATest {
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             final List<ICipherIV> ivs = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
-            final ICipherIV iv = ivs.get(ivIndex++);
-            if (ivIndex >= ivs.size()) {
-                ivIndex = 0;
-            }
+            final ICipherIV iv = ivs.get(random.nextInt(ivs.size()));
 
             final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, cipherKey, iv);
             log.info("%s with %s and %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm(),
@@ -160,8 +169,13 @@ public class SignatureVerificationFactoryTest extends ATest {
                 .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
         int symmetricAlgorithmIndex = 0;
-        int ivIndex = 0;
-        for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
+        final ISignatureAlgorithm[] signatureAlgorithms = ISignatureAlgorithm.values();
+        final Set<Integer> signatureAlgorithmIndexes = new HashSet<>();
+        while (signatureAlgorithmIndexes.size() < HASH_ALGORITHM_COUNT) {
+            signatureAlgorithmIndexes.add(random.nextInt(signatureAlgorithms.length));
+        }
+        for (final Integer signatureAlgorithmIndex : signatureAlgorithmIndexes) {
+            final ISignatureAlgorithm hashAlgorithm = signatureAlgorithms[signatureAlgorithmIndex];
             final ISymmetricCipherAlgorithm algorithm = symmetricAlgorithms[symmetricAlgorithmIndex++];
             if (symmetricAlgorithmIndex >= symmetricAlgorithms.length) {
                 symmetricAlgorithmIndex = 0;
@@ -174,10 +188,7 @@ public class SignatureVerificationFactoryTest extends ATest {
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             final List<ICipherIV> ivs = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
-            final ICipherIV iv = ivs.get(ivIndex++);
-            if (ivIndex >= ivs.size()) {
-                ivIndex = 0;
-            }
+            final ICipherIV iv = ivs.get(random.nextInt(ivs.size()));
 
             final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, cipherKey, iv);
             log.info("%s with %s and %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm(),
@@ -240,8 +251,13 @@ public class SignatureVerificationFactoryTest extends ATest {
                 .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
         final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
         int symmetricAlgorithmIndex = 0;
-        int ivIndex = 0;
-        for (final ISignatureAlgorithm hashAlgorithm : ISignatureAlgorithm.values()) {
+        final ISignatureAlgorithm[] signatureAlgorithms = ISignatureAlgorithm.values();
+        final Set<Integer> signatureAlgorithmIndexes = new HashSet<>();
+        while (signatureAlgorithmIndexes.size() < HASH_ALGORITHM_COUNT) {
+            signatureAlgorithmIndexes.add(random.nextInt(signatureAlgorithms.length));
+        }
+        for (final Integer signatureAlgorithmIndex : signatureAlgorithmIndexes) {
+            final ISignatureAlgorithm hashAlgorithm = signatureAlgorithms[signatureAlgorithmIndex];
             final ISymmetricCipherAlgorithm algorithm = symmetricAlgorithms[symmetricAlgorithmIndex++];
             if (symmetricAlgorithmIndex >= symmetricAlgorithms.length) {
                 symmetricAlgorithmIndex = 0;
@@ -254,10 +270,7 @@ public class SignatureVerificationFactoryTest extends ATest {
                     derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(), algorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(algorithm);
             final List<ICipherIV> ivs = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
-            final ICipherIV iv = ivs.get(ivIndex++);
-            if (ivIndex >= ivs.size()) {
-                ivIndex = 0;
-            }
+            final ICipherIV iv = ivs.get(random.nextInt(ivs.size()));
 
             final SymmetricEncryptionFactory cipherFactory = new SymmetricEncryptionFactory(algorithm, cipherKey, iv);
             log.info("%s with %s and %s", algorithm.getAlgorithm(), hashAlgorithm.getAlgorithm(),

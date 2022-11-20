@@ -3,6 +3,7 @@ package de.invesdwin.context.security.crypto.encryption.cipher.hybrid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -55,22 +56,22 @@ public class HybridEncryptionFactoryTest extends ATest {
             final CipherPresharedIV presharedIV = new CipherPresharedIV(symmetricAlgorithm, derivedKeyProvider
                     .newDerivedKey("preshared-iv".getBytes(), symmetricAlgorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(symmetricAlgorithm);
-            for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
+            final List<ICipherIV> ivList = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
+            for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
+                final ICipherIV iv = ivList.get(random.nextInt(ivList.size()));
                 final SymmetricEncryptionFactory symmetricFactory = new SymmetricEncryptionFactory(symmetricAlgorithm,
                         cipherKey, iv);
-                for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
-                    log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
-                            iv.getClass().getSimpleName());
-                    final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
-                            asymmetricAlgorithm, derivedKeyProvider);
-                    for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
-                            new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
-                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
-                            new HybridEncryptionFactory(symmetricFactory, symmetricFactory) }) {
-                        log.info(" * %s", factory.getAlgorithm().getAlgorithm());
-                        testEncryptionAndDecryption(factory, "1234567890");
-                        testEncryptionAndDecryption(factory, "0987654321");
-                    }
+                log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
+                        iv.getClass().getSimpleName());
+                final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
+                        asymmetricAlgorithm, derivedKeyProvider);
+                for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
+                        new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
+                        new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
+                        new HybridEncryptionFactory(symmetricFactory, symmetricFactory) }) {
+                    log.info(" * %s", factory.getAlgorithm().getAlgorithm());
+                    testEncryptionAndDecryption(factory, "1234567890");
+                    testEncryptionAndDecryption(factory, "0987654321");
                 }
             }
         }
@@ -103,22 +104,22 @@ public class HybridEncryptionFactoryTest extends ATest {
             final CipherPresharedIV presharedIV = new CipherPresharedIV(symmetricAlgorithm, derivedKeyProvider
                     .newDerivedKey("preshared-iv".getBytes(), symmetricAlgorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(symmetricAlgorithm);
-            for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
+            final List<ICipherIV> ivList = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
+            for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
+                final ICipherIV iv = ivList.get(random.nextInt(ivList.size()));
                 final SymmetricEncryptionFactory symmetricFactory = new SymmetricEncryptionFactory(symmetricAlgorithm,
                         cipherKey, iv);
-                for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
-                    log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
-                            iv.getClass().getSimpleName());
-                    final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
-                            asymmetricAlgorithm, derivedKeyProvider);
-                    for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
-                            new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
-                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
-                            new HybridEncryptionFactory(symmetricFactory, symmetricFactory) }) {
-                        log.info(" * %s", factory.getAlgorithm().getAlgorithm());
-                        testCipher(factory, "1234567890", "0987654321");
-                        testCipher(factory, "0987654321", "1234567890");
-                    }
+                log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
+                        iv.getClass().getSimpleName());
+                final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
+                        asymmetricAlgorithm, derivedKeyProvider);
+                for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
+                        new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
+                        new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
+                        new HybridEncryptionFactory(symmetricFactory, symmetricFactory) }) {
+                    log.info(" * %s", factory.getAlgorithm().getAlgorithm());
+                    testCipher(factory, "1234567890", "0987654321");
+                    testCipher(factory, "0987654321", "1234567890");
                 }
             }
         }
@@ -161,25 +162,25 @@ public class HybridEncryptionFactoryTest extends ATest {
             final CipherPresharedIV presharedIV = new CipherPresharedIV(symmetricAlgorithm, derivedKeyProvider
                     .newDerivedKey("preshared-iv".getBytes(), symmetricAlgorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(symmetricAlgorithm);
-            for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
+            final List<ICipherIV> ivList = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
+            for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
+                final ICipherIV iv = ivList.get(random.nextInt(ivList.size()));
                 final SymmetricEncryptionFactory symmetricFactory = new SymmetricEncryptionFactory(symmetricAlgorithm,
                         cipherKey, iv);
-                for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
-                    log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
-                            iv.getClass().getSimpleName());
-                    final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
-                            asymmetricAlgorithm, derivedKeyProvider);
-                    for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
-                            new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
-                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
-                            new HybridEncryptionFactory(symmetricFactory, symmetricFactory) }) {
-                        log.info(" * %s", factory.getAlgorithm().getAlgorithm());
-                        try {
-                            testCipherStream(factory, "1234567890", "0987654321");
-                            testCipherStream(factory, "0987654321", "1234567890");
-                        } catch (final IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
+                        iv.getClass().getSimpleName());
+                final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
+                        asymmetricAlgorithm, derivedKeyProvider);
+                for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
+                        new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
+                        new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
+                        new HybridEncryptionFactory(symmetricFactory, symmetricFactory) }) {
+                    log.info(" * %s", factory.getAlgorithm().getAlgorithm());
+                    try {
+                        testCipherStream(factory, "1234567890", "0987654321");
+                        testCipherStream(factory, "0987654321", "1234567890");
+                    } catch (final IOException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
@@ -237,25 +238,25 @@ public class HybridEncryptionFactoryTest extends ATest {
             final CipherPresharedIV presharedIV = new CipherPresharedIV(symmetricAlgorithm, derivedKeyProvider
                     .newDerivedKey("preshared-iv".getBytes(), symmetricAlgorithm.getIvSize() * Byte.SIZE));
             final CipherRandomIV randomIV = new CipherRandomIV(symmetricAlgorithm);
-            for (final ICipherIV iv : Arrays.asList(randomIV, derivedIV, countedIV, presharedIV)) {
+            final List<ICipherIV> ivList = Arrays.asList(randomIV, derivedIV, countedIV, presharedIV);
+            for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
+                final ICipherIV iv = ivList.get(random.nextInt(ivList.size()));
                 final SymmetricEncryptionFactory symmetricFactory = new SymmetricEncryptionFactory(symmetricAlgorithm,
                         cipherKey, iv);
-                for (final IAsymmetricCipherAlgorithm asymmetricAlgorithm : IAsymmetricCipherAlgorithm.values()) {
-                    log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
-                            iv.getClass().getSimpleName());
-                    final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
-                            asymmetricAlgorithm, derivedKeyProvider);
-                    for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
-                            new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
-                            new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
-                            new HybridEncryptionFactory(symmetricFactory, symmetricFactory) }) {
-                        log.info(" * %s", factory.getAlgorithm().getAlgorithm());
-                        try {
-                            testStreamingCipherStream(factory, "1234567890", "0987654321");
-                            testStreamingCipherStream(factory, "0987654321", "1234567890");
-                        } catch (final IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                log.info("%s with %s and %s", asymmetricAlgorithm.getAlgorithm(), symmetricAlgorithm.getAlgorithm(),
+                        iv.getClass().getSimpleName());
+                final AsymmetricEncryptionFactory asymmetricFactory = new AsymmetricEncryptionFactory(
+                        asymmetricAlgorithm, derivedKeyProvider);
+                for (final HybridEncryptionFactory factory : new HybridEncryptionFactory[] {
+                        new HybridEncryptionFactory(asymmetricFactory, symmetricFactory),
+                        new HybridEncryptionFactory(symmetricFactory, asymmetricFactory),
+                        new HybridEncryptionFactory(symmetricFactory, symmetricFactory) }) {
+                    log.info(" * %s", factory.getAlgorithm().getAlgorithm());
+                    try {
+                        testStreamingCipherStream(factory, "1234567890", "0987654321");
+                        testStreamingCipherStream(factory, "0987654321", "1234567890");
+                    } catch (final IOException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
