@@ -35,32 +35,32 @@ The `invesdwin-context-security-crypto` contains implementations for common cryp
 - **CryptoRandomGenerators**: pools, threadlocals, adapters and wrappers for SecureRandom implementations that get reseeded automatically in intervals (configurable with the system property `de.invesdwin.context.security.crypto.CryptoProperties.RESEED_INTERVAL=1 MINUTES`). `StrongRandomGenerators` forces a slower but maybe more secure random generator (DRBG instead of SHA1PRNG). Though be aware that in reality both random generators might be considered secure and that using an algorithm that needs to wait for entropy in the operating system can quickly become unbearably slow (some native or blocking implementations). So if you must, use it only to generate keys for long term storage, otherwise switch to a faster secure random generator that uses a cryprographically secure hashing function. Also prefer to use [PseudoRandomGenerators](https://github.com/invesdwin/invesdwin-util/blob/master/README.md#pseudorandomgenerators) where security is not a concern. Here some benchmarks (2022, Core i9-9900K with SSD, Java 17):
 ```
 Reuse instance:
-PseudoRandomGenerator (XoShiro256+)		Records: 1493363.24/ms	=> 638.2 times faster (insecure)
-SHA1PRNG (SecureRandom) 			Records:    6236.09/ms 	=> 1.7 times faster (CryptoRandomGenerator)
-CryptoRandom (NativePRNG) 			Records:    2346.06/ms	=> 0.4% faster
-ThreadLocalCryptoRandom (NativePRNG) 		Records:    2343.89/ms	=> 0.3% faster
-jdkDefault (NativePRNG) 			Records:    2336.50/ms	=> Baseline
-jdkStrong (Blocking) 				Records:    2297.08/ms	=> 1.7% slower
-CryptoRandomGeneratorObjectPool 		Records:    1674.06/ms	=> 28.4% slower
-DRBG (Hash_DRBG,SHA-256,128,reseed_only)	Records:     744.17/ms	=> 68.2% slower (StrongRandomGenerator)
-CommonsCryptoRandom (OpenSslCryptoRandom) 	Records:     306.47/ms	=> 86.9% slower
-Conscrypt (OpenSSLRandom) 			Records:      80.12/ms	=> 96.6% slower
-NIST800-90A/AES-CTR-256 (SPI) 			Records:      52.10/ms	=> 97.8% slower
-BC (Default) 					Records:      47.48/ms	=> 98.0% slower
+PseudoRandomGenerator (XoShiro256+)		Records: 1,493,363.24/ms	=> 638.2 times faster (insecure)
+SHA1PRNG (SecureRandom) 			Records:     6,236.09/ms 	=> 1.7 times faster (CryptoRandomGenerator)
+CryptoRandom (NativePRNG) 			Records:     2,346.06/ms	=> 0.4% faster
+ThreadLocalCryptoRandom (NativePRNG) 		Records:     2,343.89/ms	=> 0.3% faster
+jdkDefault (NativePRNG) 			Records:     2,336.50/ms	=> Baseline
+jdkStrong (Blocking) 				Records:     2,297.08/ms	=> 1.7% slower
+CryptoRandomGeneratorObjectPool 		Records:     1,674.06/ms	=> 28.4% slower
+DRBG (Hash_DRBG,SHA-256,128,reseed_only)	Records:       744.17/ms	=> 68.2% slower (StrongRandomGenerator)
+CommonsCryptoRandom (OpenSslCryptoRandom) 	Records:       306.47/ms	=> 86.9% slower
+Conscrypt (OpenSSLRandom) 			Records:        80.12/ms	=> 96.6% slower
+NIST800-90A/AES-CTR-256 (SPI) 			Records:        52.10/ms	=> 97.8% slower
+BC (Default) 					Records:        47.48/ms	=> 98.0% slower
 
 Don't reuse instance:
-PseudoRandomGenerator (XoShiro256+)		Records:   43115.07/ms 	=> 401.9 times faster (insecure)
-ThreadLocalCryptoRandom (NativePRNG)		Records:    2247.64/ms	=> 20 times faster
-CryptoRandomGeneratorObjectPool			Records:    1680.83/ms	=> 14.7 times faster
-CryptoRandom (NativePRNG)			Records:     191.83/ms	=> 79.2% faster
-DRBG (Hash_DRBG,SHA-256,128,reseed_only)	Records:     111.24/ms	=> 3.9% faster (StrongRandomGenerator)
-jdkDefault (NativePRNG)				Records:     107.02/ms	=> Baseline
-SHA1PRNG (SecureRandom)				Records:      98.95/ms	=> 7.5% slower (CryptoRandomGenerator)
-CommonsCryptoRandom (OpenSslCryptoRandom)	Records:      93.49/ms	=> 12.6% slower
-jdkStrong (Blocking)				Records:      91.43/ms	=> 14.6% slower
-Conscrypt (OpenSSLRandom)			Records:      43.31/ms	=> 59.5% slower
-NIST800-90A/AES-CTR-256 (SPI)			Records:      39.97/ms	=> 62.6% slower
-BC (Default)					Records:      30.71/ms	=> 71.3% slower
+PseudoRandomGenerator (XoShiro256+)		Records:    43,115.07/ms 	=> 401.9 times faster (insecure)
+ThreadLocalCryptoRandom (NativePRNG)		Records:      2247.64/ms	=> 20 times faster
+CryptoRandomGeneratorObjectPool			Records:      1680.83/ms	=> 14.7 times faster
+CryptoRandom (NativePRNG)			Records:       191.83/ms	=> 79.2% faster
+DRBG (Hash_DRBG,SHA-256,128,reseed_only)	Records:       111.24/ms	=> 3.9% faster (StrongRandomGenerator)
+jdkDefault (NativePRNG)				Records:       107.02/ms	=> Baseline
+SHA1PRNG (SecureRandom)				Records:        98.95/ms	=> 7.5% slower (CryptoRandomGenerator)
+CommonsCryptoRandom (OpenSslCryptoRandom)	Records:        93.49/ms	=> 12.6% slower
+jdkStrong (Blocking)				Records:        91.43/ms	=> 14.6% slower
+Conscrypt (OpenSSLRandom)			Records:        43.31/ms	=> 59.5% slower
+NIST800-90A/AES-CTR-256 (SPI)			Records:        39.97/ms	=> 62.6% slower
+BC (Default)					Records:        30.71/ms	=> 71.3% slower
 ```
 
 ### Kerberos Modules
