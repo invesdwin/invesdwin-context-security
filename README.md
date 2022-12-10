@@ -20,6 +20,47 @@ Dependency declaration:
 
 The `invesdwin-context-security` module configures the [spring-security](http://projects.spring.io/spring-security/) annotations for method level authorization. Other security modules reference this module to provide actual authorization rules to be used. Please note that the `DefaultRolePrefixRemover` changes spring-security configurations so that the `ROLE_` prefix can be ommitted (which can be unintuitive when it has or has not to be used). So to make things easier, just put role names as they are (coming from a database, ldap, manual configuration and so on) inside your autorization expressions, without adding any prefixes.
 
+### Crypto Module
+
+The `invesdwin-context-security-crypto` contains implementations for common cryptographic algorithms. We use JCA so you can plug in your custom (maybe native) security provider. We also have an integration for [commons-crypto](https://commons.apache.org/proper/commons-crypto/) (which does not use JCA).
+
+- **IEncryptionFactory**: this allows to encrypt/decrypt buffers and streams of data. We use this simplified abstraction to declaratively secure communication channels in [invesdwin-context-integration-channel](https://github.com/invesdwin/invesdwin-context-integration#synchronous-channels) with respect to performance (following zero-allocation and zero-copy principles where possible without compromising security).
+	-  `SymmetricEncryptionFactory` is used for AES and other symmetric algorithms.
+	-  `AsymmetricEncryptionFactory` is used for RSA and other asymmetric algorithms based on public/private key pairs.
+	-  `VerifiedEncryptionFactory` allows to combine an `IEncryptionFactory` with an `IVerificationFactory` to use AES with hashes (e.g. HMAC) or signatures (RSA, DSA, ECDSA, EDDSA).
+	-  `HybridEncryptionFactory` allows to use an exchanged public/private key (with RSA) to exchange a session specific symmetric key (for AES). Just discard and create a new session to initiate a key rollover.
+-  **IVerificationFactory**: this allows to add a checksum (error detection using CRC, Adler, XXHash), digest (adds integrity using SHA, SHAKE, ...), mac (adds authentication using HMAC, GMAC, ...) or signature (adds non-repudiation using RSA, DSA, ECDSA, EDDSA) of buffers or streams of data.
+-  **IDerivedKeyProvider**: can be used to derive deterministic keys from pre shared information (e.g. a password) of from key exchange procedure (random hashes that were securely communicated). Or it can be used to derive secure keys from entirely random data. It can either use HKDF or an `IPasswordHasher` for the derivation. You can generate typical symmetric keys for encryption, verification, signatures). With `SelfSignedCertGenerator` you can even create self signed certificates for SSL/TLS (based on a derived or generated public/private key pair from IDerivedKeyProvider).
+-  **IPasswordHasher**: can be used to hash plain text passwords for secure storage (Bcrypt, PBKDF2, Scrypt, Argon2). Pick the paramters so that time and memory is spent for the generation to make cracking the password using GPU or TPU sufficiently hard. This can be optimized automatically using APasswordHasherBenchmark to e.g. target 2 seconds of effort on your hardware. It makes sense to use Argon2 as the default implementation, because it also uses configurable memory effort to make it harder to crack on highly parallel hardware and there is a native binding which allows to compute iterations faster while using off-heap memory. Always keep in mind to use salt (random bytes per password) and pepper (a pre shared secret) when creating your hashes. Use our `NativeArgon2PasswordEncoder` implementation for the [spring-security-crypto](https://docs.spring.io/spring-security/site/docs/5.0.x/reference/html/crypto.html) `PasswordEncoder` interface to store and manage passwords in a database. It saves the salt, algorithm and its parameters alongside the password and provides automations to upgrade existing hashes to more secure parameters ot algorithms. `IArgon2PasswordHasher.getDefault()` is used to fallback to a pure Java implementation if the native Argon2 implementation can not be loaded.
+- **CryptoRandomGenerators**: pools, threadlocals, adapters and wrappers for SecureRandom that gets reseeded automatically in intervals (configurable with the system property `de.invesdwin.context.security.crypto.CryptoProperties.RESEED_INTERVAL=1 MINUTES`). `StrongRandomGenerators` forces a slower but maybe more secure random generator (DRBG instead of SHA1PRNG). Though be aware that in reality both random generators might be considered secure and that using an algorithm that needs to wait for entropy in the operating system can quickly become unbearably slow (some native or blocking implementations). So if you must, use it only to generate keys for long term storage, otherwise switch to a faster secure random generator that uses a cryprogrhically secure hashing function. Here some benchmarks (2022, Core i9-9900K with SSD, Java 17):
+```
+Reuse instance:
+SHA1PRNG (SecureRandom) 			Records: 6236.09/ms 	=> 166.9% faster
+CryptoRandom (NativePRNG) 			Records: 2346.06/ms	=> 0.4% faster
+ThreadLocalCryptoRandom (NativePRNG) 		Records: 2343.89/ms	=> 0.3% faster
+jdkDefault (NativePRNG) 			Records: 2336.50/ms	=> Baseline
+jdkStrong (Blocking) 				Records: 2297.08/ms	=> 1.7% slower
+CryptoRandomGeneratorObjectPool 		Records: 1674.06/ms	=> 28.4% slower
+DRBG (Hash_DRBG,SHA-256,128,reseed_only)	Records:  744.17/ms	=> 68.2% slower
+CommonsCryptoRandom (OpenSslCryptoRandom) 	Records:  306.47/ms	=> 86.9% slower
+Conscrypt (OpenSSLRandom) 			Records:   80.12/ms	=> 96.6% slower
+NIST800-90A/AES-CTR-256 (SPI) 			Records:   52.10/ms	=> 97.8% slower
+BC (Default) 					Records:   47.48/ms	=> 98.0% slower
+
+Don't reuse instance:
+ThreadLocalCryptoRandom (NativePRNG)		Records: 2247.64/ms	=> 20 times faster
+CryptoRandomGeneratorObjectPool			Records: 1680.83/ms	=> 14.7 times faster
+CryptoRandom (NativePRNG)			Records:  191.83/ms	=> 79.2% faster
+DRBG (Hash_DRBG,SHA-256,128,reseed_only)	Records:  111.24/ms	=> 3.9% faster
+jdkDefault (NativePRNG)				Records:  107.02/ms	=> Baseline
+SHA1PRNG (SecureRandom)				Records:   98.95/ms	=> 7.5% slower
+CommonsCryptoRandom (OpenSslCryptoRandom)	Records:   93.49/ms	=> 12.6% slower
+jdkStrong (Blocking)				Records:   91.43/ms	=> 14.6% slower
+Conscrypt (OpenSSLRandom)			Records:   43.31/ms	=> 59.5% slower
+NIST800-90A/AES-CTR-256 (SPI)			Records:   39.97/ms	=> 62.6% slower
+BC (Default)					Records:   30.71/ms	=> 71.3% slower
+```
+
 ### Kerberos Modules
 
 The `invesdwin-context-security-kerberos` module provides some utilities to generate krb5.conf and keytab files while also defining some Kerberos client configuration. The following **LDAP Modules** section goes deeper into the Kerberos integration and also shows an embedded LDAP+Kerberos server module. The client configuration uses the same properties as the server configuration explained there.
