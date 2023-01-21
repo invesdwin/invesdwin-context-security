@@ -8,10 +8,10 @@ import javax.annotation.concurrent.NotThreadSafe;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.HashMode;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
-import de.invesdwin.util.streams.ASimpleDelegateOutputStream;
+import de.invesdwin.util.streams.SimpleDelegateOutputStream;
 
 @NotThreadSafe
-public class LayeredHashOutputStream extends ASimpleDelegateOutputStream {
+public class LayeredHashOutputStream extends SimpleDelegateOutputStream {
     protected final IHash hash;
 
     public LayeredHashOutputStream(final OutputStream delegate, final IHash hash, final IKey key) {
