@@ -12,8 +12,9 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
  */
 @Immutable
 public enum SipHashAlgorithm implements IHashAlgorithm {
-    SipHash_2_4(new SipHashDigestAlgorithm("SipHash-2-4", 2, 4)),
-    SipHash_4_8(new SipHashDigestAlgorithm("SipHash-4-8", 4, 8));
+    SipHash_1_3(new SipHashDigestAlgorithm(1, 3)),
+    SipHash_2_4(new SipHashDigestAlgorithm(2, 4)),
+    SipHash_4_8(new SipHashDigestAlgorithm(4, 8));
 
     public static final SipHashAlgorithm DEFAULT = SipHash_2_4;
 

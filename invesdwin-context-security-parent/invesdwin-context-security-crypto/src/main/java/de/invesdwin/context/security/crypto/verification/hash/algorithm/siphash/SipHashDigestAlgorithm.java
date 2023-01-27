@@ -13,13 +13,11 @@ import de.invesdwin.util.concurrent.pool.IObjectPool;
 @Immutable
 public class SipHashDigestAlgorithm implements IHashAlgorithm {
 
-    private final String algorithm;
     private final HashObjectPool hashPool;
     private final int c;
     private final int d;
 
-    public SipHashDigestAlgorithm(final String algorithm, final int c, final int d) {
-        this.algorithm = algorithm;
+    public SipHashDigestAlgorithm(final int c, final int d) {
         this.hashPool = new HashObjectPool(this);
         this.c = c;
         this.d = d;
@@ -27,17 +25,17 @@ public class SipHashDigestAlgorithm implements IHashAlgorithm {
 
     @Override
     public String toString() {
-        return algorithm;
+        return getAlgorithm();
     }
 
     @Override
     public String getAlgorithm() {
-        return algorithm;
+        return "SipHash-" + c + "-" + d;
     }
 
     @Override
     public String getKeyAlgorithm() {
-        return algorithm;
+        return getAlgorithm();
     }
 
     @Override
