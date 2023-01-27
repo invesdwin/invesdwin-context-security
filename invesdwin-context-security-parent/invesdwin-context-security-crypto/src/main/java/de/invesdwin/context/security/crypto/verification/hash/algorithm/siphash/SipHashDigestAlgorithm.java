@@ -1,32 +1,28 @@
-package de.invesdwin.context.security.crypto.verification.hash.algorithm;
+package de.invesdwin.context.security.crypto.verification.hash.algorithm.siphash;
 
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.HashAlgorithmType;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
 import de.invesdwin.context.security.crypto.verification.hash.wrapper.SipHasherStreamHash;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
 @Immutable
-public enum SipHashAlgorithm implements IHashAlgorithm {
-    SipHash_2_4("SipHash-2-4", 2, 4, Long.BYTES),
-    SipHash_4_8("SipHash-4-8", 2, 4, Long.BYTES);
-
-    public static final SipHashAlgorithm DEFAULT = SipHash_2_4;
+public class SipHashDigestAlgorithm implements IHashAlgorithm {
 
     private final String algorithm;
     private final HashObjectPool hashPool;
     private final int c;
     private final int d;
-    private final int hashSize;
 
-    SipHashAlgorithm(final String algorithm, final int c, final int d, final int hashSize) {
+    public SipHashDigestAlgorithm(final String algorithm, final int c, final int d) {
         this.algorithm = algorithm;
         this.hashPool = new HashObjectPool(this);
         this.c = c;
         this.d = d;
-        this.hashSize = hashSize;
     }
 
     @Override
@@ -59,7 +55,7 @@ public enum SipHashAlgorithm implements IHashAlgorithm {
 
     @Override
     public int getHashSize() {
-        return hashSize;
+        return Long.BYTES;
     }
 
     @Override
@@ -69,7 +65,7 @@ public enum SipHashAlgorithm implements IHashAlgorithm {
 
     @Override
     public IHash newHash() {
-        return new SipHasherStreamHash(c, d, hashSize);
+        return new SipHasherStreamHash(c, d, getHashSize());
     }
 
     @Override

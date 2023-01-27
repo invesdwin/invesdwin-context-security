@@ -2,6 +2,7 @@ package de.invesdwin.context.security.crypto.verification.hash.algorithm;
 
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.hmac.HmacAlgorithm;
+import de.invesdwin.context.security.crypto.verification.hash.algorithm.siphash.SipHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.pool.IHashFactory;
 import de.invesdwin.util.collections.Arrays;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
