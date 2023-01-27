@@ -25,7 +25,7 @@ The `invesdwin-context-security` module configures the [spring-security](http://
 The `invesdwin-context-security-crypto` contains implementations for common cryptographic algorithms. We use JCA so you can plug in your custom (maybe native) security provider. We also have an integration for [commons-crypto](https://commons.apache.org/proper/commons-crypto/) (which does not use JCA).
 
 - **IEncryptionFactory**: this allows to encrypt/decrypt buffers and streams of data. We use this simplified abstraction to declaratively secure communication channels in [invesdwin-context-integration-channel](https://github.com/invesdwin/invesdwin-context-integration#synchronous-channels) with respect to performance (following zero-allocation and zero-copy principles where possible without compromising security).
-	-  `SymmetricEncryptionFactory` is used for AES and other symmetric algorithms.
+	-  `SymmetricEncryptionFactory` is used for AES, ChaCha20, and other symmetric algorithms.
 	-  `AsymmetricEncryptionFactory` is used for RSA and other asymmetric algorithms based on public/private key pairs.
 	-  `VerifiedEncryptionFactory` allows to combine an `IEncryptionFactory` with an `IVerificationFactory` to use AES with hashes (e.g. HMAC) or signatures (RSA, DSA, ECDSA, EDDSA).
 	-  `HybridEncryptionFactory` allows to use an exchanged public/private key (with RSA) to exchange a session specific symmetric key (for AES). Just discard and create a new session to initiate a key rollover.
