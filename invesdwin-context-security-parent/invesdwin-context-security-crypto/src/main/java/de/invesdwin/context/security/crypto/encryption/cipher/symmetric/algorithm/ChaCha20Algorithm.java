@@ -22,9 +22,6 @@ import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.Refreshing
  */
 @Immutable
 public enum ChaCha20Algorithm implements ISymmetricCipherAlgorithm {
-    /**
-     * Encryption only
-     */
     ChaCha20("ChaCha20", 12, 0) {
         @Override
         public AlgorithmParameterSpec wrapParam(final byte[] iv) {
@@ -35,25 +32,9 @@ public enum ChaCha20Algorithm implements ISymmetricCipherAlgorithm {
         public AlgorithmParameterSpec wrapParam(final MutableIvParameterSpec iv) {
             return wrapParam(iv.getIV());
         }
-    },
-    /**
-     * Authenticated Encryption
-     * 
-     * https://mkyong.com/java/java-11-chacha20-poly1305-encryption-examples/
-     */
-    ChaCha20_Poly1305("ChaCha20-Poly1305", 12, 16) {
-        @Override
-        public AlgorithmParameterSpec wrapParam(final byte[] iv) {
-            return new MutableIvParameterSpec(iv);
-        }
-
-        @Override
-        public AlgorithmParameterSpec wrapParam(final MutableIvParameterSpec iv) {
-            return iv;
-        }
     };
 
-    public static final ChaCha20Algorithm DEFAULT = ChaCha20_Poly1305;
+    public static final ChaCha20Algorithm DEFAULT = ChaCha20;
 
     private final String algorithm;
     private final int ivSize;

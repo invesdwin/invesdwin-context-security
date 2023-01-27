@@ -96,9 +96,9 @@ public class HybridEncryptionFactoryTest extends ATest {
         random.nextBytes(key);
         derivedKeyProvider = DerivedKeyProvider
                 .fromRandom(AsymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
-        final byte[] cipherKey = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
-                AesKeySize.DEFAULT.getBits());
         for (final ISymmetricCipherAlgorithm symmetricAlgorithm : ISymmetricCipherAlgorithm.values()) {
+            final byte[] cipherKey = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
+                    symmetricAlgorithm.getDefaultKeySizeBits());
             final CipherDerivedIV derivedIV = new CipherDerivedIV(symmetricAlgorithm, derivedKeyProvider);
             final CipherCountedIV countedIV = new CipherCountedIV(symmetricAlgorithm);
             final CipherPresharedIV presharedIV = new CipherPresharedIV(symmetricAlgorithm, derivedKeyProvider
