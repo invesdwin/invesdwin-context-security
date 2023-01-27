@@ -55,9 +55,12 @@ public enum ChaCha20Algorithm implements ISymmetricCipherAlgorithm {
         return "ChaCha20";
     }
 
+    /**
+     * com.sun.crypto.provider.ChaCha20Cipher does not support 128 bit keys
+     */
     @Override
     public int getDefaultKeySizeBits() {
-        return ChaCha20KeySize.DEFAULT.getBits();
+        return AesKeySize._256.getBits();
     }
 
     @Override
