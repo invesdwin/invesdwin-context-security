@@ -17,7 +17,7 @@ public interface IHashAlgorithm extends IHashFactory {
     static IHashAlgorithm[] values() {
         return Arrays.concat(IHashAlgorithm.class, ChecksumAlgorithm.values(), DigestAlgorithm.values(),
                 HmacAlgorithm.values(), CmacAlgorithm.values(), GmacAlgorithm.values(), KmacAlgorithm.values(),
-                SkeinMacAlgorithm.values());
+                SkeinMacAlgorithm.values(), SipHashAlgorithm.values());
     }
 
     String getKeyAlgorithm();
