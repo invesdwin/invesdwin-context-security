@@ -49,7 +49,6 @@
 
 		<version.AmazonCorrettoCryptoProvider>1.6.1</version.AmazonCorrettoCryptoProvider>
 		<version.wildfly-openssl>2.2.1.Final</version.wildfly-openssl>
-		<version.siphash>2.0.0</version.siphash>
 	</properties>
 
 	<dependencyManagement>
@@ -419,11 +418,6 @@
 				<groupId>org.wildfly.openssl</groupId>
 				<artifactId>wildfly-openssl</artifactId>
 				<version>${version.wildfly-openssl}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.whitfin</groupId>
-				<artifactId>siphash</artifactId>
-				<version>${version.siphash}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

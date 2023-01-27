@@ -1,41 +1,46 @@
-package de.invesdwin.context.security.crypto.verification.hash.algorithm.siphash;
+package de.invesdwin.context.security.crypto.verification.hash.algorithm;
 
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.algorithm.AesKeySize;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
-import de.invesdwin.context.security.crypto.verification.hash.algorithm.HashAlgorithmType;
-import de.invesdwin.context.security.crypto.verification.hash.algorithm.IHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.pool.HashObjectPool;
-import de.invesdwin.context.security.crypto.verification.hash.wrapper.SipHasherStreamHash;
+import de.invesdwin.context.security.crypto.verification.hash.wrapper.JceMacHash;
+import de.invesdwin.context.security.crypto.verification.hash.wrapper.LazyDelegateHash;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 
+/**
+ * https://www.bouncycastle.org/specifications.html
+ */
 @Immutable
-public class SipHashDigestAlgorithm implements IHashAlgorithm {
+public enum Poly1305MacAlgorithm implements IHashAlgorithm {
+    Poly1305("Poly1305", Long.BYTES);
 
+    public static final Poly1305MacAlgorithm DEFAULT = Poly1305;
+
+    private final String algorithm;
     private final HashObjectPool hashPool;
-    private final int c;
-    private final int d;
+    private final int hashSize;
 
-    public SipHashDigestAlgorithm(final int c, final int d) {
+    Poly1305MacAlgorithm(final String algorithm, final int hashSize) {
+        this.algorithm = algorithm;
         this.hashPool = new HashObjectPool(this);
-        this.c = c;
-        this.d = d;
+        this.hashSize = hashSize;
     }
 
     @Override
     public String toString() {
-        return getAlgorithm();
+        return algorithm;
     }
 
     @Override
     public String getAlgorithm() {
-        return "SipHash-" + c + "-" + d;
+        return algorithm;
     }
 
     @Override
     public String getKeyAlgorithm() {
-        return getAlgorithm();
+        return algorithm;
     }
 
     @Override
@@ -43,27 +48,19 @@ public class SipHashDigestAlgorithm implements IHashAlgorithm {
         return HashAlgorithmType.Mac;
     }
 
-    public int getC() {
-        return c;
-    }
-
-    public int getD() {
-        return d;
-    }
-
     @Override
     public int getHashSize() {
-        return Long.BYTES;
+        return hashSize;
     }
 
     @Override
     public int getDefaultKeySizeBits() {
-        return AesKeySize._128.getBits();
+        return AesKeySize._256.getBits();
     }
 
     @Override
     public IHash newHash() {
-        return new SipHasherStreamHash(c, d, getHashSize());
+        return new LazyDelegateHash(new JceMacHash(getAlgorithm()));
     }
 
     @Override

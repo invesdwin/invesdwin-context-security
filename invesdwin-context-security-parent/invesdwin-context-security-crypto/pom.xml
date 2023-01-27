@@ -57,10 +57,6 @@
 			<artifactId>commons-crypto</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>io.whitfin</groupId>
-			<artifactId>siphash</artifactId>
-		</dependency>
 	</dependencies>
 
 </project>

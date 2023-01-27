@@ -2,7 +2,6 @@ package de.invesdwin.context.security.crypto.verification.hash.algorithm;
 
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.context.security.crypto.verification.hash.algorithm.hmac.HmacAlgorithm;
-import de.invesdwin.context.security.crypto.verification.hash.algorithm.siphash.SipHashAlgorithm;
 import de.invesdwin.context.security.crypto.verification.hash.pool.IHashFactory;
 import de.invesdwin.util.collections.Arrays;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
@@ -18,7 +17,7 @@ public interface IHashAlgorithm extends IHashFactory {
     static IHashAlgorithm[] values() {
         return Arrays.concat(IHashAlgorithm.class, ChecksumAlgorithm.values(), DigestAlgorithm.values(),
                 HmacAlgorithm.values(), CmacAlgorithm.values(), GmacAlgorithm.values(), KmacAlgorithm.values(),
-                SkeinMacAlgorithm.values(), SipHashAlgorithm.values());
+                SkeinMacAlgorithm.values(), SipHashMacAlgorithm.values(), Poly1305MacAlgorithm.values());
     }
 
     String getKeyAlgorithm();
