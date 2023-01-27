@@ -12,9 +12,9 @@ import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 /**
- * Does not reuse cipher instances (e.g. GCM will refuse to encrypt twice in a row with the same IV)
+ * Does not reuse cipher instances (e.g. ChaCha20 will refuse to encrypt twice in a row with the same IV)
  * 
- * This will cause a significant drop in performance because cipher instances can not be reused.
+ * This can cause a significant drop in performance because cipher instances can not be reused.
  */
 @NotThreadSafe
 public class RefreshingDelegateCipher implements ICipher {
