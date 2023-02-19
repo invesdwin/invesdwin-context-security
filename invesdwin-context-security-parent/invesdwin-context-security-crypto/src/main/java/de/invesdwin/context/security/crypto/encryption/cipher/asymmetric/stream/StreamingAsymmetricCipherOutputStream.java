@@ -12,6 +12,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.asymmetric.IAsymme
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.CipherStreams;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.output.ICipherOutput;
 import de.invesdwin.context.security.crypto.key.IKey;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @NotThreadSafe
 public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutputStream {
@@ -109,11 +110,11 @@ public class StreamingAsymmetricCipherOutputStream extends AsymmetricCipherOutpu
             return;
         }
 
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
         encryptBuffer(outBuffer);
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
 
         final int len = output.write(outBuffer);
         streamOffset += len;

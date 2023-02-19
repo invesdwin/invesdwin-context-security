@@ -416,7 +416,7 @@ public class SymmetricCipherInputStream extends InputStream implements ReadableB
      */
     protected void decrypt() throws IOException {
         // Prepare the input buffer and clear the out buffer
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
 
         try {
@@ -427,7 +427,7 @@ public class SymmetricCipherInputStream extends InputStream implements ReadableB
 
         // Clear the input buffer and prepare out buffer
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
     }
 
     /**
@@ -438,7 +438,7 @@ public class SymmetricCipherInputStream extends InputStream implements ReadableB
      */
     protected void decryptFinal() throws IOException {
         // Prepare the input buffer and clear the out buffer
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
 
         try {
@@ -450,7 +450,7 @@ public class SymmetricCipherInputStream extends InputStream implements ReadableB
 
         // Clear the input buffer and prepare out buffer
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
     }
 
     /**

@@ -268,7 +268,7 @@ public class SymmetricCipherOutputStream extends OutputStream implements Writabl
      */
     protected void encrypt() throws IOException {
 
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
 
         try {
@@ -278,7 +278,7 @@ public class SymmetricCipherOutputStream extends OutputStream implements Writabl
         }
 
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
 
         // write to output
         while (outBuffer.hasRemaining()) {
@@ -293,7 +293,7 @@ public class SymmetricCipherOutputStream extends OutputStream implements Writabl
      *             if an I/O error occurs.
      */
     protected void encryptFinal() throws IOException {
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
 
         try {
@@ -303,7 +303,7 @@ public class SymmetricCipherOutputStream extends OutputStream implements Writabl
         }
 
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
 
         // write to output
         while (outBuffer.hasRemaining()) {

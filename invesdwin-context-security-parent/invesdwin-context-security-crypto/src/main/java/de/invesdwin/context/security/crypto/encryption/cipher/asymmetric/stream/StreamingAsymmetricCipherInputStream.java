@@ -258,11 +258,11 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
             return;
         }
 
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
         decryptBuffer(outBuffer);
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
     }
 
     /**
@@ -283,7 +283,7 @@ public class StreamingAsymmetricCipherInputStream extends AsymmetricCipherInputS
             // There is no real data in inBuffer.
             return;
         }
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         decryptBuffer(buf);
         inBuffer.clear();
     }

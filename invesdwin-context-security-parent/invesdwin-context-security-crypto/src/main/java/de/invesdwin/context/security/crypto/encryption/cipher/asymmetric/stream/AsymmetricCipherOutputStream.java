@@ -258,7 +258,7 @@ public class AsymmetricCipherOutputStream extends OutputStream implements Writab
      */
     protected void encrypt() throws IOException {
 
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
 
         try {
@@ -268,7 +268,7 @@ public class AsymmetricCipherOutputStream extends OutputStream implements Writab
         }
 
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
 
         // write to output
         while (outBuffer.hasRemaining()) {
@@ -283,7 +283,7 @@ public class AsymmetricCipherOutputStream extends OutputStream implements Writab
      *             if an I/O error occurs.
      */
     protected void encryptFinal() throws IOException {
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
 
         try {
@@ -293,7 +293,7 @@ public class AsymmetricCipherOutputStream extends OutputStream implements Writab
         }
 
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
 
         // write to output
         while (outBuffer.hasRemaining()) {

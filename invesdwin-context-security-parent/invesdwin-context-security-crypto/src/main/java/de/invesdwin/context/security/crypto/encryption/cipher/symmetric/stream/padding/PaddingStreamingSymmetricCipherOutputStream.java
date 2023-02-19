@@ -158,11 +158,11 @@ public class PaddingStreamingSymmetricCipherOutputStream extends SymmetricCipher
             return;
         }
 
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
         encryptBuffer(outBuffer);
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
 
         if (padding > 0) {
             /*

@@ -299,11 +299,11 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
             return;
         }
 
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
         decryptBuffer(outBuffer);
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
 
         if (padding > 0) {
             /*
@@ -333,7 +333,7 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
             // There is no real data in inBuffer.
             return;
         }
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         decryptBuffer(buf);
         inBuffer.clear();
     }

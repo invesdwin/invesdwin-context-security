@@ -288,11 +288,11 @@ public class StreamingSymmetricCipherInputStream extends SymmetricCipherInputStr
             return;
         }
 
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         outBuffer.clear();
         decryptBuffer(outBuffer);
         inBuffer.clear();
-        outBuffer.flip();
+        ByteBuffers.flip(outBuffer);
     }
 
     /**
@@ -313,7 +313,7 @@ public class StreamingSymmetricCipherInputStream extends SymmetricCipherInputStr
             // There is no real data in inBuffer.
             return;
         }
-        inBuffer.flip();
+        ByteBuffers.flip(inBuffer);
         decryptBuffer(buf);
         inBuffer.clear();
     }
