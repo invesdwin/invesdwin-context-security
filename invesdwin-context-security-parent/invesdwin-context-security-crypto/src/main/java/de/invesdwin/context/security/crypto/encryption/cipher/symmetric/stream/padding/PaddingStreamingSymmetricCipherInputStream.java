@@ -201,9 +201,9 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
         final int toRead = buf.remaining();
         if (toRead <= unread) {
             final int limit = outBuffer.limit();
-            outBuffer.limit(outBuffer.position() + toRead);
+            ByteBuffers.limit(outBuffer, outBuffer.position() + toRead);
             buf.put(outBuffer);
-            outBuffer.limit(limit);
+            ByteBuffers.limit(outBuffer, limit);
             return toRead;
         }
         buf.put(outBuffer);
@@ -309,7 +309,7 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
             /*
              * The plain text and cipher text have a 1:1 mapping, they start at the same position.
              */
-            outBuffer.position(padding);
+            ByteBuffers.position(outBuffer, padding);
         }
     }
 
@@ -357,13 +357,13 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
         int n = 0;
         while (n < len) {
             ByteBuffers.position(buf, offset + n);
-            buf.limit(offset + n + Math.min(len - n, inBuffer.remaining()));
+            ByteBuffers.limit(buf, offset + n + Math.min(len - n, inBuffer.remaining()));
             inBuffer.put(buf);
             // Do decryption
             try {
                 decrypt();
                 ByteBuffers.position(buf, offset + n);
-                buf.limit(limit);
+                ByteBuffers.limit(buf, limit);
                 n += outBuffer.remaining();
                 buf.put(outBuffer);
             } finally {
@@ -462,7 +462,7 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
         streamOffset = offset;
         inBuffer.clear();
         outBuffer.clear();
-        outBuffer.limit(0);
+        ByteBuffers.limit(outBuffer, 0);
         if (offset != 0) {
             resetCipher(offset);
             padding = getPadding(offset);

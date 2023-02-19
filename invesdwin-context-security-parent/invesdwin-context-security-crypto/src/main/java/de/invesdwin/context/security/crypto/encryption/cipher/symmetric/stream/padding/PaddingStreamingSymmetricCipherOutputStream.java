@@ -16,6 +16,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.u
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.output.ICipherOutput;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.assertions.Assertions;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 /**
  * <p>
@@ -167,7 +168,7 @@ public class PaddingStreamingSymmetricCipherOutputStream extends SymmetricCipher
             /*
              * The plain text and cipher text have a 1:1 mapping, they start at the same position.
              */
-            outBuffer.position(padding);
+            ByteBuffers.position(outBuffer, padding);
             padding = 0;
         }
 
@@ -203,7 +204,7 @@ public class PaddingStreamingSymmetricCipherOutputStream extends SymmetricCipher
     private void resetCipher() throws IOException {
         final long counter = streamOffset / cipher.getBlockSize();
         padding = (byte) (streamOffset % cipher.getBlockSize());
-        inBuffer.position(padding); // Set proper position for input data.
+        ByteBuffers.position(inBuffer, padding); // Set proper position for input data.
 
         CipherDerivedIV.calculateIV(initIV, counter, iv.getIV());
         try {

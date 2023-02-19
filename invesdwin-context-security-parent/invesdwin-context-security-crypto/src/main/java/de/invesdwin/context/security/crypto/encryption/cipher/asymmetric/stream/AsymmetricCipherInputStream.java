@@ -97,7 +97,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
         this.inBuffer = java.nio.ByteBuffer.allocateDirect(this.bufferSize);
         this.outBuffer = java.nio.ByteBuffer
                 .allocateDirect(this.bufferSize + cipher.getBlockSize() + cipher.getHashSize());
-        this.outBuffer.limit(0);
+        ByteBuffers.limit(this.outBuffer, 0);
     }
 
     /**
@@ -295,9 +295,9 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
         final int toRead = dst.remaining();
         if (toRead <= remaining) {
             final int limit = outBuffer.limit();
-            outBuffer.limit(outBuffer.position() + toRead);
+            ByteBuffers.limit(outBuffer, outBuffer.position() + toRead);
             dst.put(outBuffer);
-            outBuffer.limit(limit);
+            ByteBuffers.limit(outBuffer, limit);
             return toRead;
         }
         dst.put(outBuffer);

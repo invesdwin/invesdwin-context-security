@@ -14,6 +14,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.u
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.output.ICipherOutput;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.assertions.Assertions;
+import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @NotThreadSafe
 public class AsymmetricCipherOutputStream extends OutputStream implements WritableByteChannel {
@@ -219,12 +220,12 @@ public class AsymmetricCipherOutputStream extends OutputStream implements Writab
                 // to void copy twice, we set the limit to copy directly
                 final int oldLimit = src.limit();
                 final int newLimit = src.position() + space;
-                src.limit(newLimit);
+                ByteBuffers.limit(src, newLimit);
 
                 inBuffer.put(src);
 
                 // restore the old limit
-                src.limit(oldLimit);
+                ByteBuffers.limit(src, oldLimit);
 
                 remaining -= space;
                 encrypt();

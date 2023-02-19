@@ -191,9 +191,9 @@ public class StreamingSymmetricCipherInputStream extends SymmetricCipherInputStr
         final int toRead = buf.remaining();
         if (toRead <= unread) {
             final int limit = outBuffer.limit();
-            outBuffer.limit(outBuffer.position() + toRead);
+            ByteBuffers.limit(outBuffer, outBuffer.position() + toRead);
             buf.put(outBuffer);
-            outBuffer.limit(limit);
+            ByteBuffers.limit(outBuffer, limit);
             return toRead;
         }
         buf.put(outBuffer);
@@ -337,13 +337,13 @@ public class StreamingSymmetricCipherInputStream extends SymmetricCipherInputStr
         int n = 0;
         while (n < len) {
             ByteBuffers.position(buf, offset + n);
-            buf.limit(offset + n + Math.min(len - n, inBuffer.remaining()));
+            ByteBuffers.limit(buf, offset + n + Math.min(len - n, inBuffer.remaining()));
             inBuffer.put(buf);
             // Do decryption
             try {
                 decrypt();
                 ByteBuffers.position(buf, offset + n);
-                buf.limit(limit);
+                ByteBuffers.limit(buf, limit);
                 n += outBuffer.remaining();
                 buf.put(outBuffer);
             } finally {
@@ -426,7 +426,7 @@ public class StreamingSymmetricCipherInputStream extends SymmetricCipherInputStr
         streamOffset = offset;
         inBuffer.clear();
         outBuffer.clear();
-        outBuffer.limit(0);
+        ByteBuffers.limit(outBuffer, 0);
         if (offset != 0) {
             resetCipher(offset);
         }
