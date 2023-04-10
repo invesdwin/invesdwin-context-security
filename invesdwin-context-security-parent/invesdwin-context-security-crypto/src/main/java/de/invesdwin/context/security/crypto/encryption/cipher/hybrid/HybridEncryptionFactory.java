@@ -22,6 +22,7 @@ import de.invesdwin.util.streams.InputStreams;
 import de.invesdwin.util.streams.OutputStreams;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
+import de.invesdwin.util.streams.buffer.bytes.ICloseableByteBuffer;
 
 /**
  * This will encrypt a new random symmetric key with the asymmetric encryption factory. The key size is taken from the
@@ -94,13 +95,11 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
             protected OutputStream newDelegate() {
                 //prepare secret key and iv
                 final IKey randomDataKey = dataEncryptionFactory.getKey().newRandomInstance();
-                final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-                try {
+                try (ICloseableByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
                     final int decryptedSize = randomDataKey.toBuffer(decryptedDataKeyBuffer);
 
                     //encrypt secret key and iv and send it over the wire with the encrypted length
-                    final IByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-                    try {
+                    try (ICloseableByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
                         final int encryptedDataKeySize = keyEncryptionFactory.encrypt(
                                 decryptedDataKeyBuffer.sliceTo(decryptedSize), encryptedDataKeyBuffer,
                                 hybridCipher.getKeyCipher());
@@ -108,12 +107,7 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
                         encryptedDataKeyBuffer.getBytesTo(0, out, encryptedDataKeySize);
                     } catch (final IOException e) {
                         throw new RuntimeException(e);
-                    } finally {
-                        ByteBuffers.EXPANDABLE_POOL.returnObject(encryptedDataKeyBuffer);
                     }
-
-                } finally {
-                    ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
                 }
 
                 //switch to symmetric encryption using the secret key and iv
@@ -128,22 +122,19 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
         return new ALazyDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
-                final IByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-                final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-                try {
-                    final int encryptedDataKeySize = InputStreams.readInt(in);
-                    encryptedDataKeyBuffer.putBytesTo(0, in, encryptedDataKeySize);
-                    final int decryptedSize = keyEncryptionFactory.decrypt(
-                            encryptedDataKeyBuffer.sliceTo(encryptedDataKeySize), decryptedDataKeyBuffer,
-                            hybridCipher.getKeyCipher());
-                    final IKey randomDataKey = dataEncryptionFactory.getKey()
-                            .fromBuffer(decryptedDataKeyBuffer.sliceTo(decryptedSize));
-                    return dataEncryptionFactory.newDecryptor(in, hybridCipher.getDataCipher(), randomDataKey);
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
-                    ByteBuffers.EXPANDABLE_POOL.returnObject(encryptedDataKeyBuffer);
+                try (ICloseableByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
+                    try (ICloseableByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
+                        final int encryptedDataKeySize = InputStreams.readInt(in);
+                        encryptedDataKeyBuffer.putBytesTo(0, in, encryptedDataKeySize);
+                        final int decryptedSize = keyEncryptionFactory.decrypt(
+                                encryptedDataKeyBuffer.sliceTo(encryptedDataKeySize), decryptedDataKeyBuffer,
+                                hybridCipher.getKeyCipher());
+                        final IKey randomDataKey = dataEncryptionFactory.getKey()
+                                .fromBuffer(decryptedDataKeyBuffer.sliceTo(decryptedSize));
+                        return dataEncryptionFactory.newDecryptor(in, hybridCipher.getDataCipher(), randomDataKey);
+                    } catch (final IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         };
@@ -157,13 +148,11 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
             protected OutputStream newDelegate() {
                 //prepare secret key and iv
                 final IKey randomDataKey = dataEncryptionFactory.getKey().newRandomInstance();
-                final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-                try {
+                try (ICloseableByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
                     final int decryptedSize = randomDataKey.toBuffer(decryptedDataKeyBuffer);
 
                     //encrypt secret key and iv and send it over the wire with the encrypted length
-                    final IByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-                    try {
+                    try (ICloseableByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
                         final int encryptedDataKeySize = keyEncryptionFactory.encrypt(
                                 decryptedDataKeyBuffer.sliceTo(decryptedSize), encryptedDataKeyBuffer,
                                 hybridCipher.getKeyCipher());
@@ -171,12 +160,7 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
                         encryptedDataKeyBuffer.getBytesTo(0, out, encryptedDataKeySize);
                     } catch (final IOException e) {
                         throw new RuntimeException(e);
-                    } finally {
-                        ByteBuffers.EXPANDABLE_POOL.returnObject(encryptedDataKeyBuffer);
                     }
-
-                } finally {
-                    ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
                 }
 
                 //switch to symmetric encryption using the secret key and iv
@@ -191,22 +175,20 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
         return new ALazyDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
-                final IByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-                final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-                try {
-                    final int encryptedDataKeySize = InputStreams.readInt(in);
-                    encryptedDataKeyBuffer.putBytesTo(0, in, encryptedDataKeySize);
-                    final int decryptedSize = keyEncryptionFactory.decrypt(
-                            encryptedDataKeyBuffer.sliceTo(encryptedDataKeySize), decryptedDataKeyBuffer,
-                            hybridCipher.getKeyCipher());
-                    final IKey randomDataKey = dataEncryptionFactory.getKey()
-                            .fromBuffer(decryptedDataKeyBuffer.sliceTo(decryptedSize));
-                    return dataEncryptionFactory.newStreamingDecryptor(in, hybridCipher.getDataCipher(), randomDataKey);
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
-                    ByteBuffers.EXPANDABLE_POOL.returnObject(encryptedDataKeyBuffer);
+                try (ICloseableByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
+                    try (ICloseableByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
+                        final int encryptedDataKeySize = InputStreams.readInt(in);
+                        encryptedDataKeyBuffer.putBytesTo(0, in, encryptedDataKeySize);
+                        final int decryptedSize = keyEncryptionFactory.decrypt(
+                                encryptedDataKeyBuffer.sliceTo(encryptedDataKeySize), decryptedDataKeyBuffer,
+                                hybridCipher.getKeyCipher());
+                        final IKey randomDataKey = dataEncryptionFactory.getKey()
+                                .fromBuffer(decryptedDataKeyBuffer.sliceTo(decryptedSize));
+                        return dataEncryptionFactory.newStreamingDecryptor(in, hybridCipher.getDataCipher(),
+                                randomDataKey);
+                    } catch (final IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         };
@@ -218,8 +200,7 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
 
         //prepare secret key and iv
         final IKey randomDataKey = dataEncryptionFactory.getKey().newRandomInstance();
-        final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
-        try {
+        try (ICloseableByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
             final int decryptedSize = randomDataKey.toBuffer(decryptedDataKeyBuffer);
 
             //encrypt secret key and iv and send it over the wire with the encrypted length
@@ -232,8 +213,6 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
                     hybridCipher.getDataCipher(), randomDataKey);
 
             return payloadIndex + payloadSize;
-        } finally {
-            ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
         }
     }
 
@@ -243,15 +222,12 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
 
         final int encryptedDataKeySize = src.getInt(ENCRYPTEDDATAKEYLENGTH_INDEX);
 
-        final IByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
         final IKey randomDataKey;
-        try {
+        try (ICloseableByteBuffer decryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
             final int decryptedSize = keyEncryptionFactory.decrypt(
                     src.slice(ENCRYPTEDDATAKEY_INDEX, encryptedDataKeySize), decryptedDataKeyBuffer,
                     hybridCipher.getKeyCipher());
             randomDataKey = dataEncryptionFactory.getKey().fromBuffer(decryptedDataKeyBuffer.sliceTo(decryptedSize));
-        } finally {
-            ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedDataKeyBuffer);
         }
 
         final int payloadIndex = ENCRYPTEDDATAKEY_INDEX + encryptedDataKeySize;

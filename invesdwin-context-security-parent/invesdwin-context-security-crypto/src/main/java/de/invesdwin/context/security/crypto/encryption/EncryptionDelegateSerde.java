@@ -9,6 +9,7 @@ import de.invesdwin.util.marshallers.serde.ISerde;
 import de.invesdwin.util.marshallers.serde.SerdeBaseMethods;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
+import de.invesdwin.util.streams.buffer.bytes.ICloseableByteBuffer;
 
 @Immutable
 public class EncryptionDelegateSerde<E> implements ISerde<E> {
@@ -48,16 +49,14 @@ public class EncryptionDelegateSerde<E> implements ISerde<E> {
             //we can save a copy here
             return delegate.fromBuffer(buffer);
         } else {
-            final IByteBuffer decryptedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
             final ICipher cipher = encryptionFactory.getCipherPool().borrowObject();
-            try {
+            try (ICloseableByteBuffer decryptedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
                 final int decryptedLength = encryptionFactory.encrypt(buffer, decryptedBuffer, cipher, key);
                 final E copied = delegate.fromBuffer(decryptedBuffer.sliceTo(decryptedLength));
                 //                decryptedBuffer.clear(Bytes.ZERO, 0, decryptedLength);
                 return copied;
             } finally {
                 encryptionFactory.getCipherPool().returnObject(cipher);
-                ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedBuffer);
             }
         }
     }
@@ -71,9 +70,8 @@ public class EncryptionDelegateSerde<E> implements ISerde<E> {
             //we can save a copy here
             return delegate.toBuffer(buffer, obj);
         } else {
-            final IByteBuffer decryptedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject();
             final ICipher cipher = encryptionFactory.getCipherPool().borrowObject();
-            try {
+            try (ICloseableByteBuffer decryptedBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
                 final int decryptedLength = delegate.toBuffer(decryptedBuffer, obj);
                 final int copied = encryptionFactory.decrypt(decryptedBuffer.sliceTo(decryptedLength), buffer, cipher,
                         key);
@@ -81,7 +79,6 @@ public class EncryptionDelegateSerde<E> implements ISerde<E> {
                 return copied;
             } finally {
                 encryptionFactory.getCipherPool().returnObject(cipher);
-                ByteBuffers.EXPANDABLE_POOL.returnObject(decryptedBuffer);
             }
         }
     }
