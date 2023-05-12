@@ -26,8 +26,7 @@ public final class HybridCipherObjectPool extends ATimeoutObjectPool<ICipher> {
 
     @Override
     protected HybridCipher newObject() {
-        return new HybridCipher(algorithm.getKeyEncryptionFactory(), algorithm.getDataEncryptionFactory(), null,
-                null);
+        return new HybridCipher(algorithm.getKeyEncryptionFactory(), algorithm.getDataEncryptionFactory(), null, null);
     }
 
     @Override
@@ -45,12 +44,13 @@ public final class HybridCipherObjectPool extends ATimeoutObjectPool<ICipher> {
     }
 
     @Override
-    protected void passivateObject(final ICipher element) {
+    protected boolean passivateObject(final ICipher element) {
         final HybridCipher cElement = (HybridCipher) element;
         keyCipherPool.returnObject(cElement.getKeyCipher());
         dataCipherPool.returnObject(cElement.getDataCipher());
         cElement.setKeyCipher(null);
         cElement.setDataCipher(null);
+        return true;
 
     }
 

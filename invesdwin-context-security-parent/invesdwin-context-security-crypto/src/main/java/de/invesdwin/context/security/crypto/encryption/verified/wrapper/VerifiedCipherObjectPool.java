@@ -49,12 +49,13 @@ public final class VerifiedCipherObjectPool extends ATimeoutObjectPool<ICipher> 
     }
 
     @Override
-    protected void passivateObject(final ICipher element) {
+    protected boolean passivateObject(final ICipher element) {
         final VerifiedCipher cElement = (VerifiedCipher) element;
         cipherPool.returnObject(cElement.getUnverifiedCipher());
         hashPool.returnObject(cElement.getHash());
         cElement.setUnverifiedCipher(null);
         cElement.setHash(null);
+        return true;
     }
 
 }

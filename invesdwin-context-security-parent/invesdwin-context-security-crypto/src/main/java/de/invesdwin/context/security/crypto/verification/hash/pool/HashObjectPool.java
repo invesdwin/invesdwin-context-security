@@ -29,9 +29,10 @@ public final class HashObjectPool extends ATimeoutObjectPool<IHash> {
     }
 
     @Override
-    protected void passivateObject(final IHash element) {
+    protected boolean passivateObject(final IHash element) {
         //will do a lazy reset only if required
         element.reset();
+        return true;
     }
 
 }

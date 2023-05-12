@@ -29,8 +29,8 @@ public final class CipherObjectPool extends ATimeoutObjectPool<ICipher> {
     }
 
     @Override
-    protected void passivateObject(final ICipher element) {
-        //noop
+    protected boolean passivateObject(final ICipher element) {
+        return true;
     }
 
 }
