@@ -26,14 +26,4 @@ public final class CryptoRandomGeneratorObjectPool extends AAgronaObjectPool<Cry
         return random;
     }
 
-    @Override
-    public void invalidateObject(final CryptoRandomGenerator element) {
-        //noop
-    }
-
-    @Override
-    protected void passivateObject(final CryptoRandomGenerator element) {
-        //noop
-    }
-
 }

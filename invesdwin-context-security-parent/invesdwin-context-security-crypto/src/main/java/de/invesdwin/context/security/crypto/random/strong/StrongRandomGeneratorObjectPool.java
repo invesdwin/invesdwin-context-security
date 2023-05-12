@@ -26,14 +26,4 @@ public final class StrongRandomGeneratorObjectPool extends AAgronaObjectPool<Str
         return random;
     }
 
-    @Override
-    public void invalidateObject(final StrongRandomGenerator element) {
-        //noop
-    }
-
-    @Override
-    protected void passivateObject(final StrongRandomGenerator element) {
-        //noop
-    }
-
 }
