@@ -10,14 +10,12 @@
 	<artifactId>invesdwin-context-security-parent</artifactId>
 	<version>1.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
-
 	<licenses>
 		<license>
 			<name>GNU Lesser General Public License (LGPL), Version 3.0</name>
 			<url>http://www.gnu.org/licenses/lgpl-3.0.html</url>
 		</license>
 	</licenses>
-
 	<modules>
 		<module>invesdwin-context-security</module>
 		<module>invesdwin-context-security-crypto</module>
@@ -30,27 +28,22 @@
 		<module>invesdwin-context-security-ldap-server</module>
 		<module>invesdwin-context-security-ldap-test</module>
 	</modules>
-
 	<properties>
 		<project.version.invesdwin-context>1.0.4-SNAPSHOT</project.version.invesdwin-context>
 		<project.version.invesdwin-context-security>${project.version}</project.version.invesdwin-context-security>
 		<project.version.invesdwin-context-persistence>1.0.4-SNAPSHOT</project.version.invesdwin-context-persistence>
-
 		<version.api-ldap>2.0.1</version.api-ldap>
 		<version.apacheds>2.0.0.AM26</version.apacheds>
-		<version.spring-security-kerberos>1.0.1.RELEASE</version.spring-security-kerberos>
+		<version.spring-security-kerberos>2.0.0</version.spring-security-kerberos>
 		<version.spring-security-saml>1.0.10.RELEASE</version.spring-security-saml>
-		<version.spring-ws-security>4.0.0-M3</version.spring-ws-security>
+		<version.spring-ws-security>4.0.8</version.spring-ws-security>
 		<version.not-going-to-be-commons-ssl>0.3.20</version.not-going-to-be-commons-ssl>
-
 		<version.commons-crypto>1.1.0</version.commons-crypto>
 		<version.argon2-jvm>2.11</version.argon2-jvm>
 		<version.password4j>1.6.0</version.password4j>
-
 		<version.AmazonCorrettoCryptoProvider>1.6.1</version.AmazonCorrettoCryptoProvider>
 		<version.wildfly-openssl>2.2.1.Final</version.wildfly-openssl>
 	</properties>
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -67,7 +60,6 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security</artifactId>
@@ -83,7 +75,6 @@
 				<artifactId>invesdwin-context-security-kerberos</artifactId>
 				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-context-security-web</artifactId>
@@ -119,7 +110,6 @@
 				<artifactId>invesdwin-context-security-ldap-server</artifactId>
 				<version>${project.version.invesdwin-context-security}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.directory.server</groupId>
 				<artifactId>apacheds-protocol-ldap</artifactId>
@@ -225,7 +215,6 @@
 				<artifactId>api-asn1-api</artifactId>
 				<version>${version.api-ldap}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.directory.server</groupId>
 				<artifactId>apacheds-kerberos-codec</artifactId>
@@ -241,14 +230,17 @@
 				<groupId>org.springframework.security.kerberos</groupId>
 				<artifactId>spring-security-kerberos-client</artifactId>
 				<version>${version.spring-security-kerberos}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>commons-logging</groupId>
-						<artifactId>commons-logging</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
-
+			<dependency>
+				<groupId>org.springframework.security.kerberos</groupId>
+				<artifactId>spring-security-kerberos-core</artifactId>
+				<version>${version.spring-security-kerberos}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security.kerberos</groupId>
+				<artifactId>spring-security-kerberos-web</artifactId>
+				<version>${version.spring-security-kerberos}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.ws</groupId>
 				<artifactId>spring-ws-security</artifactId>
@@ -296,7 +288,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>org.springframework.security.kerberos</groupId>
 				<artifactId>spring-security-kerberos-web</artifactId>
@@ -390,7 +381,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-crypto</artifactId>
@@ -406,7 +396,6 @@
 				<artifactId>password4j</artifactId>
 				<version>${version.password4j}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>software.amazon.cryptools</groupId>
 				<artifactId>AmazonCorrettoCryptoProvider</artifactId>
@@ -414,7 +403,6 @@
 				<!-- only linux support at the moment -->
 				<classifier>linux-x86_64</classifier>
 			</dependency>
-
 			<dependency>
 				<groupId>org.wildfly.openssl</groupId>
 				<artifactId>wildfly-openssl</artifactId>
@@ -422,7 +410,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
 	<distributionManagement>
 		<repository>
 			<id>invesdwin-oss</id>
@@ -435,7 +422,6 @@
 			<url>https://invesdwin.de/repo/invesdwin-oss</url>
 		</snapshotRepository>
 	</distributionManagement>
-
 	<repositories>
 		<repository>
 			<id>invesdwin-oss</id>
@@ -448,16 +434,13 @@
 			<url>https://invesdwin.de/repo/invesdwin-oss-remote</url>
 		</pluginRepository>
 	</pluginRepositories>
-
 	<scm>
 		<url>https://github.com/invesdwin/invesdwin-context-security</url>
 		<connection>scm:git:https://github.com/invesdwin/invesdwin-context-security.git</connection>
 		<tag>HEAD</tag>
 	</scm>
-
 	<ciManagement>
 		<system>jenkins</system>
 		<url>https://invesdwin.de/jenkins/job/dgr-deploy-invesdwin-context-security/</url>
 	</ciManagement>
-
 </project>

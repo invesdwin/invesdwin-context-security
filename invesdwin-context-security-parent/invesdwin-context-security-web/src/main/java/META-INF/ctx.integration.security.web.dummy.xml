@@ -12,7 +12,7 @@
 		to spring-security filter access denied page after login when it was the 
 		first request -->
 	<security:http auto-config="true" authentication-manager-ref="dummyAuthenticationManager"
-		use-expressions="true" pattern="_DUMMY_">
+		use-expressions="true" pattern="/**">
 
 		<!-- See: http://stackoverflow.com/questions/28138864/expected-csrf-token-not-found-has-your-session-expired-403 -->
 		<security:csrf disabled="true" />
@@ -22,7 +22,8 @@
 			<security:frame-options policy="SAMEORIGIN" />
 		</security:headers>
 
-		<security:intercept-url pattern="_DUMMY_" />
+		<!-- default changed to denyAll in spring-security 6: https://stackoverflow.com/a/76339455/67492 -->
+		<security:intercept-url pattern="/**" access="permitAll" />
 
 	</security:http>
 
