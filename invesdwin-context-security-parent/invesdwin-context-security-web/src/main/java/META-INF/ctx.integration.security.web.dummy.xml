@@ -20,6 +20,8 @@
 			http://rpuchkovskiy.blogspot.de/2014/10/spring-security-32-defaults-break.html -->
 		<security:headers>
 			<security:frame-options policy="SAMEORIGIN" />
+			<!-- X-Content-Type-Options: nosniff default breaks .js.map resources in wicket: https://docs.spring.io/spring-security/site/docs/5.0.x/reference/html/headers.html -->
+			<security:content-type-options disabled="true" />
 		</security:headers>
 
 		<!-- default changed to denyAll in spring-security 6: https://stackoverflow.com/a/76339455/67492 -->

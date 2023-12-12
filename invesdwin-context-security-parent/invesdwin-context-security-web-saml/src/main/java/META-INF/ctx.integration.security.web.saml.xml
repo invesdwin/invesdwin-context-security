@@ -18,6 +18,7 @@
 		<security:csrf disabled="true" />
 		<security:headers>
 			<security:frame-options policy="SAMEORIGIN" />
+			<security:content-type-options disabled="true" />
 		</security:headers>
 
 		<!-- <security:intercept-url pattern="/saml/**" access="IS_AUTHENTICATED_FULLY" 
