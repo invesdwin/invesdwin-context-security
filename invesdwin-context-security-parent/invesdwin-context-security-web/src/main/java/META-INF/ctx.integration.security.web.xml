@@ -18,6 +18,9 @@
 	<bean name="noopPasswordEncoder"
 		class="org.springframework.security.crypto.password.NoOpPasswordEncoder" />
 
+	<bean name="mvcHandlerMappingIntrospector"
+		class="org.springframework.web.servlet.handler.HandlerMappingIntrospector" />
+
 	<!-- the default authentication manager is a dummy, please always reference 
 		a specific one in your code -->
 	<security:authentication-manager
