@@ -36,7 +36,7 @@
 		<version.apacheds>2.0.0.AM26</version.apacheds>
 		<version.spring-security-kerberos>2.0.0</version.spring-security-kerberos>
 		<version.spring-security-saml>1.0.10.RELEASE</version.spring-security-saml>
-		<version.spring-ws-security>4.0.10</version.spring-ws-security>
+		<version.spring-ws-security>4.0.11</version.spring-ws-security>
 		<version.not-going-to-be-commons-ssl>0.3.20</version.not-going-to-be-commons-ssl>
 		<version.commons-crypto>1.1.0</version.commons-crypto>
 		<version.argon2-jvm>2.11</version.argon2-jvm>
