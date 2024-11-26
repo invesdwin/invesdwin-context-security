@@ -1,10 +1,11 @@
 package de.invesdwin.context.security.crypto.key;
 
+import de.invesdwin.norva.beanpath.spi.IUnwrap;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.ICloseableByteBuffer;
 
-public interface IKey {
+public interface IKey extends IUnwrap {
 
     /**
      * This is the number of bytes of the key (e.g. 128/256 for AES or 4096 for RSA)
@@ -32,7 +33,5 @@ public interface IKey {
     IKey fromBuffer(IByteBuffer buffer);
 
     IKey newRandomInstance();
-
-    <T> T unwrap(Class<T> type);
 
 }
