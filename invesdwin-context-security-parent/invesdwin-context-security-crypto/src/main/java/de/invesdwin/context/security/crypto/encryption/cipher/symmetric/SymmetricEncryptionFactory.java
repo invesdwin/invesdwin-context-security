@@ -22,10 +22,10 @@ import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 import de.invesdwin.util.error.UnknownArgumentException;
 import de.invesdwin.util.marshallers.serde.ISerde;
-import de.invesdwin.util.streams.ALazyDelegateInputStream;
-import de.invesdwin.util.streams.ALazyDelegateOutputStream;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
+import de.invesdwin.util.streams.delegate.AFastDelegateInputStream;
+import de.invesdwin.util.streams.delegate.AFastDelegateOutputStream;
 
 /**
  * Derived IV is the best compromise between security and speed. It does not send the IV over the wire, instead it only
@@ -113,7 +113,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     @Override
     public OutputStream newEncryptor(final OutputStream out, final ICipher cipher, final IKey key) {
         final SymmetricCipherKey cKey = key.unwrap(SymmetricCipherKey.class);
-        return new ALazyDelegateOutputStream() {
+        return new AFastDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
                 final byte[] iv = cKey.getCipherIV().putNewIV(out);
@@ -129,7 +129,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     @Override
     public InputStream newDecryptor(final InputStream in, final ICipher cipher, final IKey key) {
         final SymmetricCipherKey cKey = key.unwrap(SymmetricCipherKey.class);
-        return new ALazyDelegateInputStream() {
+        return new AFastDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
                 final byte[] iv = cKey.getCipherIV().getNewIV(in);
@@ -145,7 +145,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     @Override
     public OutputStream newStreamingEncryptor(final OutputStream out, final ICipher cipher, final IKey key) {
         final SymmetricCipherKey cKey = key.unwrap(SymmetricCipherKey.class);
-        return new ALazyDelegateOutputStream() {
+        return new AFastDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
                 final byte[] iv = cKey.getCipherIV().putNewIV(out);
@@ -161,7 +161,7 @@ public class SymmetricEncryptionFactory implements IEncryptionFactory {
     @Override
     public InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher, final IKey key) {
         final SymmetricCipherKey cKey = key.unwrap(SymmetricCipherKey.class);
-        return new ALazyDelegateInputStream() {
+        return new AFastDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
                 final byte[] iv = cKey.getCipherIV().getNewIV(in);

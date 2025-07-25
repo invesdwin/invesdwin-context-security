@@ -16,13 +16,13 @@ import de.invesdwin.context.security.crypto.encryption.cipher.hybrid.wrapper.Hyb
 import de.invesdwin.context.security.crypto.encryption.cipher.wrapper.ByteBufferAlgorithmParameterSpec;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.marshallers.serde.ISerde;
-import de.invesdwin.util.streams.ALazyDelegateInputStream;
-import de.invesdwin.util.streams.ALazyDelegateOutputStream;
 import de.invesdwin.util.streams.InputStreams;
 import de.invesdwin.util.streams.OutputStreams;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.ICloseableByteBuffer;
+import de.invesdwin.util.streams.delegate.AFastDelegateInputStream;
+import de.invesdwin.util.streams.delegate.AFastDelegateOutputStream;
 
 /**
  * This will encrypt a new random symmetric key with the asymmetric encryption factory. The key size is taken from the
@@ -90,7 +90,7 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
     @Override
     public OutputStream newEncryptor(final OutputStream out, final ICipher cipher, final IKey key) {
         final HybridCipher hybridCipher = (HybridCipher) cipher;
-        return new ALazyDelegateOutputStream() {
+        return new AFastDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
                 //prepare secret key and iv
@@ -119,7 +119,7 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
     @Override
     public InputStream newDecryptor(final InputStream in, final ICipher cipher, final IKey key) {
         final HybridCipher hybridCipher = (HybridCipher) cipher;
-        return new ALazyDelegateInputStream() {
+        return new AFastDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
                 try (ICloseableByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
@@ -143,7 +143,7 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
     @Override
     public OutputStream newStreamingEncryptor(final OutputStream out, final ICipher cipher, final IKey key) {
         final HybridCipher hybridCipher = (HybridCipher) cipher;
-        return new ALazyDelegateOutputStream() {
+        return new AFastDelegateOutputStream() {
             @Override
             protected OutputStream newDelegate() {
                 //prepare secret key and iv
@@ -172,7 +172,7 @@ public class HybridEncryptionFactory implements IEncryptionFactory {
     @Override
     public InputStream newStreamingDecryptor(final InputStream in, final ICipher cipher, final IKey key) {
         final HybridCipher hybridCipher = (HybridCipher) cipher;
-        return new ALazyDelegateInputStream() {
+        return new AFastDelegateInputStream() {
             @Override
             protected InputStream newDelegate() {
                 try (ICloseableByteBuffer encryptedDataKeyBuffer = ByteBuffers.EXPANDABLE_POOL.borrowObject()) {
