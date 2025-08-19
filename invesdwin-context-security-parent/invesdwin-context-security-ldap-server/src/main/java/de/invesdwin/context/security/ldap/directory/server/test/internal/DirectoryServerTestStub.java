@@ -83,7 +83,7 @@ public class DirectoryServerTestStub extends StubSupport {
 
     @Override
     public void tearDownOnce(final ATest test, final TestContext ctx) throws Exception {
-        if (!ctx.isFinished()) {
+        if (!ctx.isFinishedGlobal()) {
             return;
         }
         maybeStopLastServer();
