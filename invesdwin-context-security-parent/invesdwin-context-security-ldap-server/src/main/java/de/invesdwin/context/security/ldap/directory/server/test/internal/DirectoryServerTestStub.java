@@ -3,7 +3,8 @@ package de.invesdwin.context.security.ldap.directory.server.test.internal;
 import java.io.IOException;
 import java.util.List;
 
-import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.ThreadSafe;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
@@ -24,10 +25,11 @@ import de.invesdwin.util.shutdown.ShutdownHookManager;
 import jakarta.inject.Named;
 
 @Named
-@NotThreadSafe
+@ThreadSafe
 public class DirectoryServerTestStub extends StubSupport {
 
-    private static volatile DirectoryServer lastServer;
+    @GuardedBy("this.class")
+    private static DirectoryServer lastServer;
 
     static {
         ShutdownHookManager.register(new IShutdownHook() {
@@ -41,8 +43,6 @@ public class DirectoryServerTestStub extends StubSupport {
 
     @Override
     public void setUpContextLocations(final ATest test, final List<PositionedResource> locations) throws Exception {
-        //if for some reason the tearDownOnce was not executed on the last test (maybe maven killed it?), then try to stop here aswell
-        maybeStopLastServer();
         final DirectoryServerTest annotation = Reflections.getAnnotation(test, DirectoryServerTest.class);
         if (annotation != null) {
             if (annotation.value()) {
@@ -55,6 +55,11 @@ public class DirectoryServerTestStub extends StubSupport {
 
     @Override
     public void setUpContext(final ATest test, final TestContext ctx) throws Exception {
+        if (ctx.isPreMergedContext()) {
+            return;
+        }
+        //if for some reason the tearDownOnce was not executed on the last test (maybe maven killed it?), then try to stop here aswell
+        maybeStopLastServer();
         //clean up for next test
         try {
             Files.deleteDirectory(DirectoryServerProperties.WORKING_DIR);
@@ -65,10 +70,14 @@ public class DirectoryServerTestStub extends StubSupport {
 
     @Override
     public void setUpOnce(final ATest test, final TestContext ctx) throws Exception {
-        try {
-            DirectoryServerTestStub.lastServer = MergedContext.getInstance().getBean(DirectoryServer.class);
-        } catch (final NoSuchBeanDefinitionException e) { //SUPPRESS CHECKSTYLE empty block
-            //ignore
+        synchronized (DirectoryServerTestStub.class) {
+            if (DirectoryServerTestStub.lastServer == null) {
+                try {
+                    DirectoryServerTestStub.lastServer = MergedContext.getInstance().getBean(DirectoryServer.class);
+                } catch (final NoSuchBeanDefinitionException e) { //SUPPRESS CHECKSTYLE empty block
+                    //ignore
+                }
+            }
         }
     }
 
@@ -80,7 +89,7 @@ public class DirectoryServerTestStub extends StubSupport {
         maybeStopLastServer();
     }
 
-    private static void maybeStopLastServer() throws Exception {
+    private static synchronized void maybeStopLastServer() throws Exception {
         if (lastServer != null) {
             lastServer.stop();
             lastServer = null;

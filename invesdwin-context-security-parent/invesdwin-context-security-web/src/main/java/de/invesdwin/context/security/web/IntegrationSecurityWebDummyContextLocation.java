@@ -25,7 +25,7 @@ import jakarta.inject.Named;
 @Immutable
 public class IntegrationSecurityWebDummyContextLocation extends AConditionalContextLocation {
 
-    private static Boolean activated;
+    private static volatile Boolean activated;
 
     @Override
     protected List<PositionedResource> getContextResourcesIfConditionSatisfied() {
