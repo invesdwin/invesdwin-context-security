@@ -27,12 +27,8 @@
 			<artifactId>spring-security-kerberos-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.directory.server</groupId>
-			<artifactId>apacheds-kerberos-codec</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.directory.server</groupId>
-			<artifactId>apacheds-protocol-kerberos</artifactId>
+		    <groupId>org.apache.kerby</groupId>
+		    <artifactId>kerb-client-api-all</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.mina</groupId>

@@ -34,10 +34,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.directory.server</groupId>
-			<artifactId>apacheds-protocol-kerberos</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.directory.server</groupId>
 			<artifactId>apacheds-interceptor-kerberos</artifactId>
 		</dependency>
 		<dependency>
@@ -75,6 +71,30 @@
 		<dependency>
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.kerby</groupId>
+		    <artifactId>kerb-server-api-all</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.kerby</groupId>
+		    <artifactId>kerby-asn1</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.kerby</groupId>
+		    <artifactId>kerb-simplekdc</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.kerby</groupId>
+		    <artifactId>ldap-backend</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk18on</artifactId>
 		</dependency>
 	</dependencies>
 

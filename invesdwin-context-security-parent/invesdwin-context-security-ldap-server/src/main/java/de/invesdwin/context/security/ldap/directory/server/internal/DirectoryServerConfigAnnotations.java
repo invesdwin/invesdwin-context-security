@@ -5,8 +5,6 @@ import java.lang.annotation.Annotation;
 import javax.annotation.concurrent.Immutable;
 
 import org.apache.directory.api.ldap.model.constants.SupportedSaslMechanisms;
-import org.apache.directory.server.annotations.CreateChngPwdServer;
-import org.apache.directory.server.annotations.CreateKdcServer;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.annotations.SaslMechanism;
@@ -24,6 +22,10 @@ import org.apache.directory.server.ldap.handlers.sasl.digestMD5.DigestMd5Mechani
 import org.apache.directory.server.ldap.handlers.sasl.gssapi.GssapiMechanismHandler;
 import org.apache.directory.server.ldap.handlers.sasl.ntlm.NtlmMechanismHandler;
 import org.apache.directory.server.ldap.handlers.sasl.plain.PlainMechanismHandler;
+import org.apache.kerby.kerberos.kdc.identitybackend.LdapIdentityBackend;
+import org.apache.kerby.kerberos.kerb.identity.backend.BackendConfig;
+import org.apache.kerby.kerberos.kerb.server.KdcConfig;
+import org.apache.kerby.kerberos.kerb.server.KdcConfigKey;
 
 import de.invesdwin.context.security.kerberos.KerberosProperties;
 import de.invesdwin.context.security.ldap.LdapProperties;
@@ -37,57 +39,29 @@ import de.invesdwin.util.lang.string.Strings;
 @Immutable
 public class DirectoryServerConfigAnnotations {
 
-    //@CreateKdcServer(primaryRealm = "JBOSS.ORG", kdcPrincipal = "krbtgt/JBOSS.ORG@JBOSS.ORG", searchBaseDn = "dc=jboss,dc=org", transports = { @CreateTransport(protocol = "UDP", port = 6088) })
-    @CreateKdcServer
-    public CreateKdcServer newCreateKdcServerAnnotation() {
-        final CreateKdcServer defaults = Reflections.getAnnotation(CreateKdcServer.class);
-        return new CreateKdcServer() {
+    public KdcConfig newKdcConfig() {
+        final KdcConfig kdcConfig = new KdcConfig();
+        kdcConfig.setString(KdcConfigKey.KDC_IDENTITY_BACKEND, LdapIdentityBackend.class.getName());
+        kdcConfig.setString(KdcConfigKey.KDC_SERVICE_NAME, KerberosProperties.KERBEROS_SERVICE_PRINCIPAL);
+        kdcConfig.setString(KdcConfigKey.KDC_HOST, KerberosProperties.KERBEROS_SERVER_URI.getHost());
+        kdcConfig.setInt(KdcConfigKey.KDC_PORT, KerberosProperties.KERBEROS_SERVER_URI.getPort());
+        kdcConfig.setString(KdcConfigKey.KDC_DOMAIN, KerberosProperties.KERBEROS_PRIMARY_REALM);
+        kdcConfig.setString(KdcConfigKey.KDC_REALM, KerberosProperties.KERBEROS_PRIMARY_REALM);
+        //timestamp verificaton makes debugging harder, since every second request is the actual one
+        kdcConfig.setBoolean(KdcConfigKey.PA_ENC_TIMESTAMP_REQUIRED, false);
+        return kdcConfig;
+    }
 
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return defaults.annotationType();
-            }
-
-            @Override
-            public CreateTransport[] transports() {
-                return new CreateTransport[] { newKdcCreateTransportAnnotation() };
-            }
-
-            @Override
-            public String searchBaseDn() {
-                return LdapProperties.LDAP_CONTEXT_BASE;
-            }
-
-            @Override
-            public String primaryRealm() {
-                return KerberosProperties.KERBEROS_PRIMARY_REALM;
-            }
-
-            @Override
-            public String name() {
-                return defaults.name();
-            }
-
-            @Override
-            public long maxTicketLifetime() {
-                return defaults.maxTicketLifetime();
-            }
-
-            @Override
-            public long maxRenewableLifetime() {
-                return defaults.maxRenewableLifetime();
-            }
-
-            @Override
-            public String kdcPrincipal() {
-                return KerberosProperties.KERBEROS_SERVICE_PRINCIPAL;
-            }
-
-            @Override
-            public CreateChngPwdServer[] chngPwdServer() {
-                return defaults.chngPwdServer();
-            }
-        };
+    public BackendConfig newBackendConfig() {
+        final BackendConfig backendConfig = new BackendConfig();
+        backendConfig.setString("host", LdapProperties.LDAP_CONTEXT_URI.getHost());
+        backendConfig.setString("admin_dn", LdapProperties.LDAP_CONTEXT_USERNAME);
+        backendConfig.setString("admin_pw", LdapProperties.LDAP_CONTEXT_PASSWORD);
+        backendConfig.setString("base_dn", LdapProperties.LDAP_CONTEXT_BASE);
+        backendConfig.setInt("port", LdapProperties.LDAP_CONTEXT_URI.getPort());
+        backendConfig.setString(KdcConfigKey.KDC_IDENTITY_BACKEND,
+                "org.apache.kerby.kerberos.kdc.identitybackend.LdapIdentityBackend");
+        return backendConfig;
     }
 
     @CreateLdapServer(saslMechanisms = {
@@ -174,6 +148,11 @@ public class DirectoryServerConfigAnnotations {
             @Override
             public boolean allowAnonymousAccess() {
                 return defaults.allowAnonymousAccess();
+            }
+
+            @Override
+            public Class<?>[] trustManagers() {
+                return defaults.trustManagers();
             }
         };
     }
@@ -435,4 +414,5 @@ public class DirectoryServerConfigAnnotations {
             }
         };
     }
+
 }

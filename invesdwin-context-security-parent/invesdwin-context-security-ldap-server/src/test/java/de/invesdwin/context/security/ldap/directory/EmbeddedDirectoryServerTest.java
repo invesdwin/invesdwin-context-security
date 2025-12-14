@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import jakarta.inject.Inject;
 import javax.security.auth.Subject;
 import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.login.LoginContext;
@@ -26,6 +25,7 @@ import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.lang.UUIDs;
 import de.invesdwin.util.lang.string.Strings;
+import jakarta.inject.Inject;
 
 @NotThreadSafe
 @DirectoryServerTest

@@ -3,7 +3,6 @@ package de.invesdwin.context.security.ldap.directory.server;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -14,15 +13,17 @@ import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.ldif.LdifEntry;
 import org.apache.directory.api.ldap.model.ldif.LdifReader;
 import org.apache.directory.api.ldap.model.name.Dn;
-import org.apache.directory.server.annotations.CreateKdcServer;
+import org.apache.directory.api.util.GeneralizedTime;
 import org.apache.directory.server.core.api.CoreSession;
 import org.apache.directory.server.core.api.DirectoryService;
 import org.apache.directory.server.core.factory.DSAnnotationProcessor;
 import org.apache.directory.server.factory.ServerAnnotationProcessor;
-import org.apache.directory.server.kerberos.kdc.KdcServer;
 import org.apache.directory.server.ldap.LdapServer;
-import org.apache.directory.server.protocol.shared.transport.Transport;
-import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
+import org.apache.directory.shared.kerberos.KerberosAttribute;
+import org.apache.kerby.kerberos.kerb.KrbException;
+import org.apache.kerby.kerberos.kerb.identity.backend.BackendConfig;
+import org.apache.kerby.kerberos.kerb.server.KdcConfig;
+import org.apache.kerby.kerberos.kerb.server.KdcServer;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
@@ -32,10 +33,10 @@ import de.invesdwin.context.security.ldap.LdapProperties;
 import de.invesdwin.context.security.ldap.directory.server.internal.DirectoryServerConfigAnnotations;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.lang.UUIDs;
-import de.invesdwin.util.lang.reflection.Reflections;
 import de.invesdwin.util.lang.string.Strings;
 import de.invesdwin.util.shutdown.IShutdownHook;
 import de.invesdwin.util.shutdown.ShutdownHookManager;
+import de.invesdwin.util.time.date.FDates;
 
 @ThreadSafe
 public class DirectoryServer {
@@ -70,29 +71,22 @@ public class DirectoryServer {
         changeAdminPassword();
 
         createKerberosUsers();
-        kdcServer = Reflections.method("createKdcServer")
-                .withReturnType(KdcServer.class)
-                .withParameterTypes(CreateKdcServer.class, DirectoryService.class)
-                .in(ServerAnnotationProcessor.class)
-                .invoke(config.newCreateKdcServerAnnotation(), directoryService);
-
-        //timestamp verificaton makes debugging harder, since every second request is the actual one
-        kdcServer.getConfig().setPaEncTimestampRequired(false);
-        if (kdcServer.getChangePwdServer() != null) {
-            kdcServer.getChangePwdServer().getConfig().setPaEncTimestampRequired(false);
-        }
-
-        final Set<EncryptionType> encryptionTypes = KerberosProperties.getEncryptionTypes();
-        kdcServer.getConfig().setEncryptionTypes(encryptionTypes);
-        for (final Transport transport : kdcServer.getTransports()) {
-            Assertions.assertThat(transport.getAcceptor().isActive()).isTrue();
-        }
 
         ldapServer = ServerAnnotationProcessor.instantiateLdapServer(config.newCreateLdapServerAnnotation(),
                 directoryService);
         Assertions.assertThat(ldapServer.isStarted()).isFalse();
         ldapServer.start();
         Assertions.assertThat(ldapServer.isStarted()).isTrue();
+
+        final KdcConfig kdcConfig = config.newKdcConfig();
+        final BackendConfig backendConfig = config.newBackendConfig();
+        kdcServer = new KdcServer(kdcConfig, backendConfig);
+        kdcServer.setKdcRealm(KerberosProperties.KERBEROS_PRIMARY_REALM);
+        kdcServer.setKdcHost(KerberosProperties.KERBEROS_SERVER_URI.getHost());
+        kdcServer.setKdcPort(KerberosProperties.KERBEROS_SERVER_URI.getPort());
+        kdcServer.setWorkDir(DirectoryServerProperties.WORKING_DIR);
+        kdcServer.init();
+        kdcServer.start();
 
         ShutdownHookManager.register(shutdownHook);
     }
@@ -252,10 +246,22 @@ public class DirectoryServer {
         final String uid = Strings.removeEnd(Strings.substringBefore(principalName, "/"),
                 "@" + KerberosProperties.KERBEROS_PRIMARY_REALM);
         final String baseDn = "ou=users," + LdapProperties.LDAP_CONTEXT_BASE;
-        final String content = "dn: uid=" + uid + "," + baseDn + "\n" + "objectClass: top\n" + "objectClass: person\n"
-                + "objectClass: inetOrgPerson\n" + "objectClass: krb5principal\n" + "objectClass: krb5kdcentry\n"
-                + "cn: " + uid + "\n" + "sn: " + uid + "\n" + "uid: " + uid + "\n" + "userPassword: " + passPhrase
-                + "\n" + "krb5PrincipalName: " + principalName + "\n" + "krb5KeyVersionNumber: 0";
+        final String content = "dn: uid=" + uid + "," + baseDn + "\n" //
+                + "objectClass: top\n" //
+                + "objectClass: person\n" //
+                + "objectClass: inetOrgPerson\n" //
+                + "objectClass: krb5principal\n" //
+                + "objectClass: krb5kdcentry\n" //
+                + "cn: " + uid + "\n" //
+                + "sn: " + uid + "\n" //
+                + "uid: " + uid + "\n" //
+                + "userPassword: " + passPhrase + "\n" //
+                + KerberosAttribute.KRB5_PRINCIPAL_NAME_AT + ": " + principalName + "\n"//
+                + KerberosAttribute.KRB5_KEY_VERSION_NUMBER_AT + ": 0 \n" //
+                + KerberosAttribute.KRB5_ACCOUNT_DISABLED_AT + ": false\n" //
+                + KerberosAttribute.KRB5_ACCOUNT_LOCKEDOUT_AT + ": false\n" //
+                + "krb5KDCFlags: 0\n" + KerberosAttribute.KRB5_ACCOUNT_EXPIRATION_TIME_AT + ": "
+                + new GeneralizedTime(FDates.MAX_DATE.millisValue()) + "\n"; //
         loadLdifContent(content);
     }
 
@@ -276,7 +282,11 @@ public class DirectoryServer {
     public synchronized void stop() {
         if (directoryService != null) {
             ShutdownHookManager.unregister(shutdownHook);
-            kdcServer.stop();
+            try {
+                kdcServer.stop();
+            } catch (final KrbException e) {
+                throw new RuntimeException(e);
+            }
             kdcServer = null;
             ldapServer.stop();
             ldapServer = null;

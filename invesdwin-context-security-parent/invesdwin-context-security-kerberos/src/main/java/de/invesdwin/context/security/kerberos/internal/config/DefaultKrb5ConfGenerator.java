@@ -12,7 +12,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringSubstitutor;
-import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
+import org.apache.kerby.kerberos.kerb.type.base.EncryptionType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;

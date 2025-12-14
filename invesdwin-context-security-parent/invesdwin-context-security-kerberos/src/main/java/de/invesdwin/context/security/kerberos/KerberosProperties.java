@@ -3,14 +3,12 @@ package de.invesdwin.context.security.kerberos;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.concurrent.Immutable;
 
-import org.apache.directory.server.kerberos.KerberosConfig;
-import org.apache.directory.shared.kerberos.KerberosUtils;
-import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
+import org.apache.kerby.kerberos.kerb.type.base.EncryptionType;
 import org.springframework.core.io.Resource;
 import org.springframework.security.kerberos.authentication.sun.GlobalSunJaasKerberosConfig;
 
@@ -91,8 +89,7 @@ public final class KerberosProperties {
         }
     }
 
-    private KerberosProperties() {
-    }
+    private KerberosProperties() {}
 
     public static void refreshKrbConf() {
         try {
@@ -110,8 +107,8 @@ public final class KerberosProperties {
         }
     }
 
-    public static Set<EncryptionType> getEncryptionTypes() {
-        final Set<EncryptionType> enctypes = new HashSet<EncryptionType>();
+    public static List<EncryptionType> getEncryptionTypes() {
+        final List<EncryptionType> enctypes = new ArrayList<EncryptionType>();
         //        for (final EncryptionType enctype : EncryptionType.values()) {
         //            try {
         //                if (enctype.getValue() > 0 && KerberosUtils.getAlgoNameFromEncType(enctype) != null) {
@@ -122,9 +119,8 @@ public final class KerberosProperties {
         //            }
         //        }
         //        Assertions.assertThat(enctypes.remove(EncryptionType.RC4_HMAC)).isTrue(); //arcfour results in checksum failed error right now -.-
-        for (final String encTypeName : KerberosConfig.DEFAULT_ENCRYPTION_TYPES) {
-            final EncryptionType enctype = EncryptionType.getByName(encTypeName);
-            if (enctype.getValue() > 0 && KerberosUtils.getAlgoNameFromEncType(enctype) != null) {
+        for (final EncryptionType enctype : EncryptionType.values()) {
+            if (enctype != EncryptionType.NONE) {
                 enctypes.add(enctype);
             }
         }
