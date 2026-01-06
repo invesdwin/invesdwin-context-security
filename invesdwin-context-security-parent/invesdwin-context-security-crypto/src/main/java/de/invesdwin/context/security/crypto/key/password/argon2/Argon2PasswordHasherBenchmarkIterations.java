@@ -40,12 +40,12 @@ public class Argon2PasswordHasherBenchmarkIterations extends APasswordHasherBenc
 
     @Override
     protected int increaseCost(final int cost) {
-        return cost + 1;
+        return cost + getInitialCost();
     }
 
     @Override
     protected int getInitialCost() {
-        return 1;
+        return 2;
     }
 
 }

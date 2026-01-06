@@ -39,7 +39,7 @@ public class Pbkdf2PasswordHasherBenchmarkIterations extends APasswordHasherBenc
 
     @Override
     protected int getInitialCost() {
-        return 2500;
+        return 10_000;
     }
 
 }

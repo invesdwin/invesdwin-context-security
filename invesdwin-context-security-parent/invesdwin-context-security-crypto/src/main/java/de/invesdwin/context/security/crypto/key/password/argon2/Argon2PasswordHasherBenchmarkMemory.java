@@ -44,7 +44,7 @@ public class Argon2PasswordHasherBenchmarkMemory extends APasswordHasherBenchmar
 
     @Override
     protected int getInitialCost() {
-        return 1024; //1KB increment
+        return 1024 * 2; //2KB increment
     }
 
 }
