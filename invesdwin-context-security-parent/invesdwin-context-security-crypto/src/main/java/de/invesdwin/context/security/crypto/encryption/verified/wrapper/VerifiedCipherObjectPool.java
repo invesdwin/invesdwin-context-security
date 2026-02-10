@@ -9,7 +9,7 @@ import de.invesdwin.context.security.crypto.verification.IVerificationFactory;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
 import de.invesdwin.util.concurrent.pool.timeout.ATimeoutObjectPool;
-import de.invesdwin.util.lang.Closeables;
+import de.invesdwin.util.streams.closeable.Closeables;
 import de.invesdwin.util.time.date.FTimeUnit;
 import de.invesdwin.util.time.duration.Duration;
 

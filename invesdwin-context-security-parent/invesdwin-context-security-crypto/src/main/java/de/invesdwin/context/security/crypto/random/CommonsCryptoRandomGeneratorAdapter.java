@@ -5,8 +5,8 @@ import java.io.Closeable;
 import javax.annotation.concurrent.Immutable;
 
 import de.invesdwin.util.concurrent.reference.IReference;
-import de.invesdwin.util.lang.Closeables;
 import de.invesdwin.util.lang.finalizer.AFinalizer;
+import de.invesdwin.util.streams.closeable.Closeables;
 
 /**
  * Consider using JavaCryptoRandomDetector as a safe alternative to instantiate this.

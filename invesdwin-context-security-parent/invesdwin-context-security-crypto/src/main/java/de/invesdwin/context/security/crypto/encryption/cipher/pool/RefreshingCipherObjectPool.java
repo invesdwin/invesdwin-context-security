@@ -4,7 +4,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.util.concurrent.pool.AInvalidatingObjectPool;
-import de.invesdwin.util.lang.Closeables;
+import de.invesdwin.util.streams.closeable.Closeables;
 
 @ThreadSafe
 public final class RefreshingCipherObjectPool extends AInvalidatingObjectPool<ICipher> {
