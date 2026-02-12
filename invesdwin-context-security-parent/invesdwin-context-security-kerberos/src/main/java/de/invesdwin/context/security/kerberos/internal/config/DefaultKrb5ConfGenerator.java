@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -19,6 +18,7 @@ import org.springframework.core.io.Resource;
 
 import de.invesdwin.context.ContextProperties;
 import de.invesdwin.context.security.kerberos.KerberosProperties;
+import de.invesdwin.util.collections.factory.ILockCollectionFactory;
 import de.invesdwin.util.lang.Files;
 
 @NotThreadSafe
@@ -32,7 +32,7 @@ public class DefaultKrb5ConfGenerator {
             try {
                 if (alreadyGenerated == null || !alreadyGenerated.exists()) {
                     final String template = getTemplate();
-                    final Map<String, String> properties = new HashMap<String, String>();
+                    final Map<String, String> properties = ILockCollectionFactory.getInstance(false).newMap();
                     properties.put("HOSTNAME", KerberosProperties.KERBEROS_SERVER_URI.getHost());
                     properties.put("PORT", String.valueOf(KerberosProperties.KERBEROS_SERVER_URI.getPort()));
                     properties.put("REALM", KerberosProperties.KERBEROS_PRIMARY_REALM);

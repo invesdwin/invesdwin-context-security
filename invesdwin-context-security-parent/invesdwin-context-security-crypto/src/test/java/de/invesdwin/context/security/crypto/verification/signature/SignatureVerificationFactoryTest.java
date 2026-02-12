@@ -3,7 +3,6 @@ package de.invesdwin.context.security.crypto.verification.signature;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +30,7 @@ import de.invesdwin.context.security.crypto.verification.signature.algorithm.ISi
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.collections.Arrays;
+import de.invesdwin.util.collections.factory.ILockCollectionFactory;
 import de.invesdwin.util.math.Bytes;
 import de.invesdwin.util.math.Integers;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
@@ -54,7 +54,7 @@ public class SignatureVerificationFactoryTest extends ATest {
         final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
         int symmetricAlgorithmIndex = 0;
         final ISignatureAlgorithm[] signatureAlgorithms = ISignatureAlgorithm.values();
-        final Set<Integer> signatureAlgorithmIndexes = new HashSet<>();
+        final Set<Integer> signatureAlgorithmIndexes = ILockCollectionFactory.getInstance(false).newSet();
         while (signatureAlgorithmIndexes.size() < HASH_ALGORITHM_COUNT) {
             signatureAlgorithmIndexes.add(random.nextInt(signatureAlgorithms.length));
         }
@@ -107,7 +107,7 @@ public class SignatureVerificationFactoryTest extends ATest {
         final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
         int symmetricAlgorithmIndex = 0;
         final ISignatureAlgorithm[] signatureAlgorithms = ISignatureAlgorithm.values();
-        final Set<Integer> signatureAlgorithmIndexes = new HashSet<>();
+        final Set<Integer> signatureAlgorithmIndexes = ILockCollectionFactory.getInstance(false).newSet();
         while (signatureAlgorithmIndexes.size() < HASH_ALGORITHM_COUNT) {
             signatureAlgorithmIndexes.add(random.nextInt(signatureAlgorithms.length));
         }
@@ -170,7 +170,7 @@ public class SignatureVerificationFactoryTest extends ATest {
         final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
         int symmetricAlgorithmIndex = 0;
         final ISignatureAlgorithm[] signatureAlgorithms = ISignatureAlgorithm.values();
-        final Set<Integer> signatureAlgorithmIndexes = new HashSet<>();
+        final Set<Integer> signatureAlgorithmIndexes = ILockCollectionFactory.getInstance(false).newSet();
         while (signatureAlgorithmIndexes.size() < HASH_ALGORITHM_COUNT) {
             signatureAlgorithmIndexes.add(random.nextInt(signatureAlgorithms.length));
         }
@@ -252,7 +252,7 @@ public class SignatureVerificationFactoryTest extends ATest {
         final ISymmetricCipherAlgorithm[] symmetricAlgorithms = ISymmetricCipherAlgorithm.values();
         int symmetricAlgorithmIndex = 0;
         final ISignatureAlgorithm[] signatureAlgorithms = ISignatureAlgorithm.values();
-        final Set<Integer> signatureAlgorithmIndexes = new HashSet<>();
+        final Set<Integer> signatureAlgorithmIndexes = ILockCollectionFactory.getInstance(false).newSet();
         while (signatureAlgorithmIndexes.size() < HASH_ALGORITHM_COUNT) {
             signatureAlgorithmIndexes.add(random.nextInt(signatureAlgorithms.length));
         }

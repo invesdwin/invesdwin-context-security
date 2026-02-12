@@ -3,15 +3,12 @@ package de.invesdwin.context.security.ldap.internal;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.concurrent.ThreadSafe;
-import jakarta.inject.Named;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.io.FileSystemResource;
@@ -27,9 +24,11 @@ import de.invesdwin.context.security.ldap.dao.ALdapDao;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.classpath.ClassPathScanner;
 import de.invesdwin.util.collections.Arrays;
+import de.invesdwin.util.collections.factory.ILockCollectionFactory;
 import de.invesdwin.util.lang.Files;
 import de.invesdwin.util.lang.reflection.Reflections;
 import de.invesdwin.util.lang.string.Strings;
+import jakarta.inject.Named;
 
 @ThreadSafe
 @Named
@@ -97,7 +96,7 @@ public class LdapRepositoryScanContextLocation implements IContextLocation {
     }
 
     private Map<Class<?>, Set<Class<?>>> scanForLdapRepositories(final String basePackage) {
-        final Map<Class<?>, Set<Class<?>>> ldapRepositories = new HashMap<Class<?>, Set<Class<?>>>();
+        final Map<Class<?>, Set<Class<?>>> ldapRepositories = ILockCollectionFactory.getInstance(false).newMap();
         final ClassPathScanner scanner = new ClassPathScanner().setInterfacesOnly();
         scanner.addIncludeFilter(new AssignableTypeFilter(LdapRepository.class));
 
@@ -112,7 +111,7 @@ public class LdapRepositoryScanContextLocation implements IContextLocation {
                 final Class<?> entity = typeArguments[0];
                 Set<Class<?>> set = ldapRepositories.get(entity);
                 if (set == null) {
-                    set = new HashSet<Class<?>>();
+                    set = ILockCollectionFactory.getInstance(false).newSet();
                     ldapRepositories.put(entity, set);
                 }
                 Assertions.assertThat(set.add(repositoryClass)).isTrue();

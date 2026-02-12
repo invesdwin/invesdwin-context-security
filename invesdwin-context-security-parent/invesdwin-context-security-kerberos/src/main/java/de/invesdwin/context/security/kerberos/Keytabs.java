@@ -3,7 +3,6 @@ package de.invesdwin.context.security.kerberos;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +21,7 @@ import org.apache.kerby.kerberos.kerb.type.base.PrincipalName;
 
 import de.invesdwin.context.ContextProperties;
 import de.invesdwin.util.assertions.Assertions;
+import de.invesdwin.util.collections.factory.ILockCollectionFactory;
 import de.invesdwin.util.lang.Files;
 import de.invesdwin.util.lang.string.UniqueNameGenerator;
 
@@ -33,13 +33,13 @@ public final class Keytabs {
     private Keytabs() {}
 
     public static File createKeytab(final String principalName, final String passPhrase) {
-        final Map<String, String> principalName_passPhrase = new HashMap<String, String>();
+        final Map<String, String> principalName_passPhrase = ILockCollectionFactory.getInstance(false).newMap();
         principalName_passPhrase.put(principalName, passPhrase);
         return createKeytab(principalName_passPhrase);
     }
 
     public static File createKeytab(final String principalName, final String passPhrase, final File file) {
-        final Map<String, String> principalName_passPhrase = new HashMap<String, String>();
+        final Map<String, String> principalName_passPhrase = ILockCollectionFactory.getInstance(false).newMap();
         principalName_passPhrase.put(principalName, passPhrase);
         return createKeytab(principalName_passPhrase, file);
     }

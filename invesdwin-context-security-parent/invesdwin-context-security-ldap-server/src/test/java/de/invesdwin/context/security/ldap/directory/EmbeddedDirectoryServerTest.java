@@ -2,7 +2,6 @@ package de.invesdwin.context.security.ldap.directory;
 
 import java.io.File;
 import java.security.Principal;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -23,6 +22,7 @@ import de.invesdwin.context.security.ldap.directory.server.DirectoryServer;
 import de.invesdwin.context.security.ldap.directory.server.test.DirectoryServerTest;
 import de.invesdwin.context.test.ATest;
 import de.invesdwin.util.assertions.Assertions;
+import de.invesdwin.util.collections.factory.ILockCollectionFactory;
 import de.invesdwin.util.lang.UUIDs;
 import de.invesdwin.util.lang.string.Strings;
 import jakarta.inject.Inject;
@@ -66,11 +66,12 @@ public class EmbeddedDirectoryServerTest extends ATest {
             directoryServer.createKerberosPrincipal(principal, passphrase);
             Keytabs.createKeytab(principal, passphrase, keytab);
 
-            final Set<Principal> principals = new HashSet<Principal>();
+            final Set<Principal> principals = ILockCollectionFactory.getInstance(false).newSet();
             principals.add(new KerberosPrincipal(principal));
 
             // client login
-            Subject subject = new Subject(false, principals, new HashSet<Object>(), new HashSet<Object>());
+            Subject subject = new Subject(false, principals, ILockCollectionFactory.getInstance(false).newSet(),
+                    ILockCollectionFactory.getInstance(false).newSet());
             loginContext = new LoginContext("", subject, null, createClientConfig("foo", keytab));
             loginContext.login();
             subject = loginContext.getSubject();
@@ -80,7 +81,8 @@ public class EmbeddedDirectoryServerTest extends ATest {
             loginContext.logout();
 
             //client login with suffix
-            subject = new Subject(false, principals, new HashSet<Object>(), new HashSet<Object>());
+            subject = new Subject(false, principals, ILockCollectionFactory.getInstance(false).newSet(),
+                    ILockCollectionFactory.getInstance(false).newSet());
             loginContext = new LoginContext("", subject, null, createClientConfig("foo@INVESDWIN.DE", keytab));
             loginContext.login();
             subject = loginContext.getSubject();
@@ -90,7 +92,8 @@ public class EmbeddedDirectoryServerTest extends ATest {
             loginContext.logout();
 
             // server login
-            subject = new Subject(false, principals, new HashSet<Object>(), new HashSet<Object>());
+            subject = new Subject(false, principals, ILockCollectionFactory.getInstance(false).newSet(),
+                    ILockCollectionFactory.getInstance(false).newSet());
             loginContext = new LoginContext("", subject, null, createServerConfig("foo", keytab));
             loginContext.login();
             subject = loginContext.getSubject();
@@ -100,7 +103,8 @@ public class EmbeddedDirectoryServerTest extends ATest {
             loginContext.logout();
 
             // server login with suffix
-            subject = new Subject(false, principals, new HashSet<Object>(), new HashSet<Object>());
+            subject = new Subject(false, principals, ILockCollectionFactory.getInstance(false).newSet(),
+                    ILockCollectionFactory.getInstance(false).newSet());
             loginContext = new LoginContext("", subject, null, createServerConfig("foo@INVESDWIN.DE", keytab));
             loginContext.login();
             subject = loginContext.getSubject();

@@ -2,7 +2,6 @@ package de.invesdwin.context.security.kerberos;
 
 import java.io.File;
 import java.net.Proxy;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -10,6 +9,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.kerberos.client.KerberosRestTemplate;
 
+import de.invesdwin.util.collections.factory.ILockCollectionFactory;
 import de.invesdwin.util.lang.uri.URIs;
 
 @ThreadSafe
@@ -36,7 +36,7 @@ public class ProxyEnabledKerberosRestTemplate extends KerberosRestTemplate {
     }
 
     private static Map<String, Object> createLoginOptions() {
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = ILockCollectionFactory.getInstance(false).newMap();
         options.put("debug", Boolean.toString(KerberosProperties.KERBEROS_DEBUG));
         return options;
     }
