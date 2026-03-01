@@ -14,6 +14,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.u
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.input.ICipherInput;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.assertions.Assertions;
+import de.invesdwin.util.error.FastIndexOutOfBoundsException;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 /**
@@ -145,7 +146,8 @@ public class SymmetricCipherInputStream extends InputStream implements ReadableB
         checkStream();
         Assertions.checkNotNull(array, "array");
         if (off < 0 || len < 0 || len > array.length - off) {
-            throw new IndexOutOfBoundsException();
+            throw FastIndexOutOfBoundsException.getInstance("%s.read",
+                    SymmetricCipherInputStream.class.getSimpleName());
         } else if (len == 0) {
             return 0;
         }

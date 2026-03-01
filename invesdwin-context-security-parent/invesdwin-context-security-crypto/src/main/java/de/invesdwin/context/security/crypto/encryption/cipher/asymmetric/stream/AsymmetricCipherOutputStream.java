@@ -14,6 +14,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.u
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.output.ICipherOutput;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.assertions.Assertions;
+import de.invesdwin.util.error.FastIndexOutOfBoundsException;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @NotThreadSafe
@@ -130,7 +131,8 @@ public class AsymmetricCipherOutputStream extends OutputStream implements Writab
         checkStream();
         Assertions.checkNotNull(array, "array");
         if (off < 0 || len < 0 || off > array.length || len > array.length - off) {
-            throw new IndexOutOfBoundsException();
+            throw FastIndexOutOfBoundsException.getInstance("%s.wriite",
+                    AsymmetricCipherOutputStream.class.getSimpleName());
         }
 
         while (len > 0) {
