@@ -15,6 +15,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.u
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.error.FastIndexOutOfBoundsException;
+import de.invesdwin.util.math.Integers;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 @NotThreadSafe
@@ -148,7 +149,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
         final int remaining = outBuffer.remaining();
         if (remaining > 0) {
             // Satisfy the read with the existing data
-            final int n = Math.min(len, remaining);
+            final int n = Integers.min(len, remaining);
             outBuffer.get(array, off, n);
             return n;
         }
@@ -162,7 +163,7 @@ public class AsymmetricCipherInputStream extends InputStream implements Readable
             return nd;
         }
 
-        final int n = Math.min(len, outBuffer.remaining());
+        final int n = Integers.min(len, outBuffer.remaining());
         outBuffer.get(array, off, n);
         return n;
     }

@@ -5,6 +5,8 @@ import java.io.OutputStream;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import de.invesdwin.util.math.Integers;
+
 /**
  * Adapted from: org.apache.commons.crypto.stream.output.StreamOutput
  */
@@ -26,7 +28,7 @@ public class StreamCipherOutput implements ICipherOutput {
 
         int remaining = len;
         while (remaining > 0) {
-            final int n = Math.min(remaining, bufferSize);
+            final int n = Integers.min(remaining, bufferSize);
             src.get(buf, 0, n);
             out.write(buf, 0, n);
             remaining = src.remaining();

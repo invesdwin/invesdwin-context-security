@@ -5,6 +5,7 @@ import java.nio.channels.ReadableByteChannel;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import de.invesdwin.util.math.Longs;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 /**
@@ -35,11 +36,11 @@ public class ChannelCipherInput implements ICipherInput {
             return 0;
         }
 
-        final int size = (int) Math.min(SKIP_BUFFER_SIZE, remaining);
+        final int size = (int) Longs.min(SKIP_BUFFER_SIZE, remaining);
         final java.nio.ByteBuffer skipBuffer = getSkipBuf();
         while (remaining > 0) {
             skipBuffer.clear();
-            ByteBuffers.limit(skipBuffer, (int) Math.min(size, remaining));
+            ByteBuffers.limit(skipBuffer, (int) Longs.min(size, remaining));
             nr = read(skipBuffer);
             if (nr < 0) {
                 break;

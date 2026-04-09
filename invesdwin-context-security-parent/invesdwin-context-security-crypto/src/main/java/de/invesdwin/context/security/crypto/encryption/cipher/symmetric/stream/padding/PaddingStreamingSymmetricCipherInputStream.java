@@ -16,6 +16,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.u
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.stream.util.input.ICipherInput;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.assertions.Assertions;
+import de.invesdwin.util.math.Integers;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 
 /**
@@ -357,7 +358,7 @@ public class PaddingStreamingSymmetricCipherInputStream extends SymmetricCipherI
         int n = 0;
         while (n < len) {
             ByteBuffers.position(buf, offset + n);
-            ByteBuffers.limit(buf, offset + n + Math.min(len - n, inBuffer.remaining()));
+            ByteBuffers.limit(buf, offset + n + Integers.min(len - n, inBuffer.remaining()));
             inBuffer.put(buf);
             // Do decryption
             try {

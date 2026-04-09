@@ -83,12 +83,12 @@ public class HkdfDerivationFactory implements IDerivationFactory {
             byte[] hashRound = new byte[0];
             final java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocate(length);
 
-            for (int i = 0; i < (int) Math.ceil(length / (double) mac.getHashSize()); i++) {
+            for (int i = 0; i < Integers.ceil(length / (double) mac.getHashSize()); i++) {
                 mac.update(hashRound);
                 mac.update(info);
                 mac.update((byte) (i + 1));
                 hashRound = mac.doFinal();
-                final int size = Math.min(length, hashRound.length);
+                final int size = Integers.min(length, hashRound.length);
                 final int copySize = Integers.min(buffer.remaining(), size);
                 buffer.put(hashRound, 0, copySize);
             }

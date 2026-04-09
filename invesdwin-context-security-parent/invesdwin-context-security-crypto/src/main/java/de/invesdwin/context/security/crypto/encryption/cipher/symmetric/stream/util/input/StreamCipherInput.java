@@ -5,6 +5,8 @@ import java.io.InputStream;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import de.invesdwin.util.math.Integers;
+
 /**
  * Adapted from: org.apache.commons.crypto.stream.input.StreamInput
  */
@@ -25,7 +27,7 @@ public class StreamCipherInput implements ICipherInput {
         int remaining = dst.remaining();
         int read = 0;
         while (remaining > 0) {
-            final int n = in.read(buf, 0, Math.min(remaining, bufferSize));
+            final int n = in.read(buf, 0, Integers.min(remaining, bufferSize));
             if (n == -1) {
                 if (read == 0) {
                     read = -1;
