@@ -6,7 +6,6 @@ import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.context.security.crypto.verification.hash.IHash;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.marshallers.serde.ISerde;
-import de.invesdwin.util.marshallers.serde.SerdeBaseMethods;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
 @Immutable
@@ -26,16 +25,6 @@ public class VerificationDelegateSerde<E> implements ISerde<E> {
         this.delegate = delegate;
         this.verificationFactory = verificationFactory;
         this.key = key;
-    }
-
-    @Override
-    public E fromBytes(final byte[] bytes) {
-        return SerdeBaseMethods.fromBytes(this, bytes);
-    }
-
-    @Override
-    public byte[] toBytes(final E obj) {
-        return SerdeBaseMethods.toBytes(this, obj);
     }
 
     @Override
