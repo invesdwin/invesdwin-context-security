@@ -7,6 +7,7 @@ import javax.annotation.concurrent.Immutable;
 import de.invesdwin.util.concurrent.reference.IReference;
 import de.invesdwin.util.lang.finalizer.AFinalizer;
 import de.invesdwin.util.streams.closeable.Closeables;
+import de.invesdwin.util.time.date.millis.FDateMillis;
 
 /**
  * Consider using JavaCryptoRandomDetector as a safe alternative to instantiate this.
@@ -72,7 +73,7 @@ public class CommonsCryptoRandomGeneratorAdapter extends CryptoRandomGenerator i
 
     @Override
     public void reseed() {
-        finalizer.random.setSeed(System.currentTimeMillis() + System.identityHashCode(this));
+        finalizer.random.setSeed(FDateMillis.nowMillis() + System.identityHashCode(this));
     }
 
     @Override

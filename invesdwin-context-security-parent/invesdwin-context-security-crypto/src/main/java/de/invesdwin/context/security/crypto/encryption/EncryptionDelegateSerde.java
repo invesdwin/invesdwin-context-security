@@ -6,7 +6,6 @@ import de.invesdwin.context.security.crypto.encryption.cipher.ICipher;
 import de.invesdwin.context.security.crypto.key.IKey;
 import de.invesdwin.util.assertions.Assertions;
 import de.invesdwin.util.marshallers.serde.ISerde;
-import de.invesdwin.util.marshallers.serde.SerdeBaseMethods;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 import de.invesdwin.util.streams.buffer.bytes.ICloseableByteBuffer;
@@ -28,16 +27,6 @@ public class EncryptionDelegateSerde<E> implements ISerde<E> {
         this.delegate = delegate;
         this.encryptionFactory = encryptionFactory;
         this.key = key;
-    }
-
-    @Override
-    public E fromBytes(final byte[] bytes) {
-        return SerdeBaseMethods.fromBytes(this, bytes);
-    }
-
-    @Override
-    public byte[] toBytes(final E obj) {
-        return SerdeBaseMethods.toBytes(this, obj);
     }
 
     @Override

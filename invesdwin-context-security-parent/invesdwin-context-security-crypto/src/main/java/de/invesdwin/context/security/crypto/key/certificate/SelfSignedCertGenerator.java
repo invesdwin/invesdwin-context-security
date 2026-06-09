@@ -60,14 +60,14 @@ public final class SelfSignedCertGenerator {
      */
     public static TimeRange newMilleniumValidity() {
         //
-        final FDate milleniumStart = new FDate().truncate(FTimeUnit.MILLENIA);
+        final FDate milleniumStart = FDate.now().truncate(FTimeUnit.MILLENIA);
         final FDate notBefore = milleniumStart.addYears(-1);
         final FDate notAfter = milleniumStart.add(FTimeUnit.MILLENIA, 1).addYears(1);
         return new TimeRange(notBefore, notAfter);
     }
 
     public static TimeRange newBrowserValidity() {
-        final FDate now = new FDate();
+        final FDate now = FDate.now();
         return new TimeRange(now, now.addDays(MAX_BROWSER_VALIDITY_DAYS));
     }
 

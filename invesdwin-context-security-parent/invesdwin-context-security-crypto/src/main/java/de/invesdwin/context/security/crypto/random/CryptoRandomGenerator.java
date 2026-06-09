@@ -13,6 +13,8 @@ import de.invesdwin.context.security.crypto.CryptoProperties;
 import de.invesdwin.util.collections.factory.ILockCollectionFactory;
 import de.invesdwin.util.error.Throwables;
 import de.invesdwin.util.math.random.IRandomGenerator;
+import de.invesdwin.util.time.date.millis.FDateMillis;
+import de.invesdwin.util.time.date.millis.FDateNanos;
 
 @NotThreadSafe
 public class CryptoRandomGenerator extends java.security.SecureRandom implements IRandomGenerator {
@@ -29,7 +31,7 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
 
     public CryptoRandomGenerator(final String algorithm) {
         if (!RESEED_UNSUPPORTED_ALGORITHM.contains(algorithm)) {
-            lastReseedNanos = System.nanoTime();
+            lastReseedNanos = FDateNanos.elapsedNanos();
         } else {
             lastReseedNanos = RESEED_UNSUPPORTED_NANOS;
         }
@@ -37,7 +39,7 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
 
     public CryptoRandomGenerator(final boolean reseedSupported) {
         if (!reseedSupported) {
-            lastReseedNanos = System.nanoTime();
+            lastReseedNanos = FDateNanos.elapsedNanos();
         } else {
             lastReseedNanos = RESEED_UNSUPPORTED_NANOS;
         }
@@ -45,7 +47,7 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
 
     public CryptoRandomGenerator() {
         if (DEFAULT_RESEED_SUPPORTED) {
-            lastReseedNanos = System.nanoTime();
+            lastReseedNanos = FDateNanos.elapsedNanos();
         } else {
             lastReseedNanos = RESEED_UNSUPPORTED_NANOS;
         }
@@ -189,7 +191,7 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
         if (lastReseedNanos == RESEED_UNSUPPORTED_NANOS) {
             return;
         }
-        final long currentNanos = System.nanoTime();
+        final long currentNanos = FDateNanos.elapsedNanos();
         if (CryptoProperties.RESEED_INTERVAL.isLessThanOrEqualToNanos(currentNanos - lastReseedNanos)) {
             reseed();
             lastReseedNanos = currentNanos;
@@ -204,7 +206,7 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
                 throw Throwables.propagate(e);
             }
         } else {
-            random.setSeed(System.currentTimeMillis() + System.identityHashCode(random));
+            random.setSeed(FDateMillis.nowMillis() + System.identityHashCode(random));
         }
     }
 
@@ -219,7 +221,7 @@ public class CryptoRandomGenerator extends java.security.SecureRandom implements
                 throw Throwables.propagate(e);
             }
         } else {
-            random.setSeed(System.currentTimeMillis() + System.identityHashCode(random));
+            random.setSeed(FDateMillis.nowMillis() + System.identityHashCode(random));
         }
     }
 

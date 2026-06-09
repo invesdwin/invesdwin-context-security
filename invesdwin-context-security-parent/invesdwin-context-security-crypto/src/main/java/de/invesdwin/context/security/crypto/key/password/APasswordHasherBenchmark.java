@@ -7,6 +7,7 @@ import de.invesdwin.context.security.crypto.random.CryptoRandomGenerator;
 import de.invesdwin.context.security.crypto.random.CryptoRandomGenerators;
 import de.invesdwin.util.time.Instant;
 import de.invesdwin.util.time.date.FTimeUnit;
+import de.invesdwin.util.time.date.millis.FDateMillis;
 import de.invesdwin.util.time.duration.Duration;
 
 /**
@@ -65,11 +66,11 @@ public abstract class APasswordHasherBenchmark<E extends IPasswordHasher> {
 
         for (int i = 0; i < MAX_TRIES; i++) {
             while (true) {
-                final long start = System.currentTimeMillis();
+                final long start = FDateMillis.nowMillis();
 
                 currentInstance.hash(SALT, PASSWORD, LENGTH);
 
-                final long end = System.currentTimeMillis();
+                final long end = FDateMillis.nowMillis();
                 final long elapsed = end - start;
 
                 if (elapsed > maxMilliseconds) {
