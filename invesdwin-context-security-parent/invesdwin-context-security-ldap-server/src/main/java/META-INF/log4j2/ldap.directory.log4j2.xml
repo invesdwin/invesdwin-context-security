@@ -1,0 +1,17 @@
+<Configuration>
+
+    <Loggers>
+        <!-- Disable warnings about shutdown hook and admin password -->
+        <Logger name="org.apache.directory.server.core.DefaultDirectoryService" additivity="false" level="ERROR">
+            <AppenderRef ref="stdout" />
+            <AppenderRef ref="stderr" />
+            <AppenderRef ref="common" />
+            <AppenderRef ref="error" />
+        </Logger>
+        
+        <!-- Disable warnings logged as error by setting level to OFF -->
+        <Logger name="org.apache.directory.api.ldap.model.entry.Value" additivity="false" level="OFF" />
+        <Logger name="org.apache.directory.api.ldap.model.entry.DefaultAttribute" additivity="false" level="OFF" />
+    </Loggers>
+
+</Configuration>

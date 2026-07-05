@@ -273,10 +273,6 @@
 				<version>${version.spring-ws-security}</version>
 				<exclusions>
 					<exclusion>
-						<artifactId>commons-logging</artifactId>
-						<groupId>commons-logging</groupId>
-					</exclusion>
-					<exclusion>
 						<artifactId>spring-security-crypto</artifactId>
 						<groupId>org.springframework.security</groupId>
 					</exclusion>
@@ -325,10 +321,6 @@
 				<version>${version.spring-security-saml}</version>
 				<exclusions>
 					<exclusion>
-						<artifactId>commons-logging</artifactId>
-						<groupId>commons-logging</groupId>
-					</exclusion>
-					<exclusion>
 						<groupId>ca.juliusdavies</groupId>
 						<artifactId>not-yet-commons-ssl</artifactId>
 					</exclusion>
@@ -354,10 +346,6 @@
 					<exclusion>
 						<groupId>log4j</groupId>
 						<artifactId>log4j</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>commons-logging</groupId>
-						<artifactId>commons-logging</artifactId>
 					</exclusion>
 					<exclusion>
 						<groupId>org.bouncycastle</groupId>
