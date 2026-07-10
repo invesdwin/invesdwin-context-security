@@ -17,8 +17,7 @@
 			<security:content-type-options disabled="true" />
 		</security:headers>
 
-		<!-- <security:intercept-url pattern="/saml/**" access="IS_AUTHENTICATED_FULLY" 
-			/> -->
+		 <security:intercept-url pattern="_KERBEROS_" access="IS_AUTHENTICATED_FULLY" />
 
 		<security:custom-filter ref="spnegoAuthenticationProcessingFilter"
 			before="BASIC_AUTH_FILTER" />

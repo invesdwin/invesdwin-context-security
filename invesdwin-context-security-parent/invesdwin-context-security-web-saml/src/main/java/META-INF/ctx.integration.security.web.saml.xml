@@ -13,7 +13,7 @@
 
 	<!-- Secured pages with SAML as entry point; use the following http tag -->
 	<security:http entry-point-ref="samlEntryPoint"
-		use-expressions="false" pattern="/saml/**">
+		use-expressions="true" pattern="/saml/**">
 
 		<security:csrf disabled="true" />
 		<security:headers>

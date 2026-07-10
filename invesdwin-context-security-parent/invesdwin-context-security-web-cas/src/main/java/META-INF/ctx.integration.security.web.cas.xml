@@ -16,7 +16,7 @@
 
 	<!-- Secured pages with CAS as entry point; use the following http tag -->
 	<security:http entry-point-ref="casEntryPoint"
-		use-expressions="false" pattern="/cas/**">
+		use-expressions="true" pattern="/cas/**">
 
 		<security:csrf disabled="true" />
 		<security:headers>
