@@ -12,7 +12,7 @@
 	<context:component-scan base-package="org.springframework.security.saml" />
 
 	<!-- Secured pages with SAML as entry point; use the following http tag -->
-	<security:http entry-point-ref="samlEntryPoint"
+	<security:http request-matcher="ant" entry-point-ref="samlEntryPoint"
 		use-expressions="true" pattern="/saml/**">
 
 		<security:csrf disabled="true" />

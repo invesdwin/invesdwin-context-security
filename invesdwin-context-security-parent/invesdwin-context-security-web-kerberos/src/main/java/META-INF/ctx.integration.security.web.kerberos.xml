@@ -8,7 +8,7 @@
 	<bean id="kerberosProperties"
 		class="de.invesdwin.context.system.properties.SystemPropertiesDefinition" />
 
-	<security:http entry-point-ref="spnegoEntryPoint"
+	<security:http request-matcher="ant" entry-point-ref="spnegoEntryPoint"
 		use-expressions="true" pattern="_KERBEROS_">
 
 		<security:csrf disabled="true" />

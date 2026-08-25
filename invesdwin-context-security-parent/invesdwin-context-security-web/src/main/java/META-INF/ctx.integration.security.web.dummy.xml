@@ -11,7 +11,7 @@
 	<!-- create-session="ifRequired" is needed or else wicket won't redirect 
 		to spring-security filter access denied page after login when it was the 
 		first request -->
-	<security:http auto-config="true" authentication-manager-ref="dummyAuthenticationManager"
+	<security:http request-matcher="ant" auto-config="true" authentication-manager-ref="dummyAuthenticationManager"
 		use-expressions="true" pattern="/**">
 
 		<!-- See: http://stackoverflow.com/questions/28138864/expected-csrf-token-not-found-has-your-session-expired-403 -->
