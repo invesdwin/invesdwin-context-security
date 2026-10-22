@@ -118,6 +118,94 @@ public class SymmetricEncryptionFactoryTest extends ATest {
     }
 
     @Test
+    public void testCipherPresharedIVRoundTripWithFreshFactory() {
+        final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();
+        final byte[] key = ByteBuffers.allocateByteArray(AesKeySize.DEFAULT.getBytes());
+        random.nextBytes(key);
+        final DerivedKeyProvider derivedKeyProvider = DerivedKeyProvider
+                .fromRandom(SymmetricEncryptionFactoryTest.class.getSimpleName().getBytes(), key);
+        for (final ISymmetricCipherAlgorithm algorithm : ISymmetricCipherAlgorithm.values()) {
+            final byte[] cipherKey = derivedKeyProvider.newDerivedKey("cipher-key".getBytes(),
+                    algorithm.getDefaultKeySizeBits());
+            final byte[] presharedIvBytes = derivedKeyProvider.newDerivedKey("preshared-iv".getBytes(),
+                    algorithm.getIvSize() * Byte.SIZE);
+            //two independent factories, each with its own CipherPresharedIV instance over the same preshared bytes
+            final SymmetricEncryptionFactory encryptor = new SymmetricEncryptionFactory(algorithm, cipherKey,
+                    new CipherPresharedIV(algorithm, presharedIvBytes));
+            final SymmetricEncryptionFactory decryptor = new SymmetricEncryptionFactory(algorithm, cipherKey,
+                    new CipherPresharedIV(algorithm, presharedIvBytes));
+            for (final String payload : Arrays.asList("1234567890", "0987654321")) {
+                //the cipher pool path (init + doFinal) on both sides
+                testCipherPoolEncryptToCipherPoolDecrypt(encryptor, decryptor, payload);
+                //the public encrypt() path must interoperate with the cipher pool decrypt path
+                testPublicEncryptToCipherPoolDecrypt(encryptor, decryptor, payload);
+                //the cipher pool encrypt path must interoperate with the public decrypt() path
+                testCipherPoolEncryptToPublicDecrypt(encryptor, decryptor, payload);
+            }
+        }
+    }
+
+    private void testCipherPoolEncryptToCipherPoolDecrypt(final SymmetricEncryptionFactory encryptor,
+            final SymmetricEncryptionFactory decryptor, final String payload) {
+        final IByteBuffer src = ByteBuffers.wrap(payload.getBytes());
+        final IByteBuffer encrypted = ByteBuffers.allocateExpandable();
+        final int encryptedSize = cipherPoolEncrypt(encryptor, src, encrypted);
+        final IByteBuffer dst = ByteBuffers.allocateExpandable();
+        final int decryptedSize = cipherPoolDecrypt(decryptor, encrypted, encryptedSize, dst);
+        assertRoundTrip(src, dst, decryptedSize);
+    }
+
+    private void testPublicEncryptToCipherPoolDecrypt(final SymmetricEncryptionFactory encryptor,
+            final SymmetricEncryptionFactory decryptor, final String payload) {
+        final IByteBuffer src = ByteBuffers.wrap(payload.getBytes());
+        final IByteBuffer encrypted = ByteBuffers.allocateExpandable();
+        final int encryptedSize = encryptor.encrypt(src, encrypted);
+        final IByteBuffer dst = ByteBuffers.allocateExpandable();
+        final int decryptedSize = cipherPoolDecrypt(decryptor, encrypted, encryptedSize, dst);
+        assertRoundTrip(src, dst, decryptedSize);
+    }
+
+    private void testCipherPoolEncryptToPublicDecrypt(final SymmetricEncryptionFactory encryptor,
+            final SymmetricEncryptionFactory decryptor, final String payload) {
+        final IByteBuffer src = ByteBuffers.wrap(payload.getBytes());
+        final IByteBuffer encrypted = ByteBuffers.allocateExpandable();
+        final int encryptedSize = cipherPoolEncrypt(encryptor, src, encrypted);
+        final IByteBuffer dst = ByteBuffers.allocateExpandable();
+        final int decryptedSize = decryptor.decrypt(encrypted.sliceTo(encryptedSize), dst);
+        assertRoundTrip(src, dst, decryptedSize);
+    }
+
+    private int cipherPoolEncrypt(final SymmetricEncryptionFactory encryptor, final IByteBuffer src,
+            final IByteBuffer encrypted) {
+        final ICipher encryptCipher = encryptor.getCipherPool().borrowObject();
+        try {
+            final int paramsLength = encryptor.init(CipherMode.Encrypt, encryptCipher, encryptor.getKey(), encrypted);
+            //the preshared IV is never written to the wire
+            Assertions.assertThat(paramsLength).isZero();
+            return encryptCipher.doFinal(src, encrypted.sliceFrom(paramsLength));
+        } finally {
+            encryptor.getCipherPool().returnObject(encryptCipher);
+        }
+    }
+
+    private int cipherPoolDecrypt(final SymmetricEncryptionFactory decryptor, final IByteBuffer encrypted,
+            final int encryptedSize, final IByteBuffer dst) {
+        final ICipher decryptCipher = decryptor.getCipherPool().borrowObject();
+        try {
+            final int paramsLength = decryptor.init(CipherMode.Decrypt, decryptCipher, decryptor.getKey(), encrypted);
+            Assertions.assertThat(paramsLength).isZero();
+            return decryptCipher.doFinal(encrypted.slice(paramsLength, encryptedSize), dst);
+        } finally {
+            decryptor.getCipherPool().returnObject(decryptCipher);
+        }
+    }
+
+    private void assertRoundTrip(final IByteBuffer src, final IByteBuffer dst, final int decryptedSize) {
+        Assertions.assertThat(decryptedSize).isEqualTo(src.capacity());
+        Assertions.assertThat(ByteBuffers.equals(src, dst.sliceTo(decryptedSize))).isTrue();
+    }
+
+    @Test
     public void testCipherStream() {
         final DerivedKeyProvider derivedKeyProvider;
         final CryptoRandomGenerator random = CryptoRandomGenerators.getThreadLocalCryptoRandom();

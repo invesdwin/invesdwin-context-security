@@ -10,6 +10,7 @@ import de.invesdwin.context.security.crypto.encryption.cipher.pool.MutableIvPara
 import de.invesdwin.context.security.crypto.encryption.cipher.pool.RefreshingCipherObjectPool;
 import de.invesdwin.context.security.crypto.encryption.cipher.symmetric.ISymmetricCipherAlgorithm;
 import de.invesdwin.util.concurrent.pool.IObjectPool;
+import de.invesdwin.util.math.Integers;
 import de.invesdwin.util.streams.buffer.bytes.ByteBuffers;
 import de.invesdwin.util.streams.buffer.bytes.IByteBuffer;
 
@@ -34,6 +35,17 @@ public class CipherPresharedIV implements ICipherIV {
         this.cipherPool = new RefreshingCipherObjectPool(algorithm);
     }
 
+    /**
+     * The preshared IV is never written to the wire (see getIvBlockSize()), but callers that supply their own destIV
+     * (e.g. the cipher pool in SymmetricEncryptionFactory) still expect it to be filled with the IV that is used for
+     * the cipher, so it must be copied out of the preshared IV here.
+     */
+    private void fillDestIV(final MutableIvParameterSpec destIV) {
+        final byte[] source = presharedIV.getIV();
+        final byte[] target = destIV.getIV();
+        System.arraycopy(source, 0, target, 0, Integers.min(source.length, target.length));
+    }
+
     @Override
     public ISymmetricCipherAlgorithm getAlgorithm() {
         return algorithm;
@@ -46,20 +58,24 @@ public class CipherPresharedIV implements ICipherIV {
 
     @Override
     public int putIV(final IByteBuffer output, final MutableIvParameterSpec destIV) {
+        fillDestIV(destIV);
         return 0;
     }
 
     @Override
     public int putIV(final OutputStream output, final MutableIvParameterSpec destIV) {
+        fillDestIV(destIV);
         return 0;
     }
 
     @Override
     public void getIV(final IByteBuffer input, final MutableIvParameterSpec destIV) {
+        fillDestIV(destIV);
     }
 
     @Override
     public void getIV(final InputStream input, final MutableIvParameterSpec destIV) {
+        fillDestIV(destIV);
     }
 
     @Override
