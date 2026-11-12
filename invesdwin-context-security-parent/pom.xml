@@ -32,7 +32,7 @@
 		<project.version.invesdwin-context>1.0.4-SNAPSHOT</project.version.invesdwin-context>
 		<project.version.invesdwin-context-security>${project.version}</project.version.invesdwin-context-security>
 		<project.version.invesdwin-context-persistence>1.0.4-SNAPSHOT</project.version.invesdwin-context-persistence>
-		<version.api-ldap>2.1.7</version.api-ldap>
+		<version.api-ldap>2.1.8</version.api-ldap>
 		<version.apacheds>2.0.0.AM27</version.apacheds>
 		<version.kerby>2.1.1</version.kerby>
 		<version.nimbus>10.6</version.nimbus>
