@@ -263,11 +263,6 @@
 				<version>${version.spring-security-kerberos}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.security.kerberos</groupId>
-				<artifactId>spring-security-kerberos-web</artifactId>
-				<version>${version.spring-security-kerberos}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.springframework.ws</groupId>
 				<artifactId>spring-ws-security</artifactId>
 				<version>${version.spring-ws-security}</version>
